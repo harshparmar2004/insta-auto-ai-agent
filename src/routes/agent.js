@@ -14,7 +14,7 @@ const { processCommentEvent } = require('../services/automation');
 // 1. Full 1-Click Autonomous Campaign Runner
 router.post('/run', async (req, res) => {
     try {
-        const { topic, video_url } = req.body || {};
+        const { topic, video_url, simulate = false } = req.body || {};
         const baseUrl = `${req.protocol}://${req.get('host')}`;
 
         console.log('\n======================================================');
@@ -27,10 +27,11 @@ router.post('/run', async (req, res) => {
         // Step 2: Generate Companion Lead Magnet Doc & Link
         const leadMagnet = await generateLeadMagnet(research, baseUrl);
 
-        // Step 3: Publish Reel to Instagram
+        // Step 3: Publish Reel to Instagram (Live or Simulation)
         const publishResult = await publishReel({
-            videoUrl: video_url || 'https://assets.mixkit.co/videos/preview/mixkit-software-developer-working-on-code-42866-large.mp4',
-            caption: research.caption
+            videoUrl: video_url || null,
+            caption: research.caption,
+            simulate: simulate === true || simulate === 'true'
         });
 
         // Step 4: Provision InstaAuto DM Automation Rule (Zero Clicks Required)
@@ -109,7 +110,9 @@ router.post('/run', async (req, res) => {
                 topic: research.topic,
                 leadMagnetTitle: research.lead_magnet_title,
                 deliverableUrl: leadMagnet.deliverableUrl,
-                caption: research.caption
+                caption: research.caption,
+                live: publishResult.live || false,
+                warning: publishResult.warning || null
             }
         });
     } catch (err) {

@@ -38,6 +38,27 @@ window.agentView = {
                         </span>
                     </div>
 
+                    <!-- ENGINE MODE SELECTOR -->
+                    <div style="display: flex; flex-wrap: wrap; gap: 1.25rem; align-items: center; margin-bottom: 1.15rem; background: #FAF8F5; padding: 0.75rem 1rem; border-radius: 10px; border: 1px solid #E6E1D8;">
+                        <span style="font-size: 0.8rem; font-weight: 800; color: #736E68; text-transform: uppercase;">Engine Mode:</span>
+                        <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.86rem; font-weight: 700; color: #2C2A29;">
+                            <input type="radio" name="agent_run_mode" value="sandbox" checked id="agent-mode-sandbox" onchange="agentView.toggleMode('sandbox')">
+                            <span>🧪 Instant Sandbox Mode (Fast & Safe Testing)</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.86rem; font-weight: 700; color: #2C2A29;">
+                            <input type="radio" name="agent_run_mode" value="live" id="agent-mode-live" onchange="agentView.toggleMode('live')">
+                            <span>🔴 Live Instagram Meta Graph API Publishing</span>
+                        </label>
+                    </div>
+
+                    <!-- OPTIONAL LIVE VIDEO URL -->
+                    <div id="live-video-input-box" style="display: none; margin-bottom: 1.15rem;">
+                        <label style="font-size: 0.8rem; font-weight: 700; color: #736E68; display: block; margin-bottom: 0.35rem;">
+                            Public Video MP4 URL for Reel (Direct accessible URL, e.g. AWS S3 or Cloudinary)
+                        </label>
+                        <input type="url" id="agent-video-url" class="input" placeholder="https://your-domain.com/videos/reel-video.mp4" style="width: 100%; padding: 0.75rem 1rem; font-size: 0.9rem; font-weight: 600; border-radius: 10px; border: 1.5px solid #E6E1D8; background: #FAF8F5; outline: none;">
+                    </div>
+
                     <div style="display: grid; grid-template-columns: 1fr auto auto; gap: 0.85rem; align-items: center; margin-bottom: 1.25rem;">
                         <div style="position: relative;">
                             <input type="text" id="agent-topic-input" class="input" placeholder="Enter topic (e.g. 'Advanced System Design Patterns', 'NextJS 15 Turbo Guide') or leave empty for auto-trend..." style="width: 100%; padding: 0.85rem 1.15rem; font-size: 0.95rem; font-weight: 600; border-radius: 12px; border: 1.5px solid #E6E1D8; background: #FAF8F5; outline: none;">
@@ -118,6 +139,13 @@ curl -X POST http://localhost:3000/api/agent/provision \
         await this.loadCampaigns();
     },
 
+    toggleMode(mode) {
+        const box = document.getElementById('live-video-input-box');
+        if (box) {
+            box.style.display = mode === 'live' ? 'block' : 'none';
+        }
+    },
+
     pickRandomTopic() {
         const ideas = [
             "Micro-SaaS Architecture Blueprint with Node.js & Docker",
@@ -139,6 +167,9 @@ curl -X POST http://localhost:3000/api/agent/provision \
         const stepper = document.getElementById('agent-stepper');
         const resultContainer = document.getElementById('agent-run-result');
 
+        const isSandbox = document.getElementById('agent-mode-sandbox')?.checked ?? true;
+        const videoUrl = (document.getElementById('agent-video-url')?.value || '').trim();
+
         if (btn) {
             btn.disabled = true;
             btn.innerHTML = '<span class="spinner" style="width:14px;height:14px;"></span> Running Agent...';
@@ -153,7 +184,12 @@ curl -X POST http://localhost:3000/api/agent/provision \
         const timer4 = setTimeout(() => this.highlightStep(4), 2100);
 
         try {
-            const res = await App.apiCall('POST', '/api/agent/run', { topic });
+            const res = await App.apiCall('POST', '/api/agent/run', {
+                topic,
+                simulate: isSandbox,
+                video_url: isSandbox ? null : (videoUrl || null)
+            });
+
             clearTimeout(timer2);
             clearTimeout(timer3);
             clearTimeout(timer4);
@@ -163,10 +199,22 @@ curl -X POST http://localhost:3000/api/agent/provision \
 
             if (resultContainer && res.campaign) {
                 resultContainer.style.display = 'block';
+                const warningHtml = res.campaign.warning ? `
+                    <div style="margin-top: 0.65rem; padding: 0.55rem 0.85rem; background: #FFF9C4; border: 1px solid #FBC02D; border-radius: 8px; font-size: 0.8rem; color: #7F0000; font-weight: 600;">
+                        ⚠️ ${res.campaign.warning}
+                    </div>
+                ` : '';
+
+                const liveBadge = res.campaign.live ? `
+                    <span style="font-size: 0.72rem; font-weight: 800; background: #E8F5E9; color: #2E7D32; padding: 2px 7px; border-radius: 5px; margin-left: 6px;">🔴 LIVE INSTAGRAM POST</span>
+                ` : `
+                    <span style="font-size: 0.72rem; font-weight: 800; background: #EDE7F6; color: #512DA8; padding: 2px 7px; border-radius: 5px; margin-left: 6px;">🧪 SANDBOX TEST REEL</span>
+                `;
+
                 resultContainer.innerHTML = `
                     <div style="background: #E8F5E9; border: 1.5px solid #81C784; border-radius: 12px; padding: 1.25rem; color: #1B5E20;">
                         <div style="font-weight: 800; font-size: 1rem; margin-bottom: 0.35rem; display: flex; align-items: center; gap: 6px;">
-                            <span>✅</span> Autonomous Loop Complete & Armed!
+                            <span>✅</span> Autonomous Loop Complete & Armed! ${liveBadge}
                         </div>
                         <div style="font-size: 0.88rem; margin-bottom: 0.65rem;">
                             <strong>Topic:</strong> ${res.campaign.topic}<br>
@@ -174,9 +222,12 @@ curl -X POST http://localhost:3000/api/agent/provision \
                             <strong>Deliverable Guide:</strong> <a href="${res.campaign.deliverableUrl}" target="_blank" style="color: #2E7D32; font-weight: 700; text-decoration: underline;">${res.campaign.deliverableUrl}</a><br>
                             <strong>Reel Media ID:</strong> ${res.campaign.mediaId} | <strong>Rule ID:</strong> #${res.campaign.ruleId}
                         </div>
-                        <button class="btn btn-primary btn-sm" style="font-weight: 800; font-size: 0.82rem; padding: 0.45rem 1rem; border-radius: 8px;" onclick="agentView.simulateComment('${res.campaign.mediaId}', '${res.campaign.keyword}')">
-                            🧪 Test Follower Comment & Gate
-                        </button>
+                        ${warningHtml}
+                        <div style="margin-top: 0.85rem;">
+                            <button class="btn btn-primary btn-sm" style="font-weight: 800; font-size: 0.82rem; padding: 0.45rem 1rem; border-radius: 8px;" onclick="agentView.simulateComment('${res.campaign.mediaId}', '${res.campaign.keyword}')">
+                                🧪 Test Follower Comment & Gate
+                            </button>
+                        </div>
                     </div>
                 `;
             }
