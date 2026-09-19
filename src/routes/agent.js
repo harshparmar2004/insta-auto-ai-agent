@@ -81,10 +81,15 @@ router.post('/bridge/batch', async (req, res) => {
 router.post('/sync-sheet', async (req, res) => {
     try {
         const { sheet_url } = req.body || {};
-        const syncResult = await syncFromGoogleSheet(sheet_url || null);
+        if (sheet_url) {
+            setConfig('agent_sheet_url', sheet_url);
+        }
+        const activeUrl = sheet_url || getConfig('agent_sheet_url') || getConfig('google_sheet_webhook_url');
+        const syncResult = await syncFromGoogleSheet(activeUrl);
 
         res.json({
             success: true,
+            sheet_url: activeUrl,
             message: `Google Sheet sync complete! Armed ${syncResult.armedCount || 0} reels with their companion doc links.`,
             details: syncResult
         });
@@ -150,6 +155,27 @@ router.get('/bridge-config', (req, res) => {
     const batchWebhookUrl = `${protocol}://${host}/api/agent/bridge/batch`;
     const isAutoPilot = (getConfig('agent_auto_pilot') || '0') === '1';
     const googleSheetWebhook = getConfig('google_sheet_webhook_url') || '';
+    const agentSheetUrl = getConfig('agent_sheet_url') || googleSheetWebhook || '';
+
+    const googleAppsScriptExample = `function onNewReelAppended() {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  var lastRow = sheet.getLastRow();
+  // Expects columns: [A: Reel ID or Link, B: Trigger Keyword, C: Deliverable URL, D: Topic Title]
+  var rowData = sheet.getRange(lastRow, 1, 1, 4).getValues()[0];
+  var payload = {
+    media_id: rowData[0],
+    trigger_keyword: rowData[1],
+    deliverable_url: rowData[2],
+    lead_magnet_title: rowData[3],
+    source: "google_sheets_trigger"
+  };
+  UrlFetchApp.fetch("${webhookUrl}", {
+    method: "post",
+    contentType: "application/json",
+    payload: JSON.stringify(payload),
+    muteHttpExceptions: true
+  });
+}`;
 
     res.json({
         engine: 'InstaAuto External Sentinel & Bridge Engine',
@@ -159,6 +185,8 @@ router.get('/bridge-config', (req, res) => {
         webhookUrl,
         batchWebhookUrl,
         googleSheetWebhook,
+        agentSheetUrl,
+        googleAppsScriptExample,
         connectedInstagram: {
             username: getConfig('ig_username') || process.env.INSTAGRAM_USERNAME || '@harshparmar007__',
             userId: getConfig('ig_user_id') || process.env.INSTAGRAM_USER_ID
@@ -286,7 +314,27 @@ router.post('/simulate-comment', async (req, res) => {
     }
 });
 
-// 10. Status Endpoint
+// 10. Clean Test / Demo Reels
+router.post('/cleanup-test-data', (req, res) => {
+    try {
+        const { getDb } = require('../database');
+        const db = getDb();
+        const testCampaigns = db.prepare("SELECT media_id, rule_id FROM agent_campaigns WHERE media_id LIKE 'batch_reel_%' OR media_id LIKE 'reel_%' OR media_id LIKE 'ext_reel_%'").all();
+        for (const c of testCampaigns) {
+            if (c.rule_id) db.prepare("DELETE FROM rules WHERE id = ?").run(c.rule_id);
+            if (c.media_id) {
+                db.prepare("DELETE FROM media WHERE ig_media_id = ?").run(c.media_id);
+                db.prepare("DELETE FROM events WHERE media_ig_id = ?").run(c.media_id);
+            }
+        }
+        db.prepare("DELETE FROM agent_campaigns WHERE media_id LIKE 'batch_reel_%' OR media_id LIKE 'reel_%' OR media_id LIKE 'ext_reel_%'").run();
+        res.json({ success: true, message: `Cleared ${testCampaigns.length} synthetic test reels from matrix!` });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// 11. Status Endpoint
 router.get('/status', (req, res) => {
     res.json({
         engine: 'InstaAuto External Sentinel & Bridge Engine',

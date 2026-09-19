@@ -116,15 +116,30 @@ cron.schedule('*/30 * * * *', async () => {
 cron.schedule('*/10 * * * *', async () => {
   const { getConfig } = require('./src/database');
   if (getConfig('agent_auto_pilot') === '1') {
-    console.log('[Cron] Running Autonomous Agent Auto-Pilot Feed Sentinel...');
+    console.log('[Cron] Running Autonomous Agent Auto-Pilot Sentinel...');
+    const { scanAndArmFeed, syncFromGoogleSheet } = require('./src/services/postSentinel');
+    
+    // 1. Scan live Instagram feed for new reels
     try {
-      const { scanAndArmFeed } = require('./src/services/postSentinel');
       const res = await scanAndArmFeed();
       if (res.armedCount > 0) {
-        console.log(`[Cron] ⚡ Auto-Pilot Sentinel armed ${res.armedCount} new reel automation funnels!`);
+        console.log(`[Cron] ⚡ Auto-Pilot Sentinel armed ${res.armedCount} new reel automation funnels from feed!`);
       }
     } catch (err) {
-      console.warn('[Cron] Auto-Pilot Sentinel notice:', err.message);
+      console.warn('[Cron] Auto-Pilot Feed Sentinel notice:', err.message);
+    }
+
+    // 2. Sync Google Sheets deliverables if sheet URL is configured
+    try {
+      const sheetUrl = getConfig('agent_sheet_url') || getConfig('google_sheet_webhook_url');
+      if (sheetUrl) {
+        const sheetRes = await syncFromGoogleSheet(sheetUrl);
+        if (sheetRes && sheetRes.armedCount > 0) {
+          console.log(`[Cron] 📊 Auto-Pilot Sentinel synced and armed ${sheetRes.armedCount} reels from Google Sheet!`);
+        }
+      }
+    } catch (sheetErr) {
+      console.warn('[Cron] Auto-Pilot Sheet Sentinel notice:', sheetErr.message);
     }
   }
 });

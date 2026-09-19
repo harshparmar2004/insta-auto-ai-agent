@@ -21,13 +21,45 @@ function extractMediaId(input) {
     return clean;
 }
 
+function parseCSVLine(line) {
+    const values = [];
+    let current = '';
+    let inQuotes = false;
+    for (let i = 0; i < line.length; i++) {
+        const char = line[i];
+        if (char === '"') {
+            if (inQuotes && line[i + 1] === '"') {
+                current += '"';
+                i++;
+            } else {
+                inQuotes = !inQuotes;
+            }
+        } else if (char === ',' && !inQuotes) {
+            values.push(current.trim());
+            current = '';
+        } else {
+            current += char;
+        }
+    }
+    values.push(current.trim());
+    return values;
+}
+
 async function processExternalPost({ media_id, caption = '', deliverable_url = null, trigger_keyword = null, lead_magnet_title = null, source = 'external_bridge' }) {
     if (!media_id) {
         throw new Error('media_id is required');
     }
 
-    const cleanMediaId = extractMediaId(media_id);
+    let cleanMediaId = extractMediaId(media_id);
     const db = getDb();
+
+    // Check if cleanMediaId is a shortcode or permalink that matches an existing media in DB
+    try {
+        const rowByPermalink = db.prepare("SELECT ig_media_id FROM media WHERE ig_media_id = ? OR permalink LIKE ?").get(cleanMediaId, `%${cleanMediaId}%`);
+        if (rowByPermalink && rowByPermalink.ig_media_id) {
+            cleanMediaId = rowByPermalink.ig_media_id;
+        }
+    } catch (e) {}
 
     // 1. Run Autonomous Caption Intelligence
     const parsed = await parseCaptionIntelligence(caption, trigger_keyword, deliverable_url);
@@ -182,9 +214,9 @@ async function processBatchExternalPosts(postsArray, source = 'external_bridge_b
  * Syncs deliverable doc links and reel mappings directly from Google Sheets
  */
 async function syncFromGoogleSheet(customUrl = null) {
-    const sheetUrl = customUrl || getConfig('google_sheet_webhook_url');
+    const sheetUrl = customUrl || getConfig('agent_sheet_url') || getConfig('google_sheet_webhook_url');
     if (!sheetUrl) {
-        throw new Error('No Google Sheet URL or Webhook configured in Settings');
+        throw new Error('No Google Sheet URL or Webhook configured');
     }
 
     console.log(`[Sentinel] 📊 Syncing deliverable mappings from Google Sheet: ${sheetUrl}...`);
@@ -211,20 +243,24 @@ async function syncFromGoogleSheet(customUrl = null) {
     // Case 2: Published Google Sheet CSV
     if (rows.length === 0 && (sheetUrl.includes('docs.google.com/spreadsheets') || sheetUrl.includes('output=csv') || sheetUrl.includes('.csv'))) {
         try {
-            const csvUrl = sheetUrl.includes('output=csv') ? sheetUrl : sheetUrl.replace(/\/edit.*$/, '/export?format=csv');
-            const res = await axios.get(csvUrl, { timeout: 10000 });
-            const lines = res.data.split('\n').map(l => l.trim()).filter(Boolean);
+            let csvUrl = sheetUrl;
+            if (sheetUrl.includes('docs.google.com/spreadsheets')) {
+                csvUrl = sheetUrl.replace(/\/edit.*$/, '').replace(/\/view.*$/, '') + '/export?format=csv';
+            }
+            const res = await axios.get(csvUrl, { timeout: 12000 });
+            const lines = res.data.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
             if (lines.length > 1) {
-                const headers = lines[0].split(',').map(h => h.toLowerCase().replace(/['"\s_]/g, ''));
+                const headers = parseCSVLine(lines[0]).map(h => h.toLowerCase().replace(/['"\s_]/g, ''));
                 for (let i = 1; i < lines.length; i++) {
-                    const cols = lines[i].split(',').map(c => c.replace(/^["']|["']$/g, '').trim());
+                    const cols = parseCSVLine(lines[i]).map(c => c.replace(/^["']|["']$/g, '').trim());
                     const rowObj = {};
                     headers.forEach((h, idx) => {
-                        if (h.includes('id') || h.includes('reel') || h.includes('media')) rowObj.media_id = cols[idx];
-                        if (h.includes('key') || h.includes('trigger')) rowObj.trigger_keyword = cols[idx];
-                        if (h.includes('link') || h.includes('doc') || h.includes('url')) rowObj.deliverable_url = cols[idx];
-                        if (h.includes('cap') || h.includes('text')) rowObj.caption = cols[idx];
-                        if (h.includes('title') || h.includes('topic')) rowObj.lead_magnet_title = cols[idx];
+                        const val = cols[idx] || '';
+                        if (h.includes('id') || h.includes('reel') || h.includes('media') || h.includes('post')) rowObj.media_id = val;
+                        if (h.includes('key') || h.includes('trigger')) rowObj.trigger_keyword = val;
+                        if (h.includes('link') || h.includes('doc') || h.includes('url') || h.includes('resource') || h.includes('guide')) rowObj.deliverable_url = val;
+                        if (h.includes('cap') || h.includes('text')) rowObj.caption = val;
+                        if (h.includes('title') || h.includes('topic') || h.includes('name')) rowObj.lead_magnet_title = val;
                     });
                     if (rowObj.media_id) rows.push(rowObj);
                 }

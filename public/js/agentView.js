@@ -131,9 +131,21 @@ window.agentView = {
                             </div>
                         </div>
 
-                        <button class="btn btn-primary w-full" id="btn-sync-sheet" onclick="agentView.syncGoogleSheet()" style="padding: 0.75rem; font-weight: 800; font-size: 0.9rem; border-radius: 12px; box-shadow: 0 4px 14px rgba(217,119,87,0.3);">
-                            📊 Sync Deliverables from Google Sheet Now
-                        </button>
+                        <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                            <button class="btn btn-primary w-full" id="btn-sync-sheet" onclick="agentView.syncGoogleSheet()" style="padding: 0.75rem; font-weight: 800; font-size: 0.9rem; border-radius: 12px; box-shadow: 0 4px 14px rgba(217,119,87,0.3);">
+                                📊 Sync Deliverables from Google Sheet Now
+                            </button>
+                            <button type="button" class="btn btn-secondary w-full btn-sm" onclick="agentView.toggleAppsScript()" style="font-size: 0.8rem; font-weight: 700; border-radius: 8px;">
+                                ⚡ View Google Apps Script Real-Time Code
+                            </button>
+                        </div>
+                        <div id="apps-script-container" style="display: none; margin-top: 1rem; background: #2C2A29; border-radius: 10px; padding: 1rem; font-family: monospace; font-size: 0.76rem; color: #E6E1D8; position: relative;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                                <span style="color: #D97757; font-weight: 700;">Google Sheets Auto-Trigger (Extensions > Apps Script):</span>
+                                <button onclick="agentView.copyAppsScript()" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #FFF; font-size: 0.72rem; padding: 2px 8px; border-radius: 4px; cursor: pointer;">📋 Copy</button>
+                            </div>
+                            <pre id="apps-script-code" style="margin: 0; white-space: pre-wrap; word-break: break-all; max-height: 180px; overflow-y: auto;"></pre>
+                        </div>
                     </div>
 
                 </div>
@@ -168,8 +180,11 @@ window.agentView = {
                             </h2>
                             <span id="agent-posts-count" style="font-size: 0.84rem; font-weight: 700; color: var(--text-secondary);">Loading...</span>
                         </div>
-                        <div style="display: flex; gap: 0.75rem; align-items: center;">
-                            <input type="text" id="matrix-search-input" placeholder="Filter by keyword (e.g. DRAG, RAG) or Reel ID..." oninput="agentView.filterPosts(this.value)" style="padding: 0.45rem 0.85rem; font-size: 0.82rem; border-radius: 8px; border: 1.5px solid #E6E1D8; width: 280px; background: #FFFFFF;">
+                        <div style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;">
+                            <input type="text" id="matrix-search-input" placeholder="Filter by keyword (e.g. DRAG, RAG) or Reel ID..." oninput="agentView.filterPosts(this.value)" style="padding: 0.45rem 0.85rem; font-size: 0.82rem; border-radius: 8px; border: 1.5px solid #E6E1D8; width: 260px; background: #FFFFFF;">
+                            <button class="btn btn-secondary btn-sm" onclick="agentView.cleanTestData()" style="font-size: 0.78rem; font-weight: 700; padding: 0.45rem 0.75rem; border-radius: 8px;" title="Clear mock demonstration reels">
+                                🧹 Clear Test Reels
+                            </button>
                         </div>
                     </div>
 
@@ -183,6 +198,7 @@ window.agentView = {
 
         this.renderSnippet();
         await this.checkAutoPilot();
+        await this.loadConfig();
         await this.loadPosts();
     },
 
@@ -255,6 +271,49 @@ await axios.post('${batchBridgeUrl}', {
         { media_id: '18049102948201942', caption: 'Comment DRAG', deliverable_url: 'https://...' }
     ]
 });`;
+        }
+    },
+
+    async loadConfig() {
+        try {
+            const config = await App.apiCall('GET', '/api/agent/bridge-config');
+            if (config.agentSheetUrl) {
+                const input = document.getElementById('sheet-sync-url');
+                if (input && !input.value) {
+                    input.value = config.agentSheetUrl;
+                }
+            }
+            this.cachedAppsScript = config.googleAppsScriptExample || '';
+            const pre = document.getElementById('apps-script-code');
+            if (pre && this.cachedAppsScript) {
+                pre.textContent = this.cachedAppsScript;
+            }
+        } catch (e) {}
+    },
+
+    toggleAppsScript() {
+        const c = document.getElementById('apps-script-container');
+        if (c) {
+            c.style.display = c.style.display === 'none' ? 'block' : 'none';
+        }
+    },
+
+    copyAppsScript() {
+        const text = this.cachedAppsScript || (document.getElementById('apps-script-code')?.textContent);
+        if (text) {
+            navigator.clipboard.writeText(text);
+            App.showToast('📋 Google Apps Script copied to clipboard!', 'success');
+        }
+    },
+
+    async cleanTestData() {
+        if (!confirm('Clear synthetic demonstration test reels from the matrix?')) return;
+        try {
+            const res = await App.apiCall('POST', '/api/agent/cleanup-test-data');
+            App.showToast(res.message || 'Test data cleared!', 'success');
+            await this.loadPosts();
+        } catch (err) {
+            App.showToast('Error cleaning test data: ' + err.message, 'error');
         }
     },
 
