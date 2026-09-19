@@ -319,17 +319,29 @@ router.post('/cleanup-test-data', (req, res) => {
     try {
         const { getDb } = require('../database');
         const db = getDb();
+        db.pragma('foreign_keys = OFF');
         const testCampaigns = db.prepare("SELECT media_id, rule_id FROM agent_campaigns WHERE media_id LIKE 'batch_reel_%' OR media_id LIKE 'reel_%' OR media_id LIKE 'ext_reel_%'").all();
+        
         for (const c of testCampaigns) {
-            if (c.rule_id) db.prepare("DELETE FROM rules WHERE id = ?").run(c.rule_id);
+            if (c.rule_id) {
+                db.prepare("DELETE FROM clicks WHERE event_id IN (SELECT id FROM events WHERE rule_id = ?)").run(c.rule_id);
+                db.prepare("DELETE FROM conversations WHERE rule_id = ?").run(c.rule_id);
+                db.prepare("DELETE FROM events WHERE rule_id = ?").run(c.rule_id);
+                db.prepare("DELETE FROM rules WHERE id = ?").run(c.rule_id);
+            }
             if (c.media_id) {
-                db.prepare("DELETE FROM media WHERE ig_media_id = ?").run(c.media_id);
+                db.prepare("DELETE FROM clicks WHERE event_id IN (SELECT id FROM events WHERE media_ig_id = ?)").run(c.media_id);
+                db.prepare("DELETE FROM conversations WHERE event_id IN (SELECT id FROM events WHERE media_ig_id = ?)").run(c.media_id);
                 db.prepare("DELETE FROM events WHERE media_ig_id = ?").run(c.media_id);
+                db.prepare("DELETE FROM media WHERE ig_media_id = ?").run(c.media_id);
             }
         }
         db.prepare("DELETE FROM agent_campaigns WHERE media_id LIKE 'batch_reel_%' OR media_id LIKE 'reel_%' OR media_id LIKE 'ext_reel_%'").run();
+        db.pragma('foreign_keys = ON');
         res.json({ success: true, message: `Cleared ${testCampaigns.length} synthetic test reels from matrix!` });
     } catch (e) {
+        try { const { getDb } = require('../database'); getDb().pragma('foreign_keys = ON'); } catch(err) {}
+        console.error('[Cleanup Error]:', e.message);
         res.status(500).json({ error: e.message });
     }
 });

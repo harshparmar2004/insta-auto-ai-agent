@@ -45,7 +45,7 @@ function parseCSVLine(line) {
     return values;
 }
 
-async function processExternalPost({ media_id, caption = '', deliverable_url = null, trigger_keyword = null, lead_magnet_title = null, source = 'external_bridge' }) {
+async function processExternalPost({ media_id, caption = '', deliverable_url = null, trigger_keyword = null, lead_magnet_title = null, source = 'external_bridge', user_id = null }) {
     if (!media_id) {
         throw new Error('media_id is required');
     }
@@ -71,14 +71,23 @@ async function processExternalPost({ media_id, caption = '', deliverable_url = n
     console.log(`[Sentinel] 💬 Trigger Keyword: ${finalKeyword}`);
     console.log(`[Sentinel] 🔗 Deliverable Doc Link: ${finalDeliverableUrl}`);
 
+    // Resolve owner user_id
+    let targetUserId = user_id || null;
+    if (!targetUserId) {
+        try {
+            const acct = db.prepare("SELECT user_id FROM instagram_accounts WHERE is_active = 1 LIMIT 1").get();
+            if (acct && acct.user_id) targetUserId = acct.user_id;
+        } catch (e) {}
+    }
+
     // 2. Upsert into Media Table
     const now = new Date().toISOString();
     try {
         db.prepare(`
-            INSERT INTO media (ig_media_id, caption, synced_at, status)
-            VALUES (?, ?, ?, 'active')
-            ON CONFLICT(ig_media_id) DO UPDATE SET caption = excluded.caption
-        `).run(cleanMediaId, caption || 'Instagram Content', now);
+            INSERT INTO media (ig_media_id, caption, user_id, synced_at, status)
+            VALUES (?, ?, ?, ?, 'active')
+            ON CONFLICT(ig_media_id) DO UPDATE SET caption = excluded.caption, user_id = COALESCE(media.user_id, excluded.user_id)
+        `).run(cleanMediaId, caption || 'Instagram Content', targetUserId, now);
     } catch (e) {
         console.warn('[Sentinel] Media upsert notice:', e.message);
     }
@@ -114,9 +123,10 @@ async function processExternalPost({ media_id, caption = '', deliverable_url = n
                 public_reply,
                 is_active,
                 buttons_config_json,
+                user_id,
                 created_at,
                 updated_at
-            ) VALUES (?, ?, 'follow_first', ?, ?, ?, 1, ?, ?, ?)
+            ) VALUES (?, ?, 'follow_first', ?, ?, ?, 1, ?, ?, ?, ?)
         `);
 
         const ruleRes = insertRuleStmt.run(
@@ -126,6 +136,7 @@ async function processExternalPost({ media_id, caption = '', deliverable_url = n
             finalDeliverableUrl,
             `Sent you a DM with the access link! Check your message requests 🙌`,
             JSON.stringify(buttonConfig),
+            targetUserId,
             now,
             now
         );
@@ -137,9 +148,9 @@ async function processExternalPost({ media_id, caption = '', deliverable_url = n
         try {
             db.prepare(`
                 UPDATE rules 
-                SET trigger_keyword = ?, link_url = ?, updated_at = ?
+                SET trigger_keyword = ?, link_url = ?, user_id = COALESCE(user_id, ?), updated_at = ?
                 WHERE id = ?
-            `).run(finalKeyword, finalDeliverableUrl, now, ruleId);
+            `).run(finalKeyword, finalDeliverableUrl, targetUserId, now, ruleId);
             console.log(`[Sentinel] 🔄 Updated existing Rule #${ruleId} with Keyword "${finalKeyword}"`);
         } catch (e) {}
     }
