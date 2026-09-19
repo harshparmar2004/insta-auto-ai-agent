@@ -10,6 +10,7 @@ window['new-automation'] = {
     // Direct Publish & Automate Studio State
     isDirectPublish: false,
     directMediaType: 'REELS', // 'REELS' or 'IMAGE'
+    feedAspectRatio: 'auto', // 'auto', '1:1', '4:5', '16:9'
     directMediaUrl: '',
     directLocalFileUrl: '',
     directFileName: '',
@@ -177,6 +178,7 @@ window['new-automation'] = {
         
         if (file.type && file.type.startsWith('image/')) {
             this.directMediaType = 'IMAGE';
+            this.feedAspectRatio = 'auto'; // Default to auto fit so image is never cropped!
         } else {
             this.directMediaType = 'REELS';
         }
@@ -190,7 +192,21 @@ window['new-automation'] = {
 
     setDirectMediaType(type) {
         this.directMediaType = type;
-        this.renderDirectPublishStudio(document.getElementById('new-automation-content'));
+        if (type === 'IMAGE' && !this.feedAspectRatio) {
+            this.feedAspectRatio = 'auto';
+        }
+        const container = document.getElementById('new-automation-content');
+        if (container) {
+            this.renderDirectPublishStudio(container);
+        }
+    },
+
+    setFeedAspectRatio(ratio) {
+        this.feedAspectRatio = ratio || 'auto';
+        const container = document.getElementById('new-automation-content');
+        if (container) {
+            this.renderDirectPublishStudio(container);
+        }
     },
 
     setDirectSamplePreset(type) {
@@ -202,6 +218,7 @@ window['new-automation'] = {
             this.directCaption = 'Want our complete 2026 AI Agent Playbook? Comment "DRAG" below and I will send it right to your DMs! 🚀';
         } else {
             this.directMediaType = 'IMAGE';
+            this.feedAspectRatio = 'auto';
             this.directMediaUrl = 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&auto=format&fit=crop';
             this.directLocalFileUrl = '';
             this.directFileName = '';
@@ -235,21 +252,172 @@ window['new-automation'] = {
         if (!url) {
             return `
                 <div onclick="document.getElementById('direct-media-file-input')?.click()" style="color: #FFF; font-size: 0.8rem; text-align: center; padding: 1.5rem; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%;">
-                    <div style="width: 52px; height: 52px; border-radius: 50%; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; font-size: 2rem; font-weight: 900; line-height: 1; margin-bottom: 0.5rem; box-shadow: 0 4px 14px rgba(0,0,0,0.3); border: 2px solid rgba(255,255,255,0.4);">
+                    <div style="width: 48px; height: 48px; border-radius: 50%; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; font-size: 1.8rem; font-weight: 900; line-height: 1; margin-bottom: 0.5rem; box-shadow: 0 4px 14px rgba(0,0,0,0.3); border: 2px solid rgba(255,255,255,0.4);">
                         +
                     </div>
-                    <div style="font-weight: 800; font-size: 0.85rem;">No Media Selected</div>
-                    <div style="font-size: 0.7rem; color: rgba(255,255,255,0.75); margin-top: 0.25rem;">Click to choose Reel or Photo from computer gallery</div>
-                    <div style="margin-top: 0.65rem; background: var(--accent-primary); color: #FFF; font-size: 0.72rem; font-weight: 800; padding: 4px 12px; border-radius: 6px;">
+                    <div style="font-weight: 800; font-size: 0.82rem;">${isReel ? 'No Reel Video Selected' : 'No Photo Selected'}</div>
+                    <div style="font-size: 0.68rem; color: rgba(255,255,255,0.75); margin-top: 0.2rem;">Click to choose from computer gallery</div>
+                    <div style="margin-top: 0.6rem; background: var(--accent-primary); color: #FFF; font-size: 0.72rem; font-weight: 800; padding: 4px 12px; border-radius: 6px;">
                         📁 Choose from Computer
                     </div>
                 </div>
             `;
         }
         if (isReel) {
-            return `<video src="${url}" autoplay loop muted playsinline style="width: 100%; height: 100%; object-fit: cover;"></video>`;
+            return `<video src="${url}" autoplay loop muted playsinline style="width: 100%; height: 100%; object-fit: cover; display: block;"></video>`;
         } else {
-            return `<img src="${url}" alt="Post preview" style="width: 100%; height: 100%; object-fit: cover;">`;
+            const ratio = this.feedAspectRatio || 'auto';
+            if (ratio === 'auto') {
+                return `<img src="${url}" alt="Post preview" style="max-width: 100%; max-height: 220px; width: auto; height: auto; object-fit: contain; display: block; margin: 0 auto;">`;
+            } else {
+                return `<img src="${url}" alt="Post preview" style="width: 100%; height: 100%; object-fit: cover; display: block;">`;
+            }
+        }
+    },
+
+    renderSmartphonePreview(isReel, mediaUrl, caption) {
+        if (isReel) {
+            // === 9:16 INSTAGRAM REEL PREVIEW ===
+            return `
+                <div style="width: 270px; height: 470px; background: #000000; border-radius: 32px; border: 6px solid #2B2825; box-shadow: 0 12px 36px rgba(0,0,0,0.25); position: relative; overflow: hidden; display: flex; flex-direction: column; color: #FFF; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+                    
+                    <!-- TOP INSTAGRAM BAR -->
+                    <div style="position: absolute; top: 0; left: 0; right: 0; padding: 10px 12px 6px 12px; display: flex; align-items: center; justify-content: space-between; z-index: 10; background: linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, transparent 100%);">
+                        <div style="display: flex; align-items: center; gap: 6px;">
+                            <div style="width: 24px; height: 24px; border-radius: 50%; background: linear-gradient(45deg, #F58529, #DD2A7B, #8134AF); padding: 1.5px;">
+                                <div style="width: 100%; height: 100%; border-radius: 50%; background: #1C1917; display: flex; align-items: center; justify-content: center; font-size: 0.6rem; font-weight: 800; color:#FFF;">HP</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 0.72rem; font-weight: 800; line-height: 1.1; color: #FFF;">harshparmar007__</div>
+                                <div style="font-size: 0.58rem; color: rgba(255,255,255,0.8);">♫ Original audio</div>
+                            </div>
+                        </div>
+                        <div style="font-size: 0.85rem; font-weight: 800; color: #FFF; cursor: pointer;">•••</div>
+                    </div>
+
+                    <!-- 9:16 VERTICAL VIDEO CONTAINER -->
+                    <div id="phone-preview-media-container" style="flex: 1; position: relative; background: #111113; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                        ${this.renderPhoneMediaContent(true, mediaUrl)}
+                    </div>
+
+                    <!-- FLOATING RIGHT ACTION ICONS -->
+                    <div style="position: absolute; right: 10px; bottom: 85px; display: flex; flex-direction: column; align-items: center; gap: 14px; z-index: 10;">
+                        <div style="text-align: center;">
+                            <div style="font-size: 1.25rem; text-shadow: 0 1px 4px rgba(0,0,0,0.8);">❤️</div>
+                            <div style="font-size: 0.58rem; font-weight: 700; color: #FFF;">14.2K</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="font-size: 1.25rem; text-shadow: 0 1px 4px rgba(0,0,0,0.8);">💬</div>
+                            <div style="font-size: 0.58rem; font-weight: 700; color: #FFF;">284</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="font-size: 1.25rem; text-shadow: 0 1px 4px rgba(0,0,0,0.8);">✈️</div>
+                            <div style="font-size: 0.58rem; font-weight: 700; color: #FFF;">Share</div>
+                        </div>
+                        <div style="width: 22px; height: 22px; border-radius: 50%; border: 2px solid #FFF; background: #222; display: flex; align-items: center; justify-content: center; font-size: 0.65rem;">
+                            🎵
+                        </div>
+                    </div>
+
+                    <!-- OVERLAY ACTION ICONS & LIVE CAPTION -->
+                    <div style="position: absolute; bottom: 0; left: 0; right: 48px; padding: 10px 10px 12px 10px; background: linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.6) 70%, transparent 100%); z-index: 10;">
+                        <div style="font-size: 0.72rem; font-weight: 600; line-height: 1.35; margin-bottom: 6px; text-shadow: 0 1px 3px rgba(0,0,0,0.9); max-height: 48px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">
+                            <strong style="color: #FFF; margin-right: 4px;">harshparmar007__</strong>
+                            <span id="phone-caption-text">${caption || 'Your caption will appear here...'}</span>
+                        </div>
+
+                        <!-- SIMULATED AUTOMATION RESPONSE PREVIEW -->
+                        <div id="phone-funnel-preview" style="background: rgba(255,255,255,0.18); backdrop-filter: blur(8px); border-radius: 7px; padding: 4px 7px; border: 1px solid rgba(255,255,255,0.25); font-size: 0.62rem;">
+                            <div style="color: #FFD166; font-weight: 800;">💬 Comment: "${this.detectedKeyword || 'KEYWORD'}"</div>
+                            <div style="color: #A7F3D0; font-weight: 700; margin-top: 1px;">🤖 InstaAuto: DM link sent! 📩</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        } else {
+            // === AUTHENTIC INSTAGRAM FEED POST PREVIEW ===
+            const ratio = this.feedAspectRatio || 'auto';
+            let mediaBoxStyle = 'width: 100%; background: #000000; overflow: hidden; display: flex; align-items: center; justify-content: center;';
+            
+            if (ratio === '1:1') {
+                mediaBoxStyle += ' aspect-ratio: 1 / 1; max-height: 220px;';
+            } else if (ratio === '4:5') {
+                mediaBoxStyle += ' aspect-ratio: 4 / 5; max-height: 240px;';
+            } else if (ratio === '16:9') {
+                mediaBoxStyle += ' aspect-ratio: 16 / 9; max-height: 170px;';
+            } else {
+                // Auto Fit
+                mediaBoxStyle += ' min-height: 160px; max-height: 220px;';
+            }
+
+            return `
+                <div style="width: 270px; height: 470px; background: #FFFFFF; border-radius: 32px; border: 6px solid #2B2825; box-shadow: 0 12px 36px rgba(0,0,0,0.25); position: relative; overflow: hidden; display: flex; flex-direction: column; color: #18181B; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+                    
+                    <!-- TOP FEED HEADER -->
+                    <div style="padding: 10px 10px 8px 10px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #F0ECE6; background: #FFFFFF;">
+                        <div style="display: flex; align-items: center; gap: 7px;">
+                            <div style="width: 26px; height: 26px; border-radius: 50%; background: linear-gradient(45deg, #F58529, #DD2A7B, #8134AF); padding: 1.5px;">
+                                <div style="width: 100%; height: 100%; border-radius: 50%; background: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 0.62rem; font-weight: 800; color: #18181B;">HP</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 0.74rem; font-weight: 800; line-height: 1.1; color: #18181B;">harshparmar007__</div>
+                                <div style="font-size: 0.58rem; color: #71717A;">Suggested Post</div>
+                            </div>
+                        </div>
+                        <div style="font-size: 0.85rem; font-weight: 800; color: #27272A; cursor: pointer;">•••</div>
+                    </div>
+
+                    <!-- MEDIA DISPLAY (AUTO-FIT OR CHOSEN ASPECT RATIO) -->
+                    <div id="phone-preview-media-container" style="${mediaBoxStyle}">
+                        ${this.renderPhoneMediaContent(false, mediaUrl)}
+                    </div>
+
+                    <!-- ACTION BAR (HEART, COMMENT, SHARE, SAVE) -->
+                    <div style="padding: 8px 10px 4px 10px; display: flex; align-items: center; justify-content: space-between; background: #FFFFFF;">
+                        <div style="display: flex; align-items: center; gap: 10px; font-size: 1.1rem; cursor: pointer;">
+                            <span title="Like">❤️</span>
+                            <span title="Comment">💬</span>
+                            <span title="Share">✈️</span>
+                        </div>
+                        <div style="font-size: 1.05rem; cursor: pointer;" title="Save">
+                            🔖
+                        </div>
+                    </div>
+
+                    <!-- LIKES, CAPTION & SIMULATED DM AUTOMATION RESPONSE -->
+                    <div style="padding: 0 10px 8px 10px; flex: 1; overflow-y: auto; background: #FFFFFF;">
+                        <div style="font-size: 0.68rem; font-weight: 800; color: #18181B; margin-bottom: 2px;">
+                            1,842 likes
+                        </div>
+
+                        <!-- FEED POST CAPTION -->
+                        <div style="font-size: 0.72rem; line-height: 1.35; color: #27272A; margin-bottom: 6px;">
+                            <strong style="color: #18181B; margin-right: 4px;">harshparmar007__</strong>
+                            <span id="phone-caption-text">${caption || 'Your caption will appear here...'}</span>
+                        </div>
+
+                        <!-- SIMULATED COMMENT & AUTOMATION DM BUBBLE -->
+                        <div id="phone-funnel-preview" style="background: #F4F0EB; border-radius: 8px; padding: 5px 8px; border: 1px solid #E4DFD7; font-size: 0.65rem; margin-top: 4px;">
+                            <div style="color: #8B5CF6; font-weight: 800;">💬 Comment: "${this.detectedKeyword || 'KEYWORD'}"</div>
+                            <div style="color: #15803D; font-weight: 700; margin-top: 1px;">🤖 InstaAuto: DM link sent! 📩</div>
+                        </div>
+
+                        <div style="font-size: 0.62rem; color: #A1A1AA; margin-top: 6px;">
+                            View all 38 comments &bull; 2 hours ago
+                        </div>
+                    </div>
+
+                    <!-- BOTTOM INSTAGRAM TAB BAR -->
+                    <div style="padding: 6px 12px; border-top: 1px solid #F0ECE6; background: #FAFAFA; display: flex; justify-content: space-between; align-items: center; font-size: 0.95rem; color: #27272A;">
+                        <span>🏠</span>
+                        <span>🔍</span>
+                        <span style="font-size: 1.15rem; font-weight: 900;">+</span>
+                        <span>🎬</span>
+                        <div style="width: 16px; height: 16px; border-radius: 50%; background: #27272A; color: #FFF; font-size: 0.45rem; display: flex; align-items: center; justify-content: center; font-weight: 800;">HP</div>
+                    </div>
+
+                </div>
+            `;
         }
     },
 
@@ -848,6 +1016,32 @@ window['new-automation'] = {
                                     </div>
                                 </div>
                             </div>
+
+                            <!-- ASPECT RATIO PILLS FOR FEED POST -->
+                            <div style="margin-top: 0.65rem; padding: 0.65rem 0.85rem; background: #FFFFFF; border: 1px solid var(--border-color); border-radius: 10px; display: ${!isReel ? 'block' : 'none'};">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.45rem;">
+                                    <span style="font-size: 0.76rem; font-weight: 800; color: var(--text-primary);">
+                                        📐 Feed Aspect Ratio / Frame:
+                                    </span>
+                                    <span style="font-size: 0.68rem; font-weight: 700; color: var(--accent-primary); background: #FAF0EA; padding: 1px 7px; border-radius: 4px;">
+                                        ${this.feedAspectRatio === 'auto' ? 'Auto-Fit (Full Image)' : this.feedAspectRatio}
+                                    </span>
+                                </div>
+                                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.4rem;">
+                                    <button type="button" onclick="window['new-automation'].setFeedAspectRatio('auto')" style="padding: 6px 4px; font-size: 0.72rem; font-weight: ${this.feedAspectRatio === 'auto' ? '800' : '600'}; border-radius: 6px; border: ${this.feedAspectRatio === 'auto' ? '2px solid var(--accent-primary)' : '1px solid var(--border-color)'}; background: ${this.feedAspectRatio === 'auto' ? '#FDF8F6' : '#FFFFFF'}; color: ${this.feedAspectRatio === 'auto' ? 'var(--accent-primary)' : 'var(--text-primary)'}; cursor: pointer; text-align: center;" title="Keeps full image visible without cutting edges">
+                                        🔄 Auto Fit
+                                    </button>
+                                    <button type="button" onclick="window['new-automation'].setFeedAspectRatio('1:1')" style="padding: 6px 4px; font-size: 0.72rem; font-weight: ${this.feedAspectRatio === '1:1' ? '800' : '600'}; border-radius: 6px; border: ${this.feedAspectRatio === '1:1' ? '2px solid var(--accent-primary)' : '1px solid var(--border-color)'}; background: ${this.feedAspectRatio === '1:1' ? '#FDF8F6' : '#FFFFFF'}; color: ${this.feedAspectRatio === '1:1' ? 'var(--accent-primary)' : 'var(--text-primary)'}; cursor: pointer; text-align: center;" title="Square feed post (1:1)">
+                                        ⏹️ 1:1 Square
+                                    </button>
+                                    <button type="button" onclick="window['new-automation'].setFeedAspectRatio('4:5')" style="padding: 6px 4px; font-size: 0.72rem; font-weight: ${this.feedAspectRatio === '4:5' ? '800' : '600'}; border-radius: 6px; border: ${this.feedAspectRatio === '4:5' ? '2px solid var(--accent-primary)' : '1px solid var(--border-color)'}; background: ${this.feedAspectRatio === '4:5' ? '#FDF8F6' : '#FFFFFF'}; color: ${this.feedAspectRatio === '4:5' ? 'var(--accent-primary)' : 'var(--text-primary)'}; cursor: pointer; text-align: center;" title="Vertical portrait post (4:5)">
+                                        📱 4:5 Portrait
+                                    </button>
+                                    <button type="button" onclick="window['new-automation'].setFeedAspectRatio('16:9')" style="padding: 6px 4px; font-size: 0.72rem; font-weight: ${this.feedAspectRatio === '16:9' ? '800' : '600'}; border-radius: 6px; border: ${this.feedAspectRatio === '16:9' ? '2px solid var(--accent-primary)' : '1px solid var(--border-color)'}; background: ${this.feedAspectRatio === '16:9' ? '#FDF8F6' : '#FFFFFF'}; color: ${this.feedAspectRatio === '16:9' ? 'var(--accent-primary)' : 'var(--text-primary)'}; cursor: pointer; text-align: center;" title="Wide landscape post (16:9)">
+                                        🖥️ 16:9 Wide
+                                    </button>
+                                </div>
+                            </div>
                         </div>
 
                         <!-- 2. CHOOSE FROM COMPUTER GALLERY (ONLY OPTION) -->
@@ -924,7 +1118,7 @@ window['new-automation'] = {
                                     <span style="font-size: 1.1rem;">🤖</span>
                                     <div>
                                         <div style="font-size: 0.76rem; font-weight: 800; color: var(--text-primary);">
-                                            Autonomous Keyword Intelligence:
+                                             Autonomous Keyword Intelligence:
                                         </div>
                                         <div style="font-size: 0.74rem; color: var(--text-secondary);">
                                             ${this.detectedKeyword 
@@ -955,45 +1149,10 @@ window['new-automation'] = {
                     <!-- RIGHT COLUMN: SMARTPHONE MOCKUP -->
                     <div style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
                         <div style="font-size: 0.74rem; font-weight: 800; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.45rem;">
-                            📱 Live Instagram Preview
+                            📱 Live Instagram Preview (${isReel ? '9:16 Reel' : 'Feed Post'})
                         </div>
 
-                        <!-- PHONE SHELL -->
-                        <div style="width: 270px; height: 460px; background: #000; border-radius: 32px; border: 6px solid #2B2825; box-shadow: 0 10px 30px rgba(0,0,0,0.2); position: relative; overflow: hidden; display: flex; flex-direction: column; color: #FFF;">
-                            
-                            <!-- TOP INSTAGRAM BAR -->
-                            <div style="padding: 8px 12px 6px 12px; display: flex; align-items: center; justify-content: space-between; z-index: 5; background: linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, transparent 100%);">
-                                <div style="display: flex; align-items: center; gap: 6px;">
-                                    <div style="width: 24px; height: 24px; border-radius: 50%; background: linear-gradient(45deg, #F58529, #DD2A7B, #8134AF); padding: 1.5px;">
-                                        <div style="width: 100%; height: 100%; border-radius: 50%; background: #1C1917; display: flex; align-items: center; justify-content: center; font-size: 0.6rem; font-weight: 800;">HP</div>
-                                    </div>
-                                    <div>
-                                        <div style="font-size: 0.7rem; font-weight: 800; line-height: 1.1;">harshparmar007__</div>
-                                        <div style="font-size: 0.58rem; color: rgba(255,255,255,0.75);">${isReel ? 'Original audio' : 'Photo Post'}</div>
-                                    </div>
-                                </div>
-                                <div style="font-size: 0.8rem; font-weight: 800; color: #FFF;">•••</div>
-                            </div>
-
-                            <!-- MEDIA DISPLAY CONTAINER -->
-                            <div id="phone-preview-media-container" style="flex: 1; position: relative; background: #18181b; display: flex; align-items: center; justify-content: center; overflow: hidden;">
-                                ${this.renderPhoneMediaContent(isReel, mediaUrl)}
-                            </div>
-
-                            <!-- OVERLAY ACTION ICONS & LIVE CAPTION -->
-                            <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 10px 10px 12px 10px; background: linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.45) 70%, transparent 100%); z-index: 5;">
-                                <div style="font-size: 0.7rem; font-weight: 600; line-height: 1.35; margin-bottom: 6px; text-shadow: 0 1px 3px rgba(0,0,0,0.8); max-height: 52px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">
-                                    <strong style="color: #FFF; margin-right: 4px;">harshparmar007__</strong>
-                                    <span id="phone-caption-text">${caption}</span>
-                                </div>
-
-                                <!-- SIMULATED AUTOMATION RESPONSE PREVIEW -->
-                                <div id="phone-funnel-preview" style="background: rgba(255,255,255,0.16); backdrop-filter: blur(8px); border-radius: 7px; padding: 4px 7px; border: 1px solid rgba(255,255,255,0.22); font-size: 0.62rem;">
-                                    <div style="color: #FFD166; font-weight: 800;">💬 Comment: "${this.detectedKeyword || 'KEYWORD'}"</div>
-                                    <div style="color: #A7F3D0; font-weight: 700; margin-top: 1px;">🤖 InstaAuto: DM link sent! 📩</div>
-                                </div>
-                            </div>
-                        </div>
+                        ${this.renderSmartphonePreview(isReel, mediaUrl, caption)}
                     </div>
 
                 </div>
