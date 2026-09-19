@@ -2,6 +2,7 @@ const express = require('express');
 const { getDb, getConfig, backupRules } = require('../database');
 const auth = require('../middleware/auth');
 const { getMediaComments } = require('../services/instagram');
+const { publishMediaPost } = require('../services/instagramPublisher');
 const { enqueue } = require('../services/queue');
 const { v4: uuidv4 } = require('uuid');
 const config = require('../config');
@@ -140,6 +141,119 @@ router.post('/rules', auth, (req, res) => {
 
         res.json({ id: result.lastInsertRowid, success: true });
     } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// POST /api/rules/publish-and-create — 1-Click: Direct Publish Reel/Post to Instagram & Arm DM Automation
+router.post('/rules/publish-and-create', auth, async (req, res) => {
+    try {
+        const db = getDb();
+        const {
+            media_type = 'REELS',
+            media_url,
+            caption = '',
+            trigger_keyword,
+            trigger_word,
+            action_type = 'follow_first',
+            response_text,
+            link_url,
+            follow_prompt,
+            public_reply,
+            delay_seconds = 0,
+            variations_json,
+            buttons_config_json,
+            simulate = false
+        } = req.body;
+
+        const keyword = trigger_keyword || trigger_word;
+        if (!keyword || !action_type) {
+            return res.status(400).json({ error: 'trigger_keyword and action_type are required' });
+        }
+
+        const userId = req.user?.id || null;
+        const normMediaType = (media_type || 'REELS').toUpperCase();
+        const isImage = normMediaType === 'IMAGE' || normMediaType === 'PHOTO';
+
+        // 1. Publish directly to Instagram via Meta Graph API container workflow (or fallback simulation)
+        const publishResult = await publishMediaPost({
+            mediaType: isImage ? 'IMAGE' : 'REELS',
+            mediaUrl: media_url || 'https://example.com/sample_media.mp4',
+            caption: caption || `Check this out! Comment ${keyword} below to get the free link 👇`,
+            simulate: Boolean(simulate),
+            userId: userId
+        });
+
+        const igMediaId = publishResult.mediaId;
+
+        // 2. Upsert into local media table
+        const now = new Date().toISOString();
+        db.prepare(`
+            INSERT INTO media (
+                ig_media_id, caption, media_type, media_product_type,
+                media_url, thumbnail_url, timestamp, comments_count, synced_at, user_id
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, 0, ?, ?)
+            ON CONFLICT(ig_media_id) DO UPDATE SET
+                caption = excluded.caption,
+                media_url = COALESCE(excluded.media_url, media.media_url),
+                thumbnail_url = COALESCE(excluded.thumbnail_url, media.thumbnail_url),
+                synced_at = excluded.synced_at,
+                user_id = COALESCE(excluded.user_id, media.user_id)
+        `).run(
+            igMediaId,
+            caption || `Instagram Content (${normMediaType})`,
+            isImage ? 'IMAGE' : 'VIDEO',
+            isImage ? 'FEED' : 'REELS',
+            media_url || null,
+            media_url || null,
+            now,
+            now,
+            userId
+        );
+
+        const localMedia = db.prepare("SELECT * FROM media WHERE ig_media_id = ?").get(igMediaId);
+        const resolvedMediaId = localMedia ? localMedia.id : null;
+
+        // 3. Provision the automation rule in rules table
+        const sanitizedUrl = cleanUrl(link_url);
+
+        const ruleResult = db.prepare(`
+            INSERT INTO rules (
+                media_id, trigger_keyword, action_type, response_text,
+                link_url, follow_prompt, public_reply, delay_seconds,
+                variations_json, buttons_config_json, created_at, updated_at, user_id
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `).run(
+            resolvedMediaId,
+            keyword,
+            action_type,
+            response_text || null,
+            sanitizedUrl,
+            follow_prompt || null,
+            public_reply || null,
+            parseInt(delay_seconds || 0),
+            variations_json || null,
+            buttons_config_json || null,
+            now,
+            now,
+            userId
+        );
+
+        try { backupRules(db); } catch(e) { console.error('Error backing up rules:', e); }
+
+        res.json({
+            success: true,
+            rule_id: ruleResult.lastInsertRowid,
+            media_id: resolvedMediaId,
+            ig_media_id: igMediaId,
+            live: publishResult.live,
+            status: publishResult.status,
+            warning: publishResult.warning,
+            media: localMedia
+        });
+
+    } catch (err) {
+        console.error('[Publish & Arm Rule Error]', err);
         res.status(500).json({ error: err.message });
     }
 });

@@ -6,6 +6,17 @@ window['new-automation'] = {
     step1Filter: 'reels',
     keywordMode: 'specific', // 'specific' or 'any'
     keywordList: ['PLAYBOOK', 'PDF'],
+
+    // Direct Publish & Automate Studio State
+    isDirectPublish: false,
+    directMediaType: 'REELS', // 'REELS' or 'IMAGE'
+    directMediaUrl: 'https://assets.mixkit.co/videos/preview/mixkit-vertical-view-of-a-neon-sign-at-night-42721-large.mp4',
+    directLocalFileUrl: '',
+    directFileName: '',
+    directCaption: 'Want our complete 2026 AI Playbook? Comment "DRAG" below and I will send it right to your DMs! 🚀',
+    detectedKeyword: 'DRAG',
+    detectedUrl: '',
+
     savedButtonsConfig: {
         gate_type: 'buttons',
         step1_text: "Hey there! Glad you're here ☺️\n\nTap below and I'll send you the access in just a moment ✨",
@@ -43,6 +54,190 @@ window['new-automation'] = {
         this.keywordList.splice(index, 1);
         this.savedKeywords = this.keywordList.join(', ');
         this.renderStep2(document.getElementById('new-automation-content'));
+    },
+
+    extractCaptionIntelligence(caption) {
+        if (!caption || typeof caption !== 'string') return { keyword: null, url: null };
+        const clean = caption.trim();
+        const stopWords = new Set([
+            'BELOW', 'HERE', 'NOW', 'THIS', 'THE', 'AND', 'FOR', 'ME', 'TO', 'WITH', 
+            'OR', 'SOMETHING', 'A', 'AN', 'IN', 'ON', 'AT', 'GET', 'MY', 'YOUR', 
+            'ALL', 'IF', 'YOU', 'OUR', 'WE', 'LIKE', 'JUST', 'PLEASE', 'DOWN'
+        ]);
+
+        let detectedKeyword = null;
+
+        // 1. Quoted after trigger verb
+        const quotedMatch = clean.match(/(?:comment|dm|drop|reply|type|send)\s*(?:me|with|the\s*word)?\s*['"“‘]([a-zA-Z0-9_-]+)['"”’]/i);
+        if (quotedMatch && quotedMatch[1]) {
+            detectedKeyword = quotedMatch[1].toUpperCase().trim();
+        }
+
+        // 2. Word right after trigger verb
+        if (!detectedKeyword) {
+            const verbMatch = clean.match(/(?:comment|dm|drop|reply|type|send)\s*(?:me|with|the\s*word)?\s+([a-zA-Z0-9_-]{2,20})\b/i);
+            if (verbMatch && verbMatch[1]) {
+                const cand = verbMatch[1].toUpperCase().trim();
+                if (!stopWords.has(cand)) detectedKeyword = cand;
+            }
+        }
+
+        // 3. Quoted word anywhere
+        if (!detectedKeyword) {
+            const anyQuoted = clean.match(/['"“‘]([a-zA-Z0-9_-]{2,20})['"”’]/);
+            if (anyQuoted && anyQuoted[1]) {
+                const cand = anyQuoted[1].toUpperCase().trim();
+                if (!stopWords.has(cand)) detectedKeyword = cand;
+            }
+        }
+
+        // 4. Standalone capitalized word
+        if (!detectedKeyword) {
+            const allCapsWords = clean.match(/\b([A-Z0-9]{3,12})\b/g);
+            if (allCapsWords) {
+                for (const w of allCapsWords) {
+                    if (!stopWords.has(w) && !['HTTP', 'HTTPS', 'REEL', 'POST', 'INSTA'].includes(w)) {
+                        detectedKeyword = w;
+                        break;
+                    }
+                }
+            }
+        }
+
+        const urlMatch = clean.match(/https?:\/\/[^\s)\]]+/i);
+        const detectedUrl = urlMatch ? urlMatch[0] : null;
+
+        return { keyword: detectedKeyword, url: detectedUrl };
+    },
+
+    onDirectCaptionChange(caption) {
+        this.directCaption = caption;
+        const counter = document.getElementById('direct-caption-counter');
+        if (counter) counter.textContent = `${caption.length} / 2,200 chars`;
+
+        const phoneText = document.getElementById('phone-caption-text');
+        if (phoneText) phoneText.textContent = caption;
+
+        const intel = this.extractCaptionIntelligence(caption);
+        if (intel.keyword) {
+            this.detectedKeyword = intel.keyword;
+            const funnel = document.getElementById('phone-funnel-preview');
+            if (funnel) {
+                funnel.innerHTML = `
+                    <div style="color: #FFD166; font-weight: 800;">💬 Comment: "${this.detectedKeyword}"</div>
+                    <div style="color: #A7F3D0; font-weight: 700; margin-top: 1px;">🤖 InstaAuto: DM link sent! 📩</div>
+                `;
+            }
+            const nlpBadge = document.getElementById('direct-nlp-info');
+            if (nlpBadge) {
+                nlpBadge.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <span style="font-size: 1.1rem;">🤖</span>
+                        <div>
+                            <div style="font-size: 0.76rem; font-weight: 800; color: var(--text-primary);">Autonomous Keyword Intelligence:</div>
+                            <div style="font-size: 0.74rem; color: var(--text-secondary);">
+                                <span style="color: #15803D; font-weight: 800;">Target Keyword Detected: "${this.detectedKeyword}"</span>
+                                ${intel.url ? ` &bull; <span style="color: var(--accent-primary); font-weight: 700;">Link: ${intel.url}</span>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-sm btn-primary" onclick="window['new-automation'].applyDetectedKeyword()" style="font-size: 0.72rem; padding: 3px 9px; font-weight: 800;">
+                        ✓ Auto-Apply "${this.detectedKeyword}"
+                    </button>
+                `;
+            }
+        }
+        if (intel.url) {
+            this.detectedUrl = intel.url;
+        }
+    },
+
+    onDirectMediaUrlChange(url) {
+        this.directMediaUrl = url;
+        this.directLocalFileUrl = '';
+        const container = document.getElementById('phone-preview-media-container');
+        if (container) {
+            const isReel = this.directMediaType === 'REELS';
+            container.innerHTML = this.renderPhoneMediaContent(isReel, url);
+        }
+    },
+
+    onDirectLocalFileSelected(inputEl) {
+        const file = inputEl?.files?.[0];
+        if (!file) return;
+
+        this.directFileName = file.name;
+        const label = document.getElementById('direct-file-name-label');
+        if (label) label.textContent = `📁 ${file.name}`;
+
+        const blobUrl = URL.createObjectURL(file);
+        this.directLocalFileUrl = blobUrl;
+        
+        if (file.type && file.type.startsWith('image/')) {
+            this.directMediaType = 'IMAGE';
+        } else {
+            this.directMediaType = 'REELS';
+        }
+
+        const container = document.getElementById('phone-preview-media-container');
+        if (container) {
+            const isReel = this.directMediaType === 'REELS';
+            container.innerHTML = this.renderPhoneMediaContent(isReel, blobUrl);
+        }
+    },
+
+    setDirectMediaType(type) {
+        this.directMediaType = type;
+        this.renderDirectPublishStudio(document.getElementById('new-automation-content'));
+    },
+
+    setDirectSamplePreset(type) {
+        if (type === 'video') {
+            this.directMediaType = 'REELS';
+            this.directMediaUrl = 'https://assets.mixkit.co/videos/preview/mixkit-vertical-view-of-a-neon-sign-at-night-42721-large.mp4';
+            this.directLocalFileUrl = '';
+            this.directFileName = '';
+            this.directCaption = 'Want our complete 2026 AI Agent Playbook? Comment "DRAG" below and I will send it right to your DMs! 🚀';
+        } else {
+            this.directMediaType = 'IMAGE';
+            this.directMediaUrl = 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&auto=format&fit=crop';
+            this.directLocalFileUrl = '';
+            this.directFileName = '';
+            this.directCaption = 'Drop "PLAYBOOK" in the comments to get the exclusive growth blueprint! 📚';
+        }
+        const intel = this.extractCaptionIntelligence(this.directCaption);
+        this.detectedKeyword = intel.keyword || 'DRAG';
+        this.renderDirectPublishStudio(document.getElementById('new-automation-content'));
+    },
+
+    appendCaptionCta(word) {
+        const cta = ` Comment "${word}" below to get instant access! 👇`;
+        this.directCaption = (this.directCaption || '').trim() + '\n\n' + cta;
+        const txt = document.getElementById('direct-caption-input');
+        if (txt) txt.value = this.directCaption;
+        this.onDirectCaptionChange(this.directCaption);
+        this.applyDetectedKeyword();
+    },
+
+    applyDetectedKeyword() {
+        if (this.detectedKeyword) {
+            if (!this.keywordList.includes(this.detectedKeyword)) {
+                this.keywordList = [this.detectedKeyword];
+            }
+            this.savedKeywords = this.detectedKeyword;
+            App.showToast(`Applied "${this.detectedKeyword}" as trigger keyword!`, 'success');
+        }
+    },
+
+    renderPhoneMediaContent(isReel, url) {
+        if (!url) {
+            return `<div style="color: #888; font-size: 0.78rem; text-align: center; padding: 1rem;">No media selected<br><span style="font-size:0.68rem; color:#666;">Enter URL or pick a preset</span></div>`;
+        }
+        if (isReel) {
+            return `<video src="${url}" autoplay loop muted playsinline style="width: 100%; height: 100%; object-fit: cover;"></video>`;
+        } else {
+            return `<img src="${url}" alt="Post preview" style="width: 100%; height: 100%; object-fit: cover;">`;
+        }
     },
 
     async render(container) {
@@ -168,9 +363,31 @@ window['new-automation'] = {
     },
 
     goToNextStep() {
-        if (this.currentStep === 1 && !this.selectedMediaId) {
-            App.showToast('Please select a target post or choose Account-Wide Rule to continue', 'warning');
-            return;
+        if (this.currentStep === 1) {
+            if (this.isDirectPublish || this.step1Filter === 'direct') {
+                this.isDirectPublish = true;
+                const mediaUrl = (this.directMediaUrl || this.directLocalFileUrl || '').trim();
+                if (!mediaUrl) {
+                    this.setDirectSamplePreset(this.directMediaType === 'IMAGE' ? 'image' : 'video');
+                }
+                if (!this.directCaption || !this.directCaption.trim()) {
+                    App.showToast('Please enter an Instagram caption for your post', 'warning');
+                    return;
+                }
+
+                // Auto extract intelligence from caption
+                const intel = this.extractCaptionIntelligence(this.directCaption);
+                const targetKw = intel.keyword || this.detectedKeyword || 'DRAG';
+                this.keywordList = [targetKw];
+                this.savedKeywords = targetKw;
+                if (intel.url) {
+                    this.savedLinkUrl = intel.url;
+                }
+                this.selectedMediaId = 'direct_publish';
+            } else if (!this.selectedMediaId) {
+                App.showToast('Please select a target post or choose Account-Wide Rule to continue', 'warning');
+                return;
+            }
         }
 
         if (this.currentStep === 2 && this.keywordMode !== 'any') {
@@ -245,7 +462,14 @@ window['new-automation'] = {
             }
         }
 
-        if (btnDeploy) btnDeploy.style.display = this.currentStep === 4 ? 'inline-block' : 'none';
+        if (btnDeploy) {
+            btnDeploy.style.display = this.currentStep === 4 ? 'inline-block' : 'none';
+            if (this.isDirectPublish) {
+                btnDeploy.textContent = '🚀 Publish to Instagram & Arm Automation';
+            } else {
+                btnDeploy.textContent = '🚀 Deploy Automation';
+            }
+        }
     },
 
     renderStepContent() {
@@ -270,6 +494,15 @@ window['new-automation'] = {
 
     setStep1Filter(filter) {
         this.step1Filter = filter;
+        if (filter === 'direct') {
+            this.isDirectPublish = true;
+            this.selectedMediaId = 'direct_publish';
+        } else {
+            this.isDirectPublish = false;
+            if (this.selectedMediaId === 'direct_publish') {
+                this.selectedMediaId = 'global';
+            }
+        }
         this.renderStep1(document.getElementById('new-automation-content'));
     },
 
@@ -296,6 +529,10 @@ window['new-automation'] = {
     },
 
     renderStep1(container) {
+        if (this.step1Filter === 'direct') {
+            return this.renderDirectPublishStudio(container);
+        }
+
         let filtered = (this.mediaList || []).filter(m => {
             const cap = (m.caption || '').toLowerCase();
             return !this.searchQuery || cap.includes(this.searchQuery.toLowerCase());
@@ -350,6 +587,35 @@ window['new-automation'] = {
                             ✓ SELECTED
                         </div>
                     ` : ''}
+                </div>
+
+                <!-- DIRECT PUBLISH HERO CARD -->
+                <div class="reel-card-item" onclick="window['new-automation'].setStep1Filter('direct')" style="
+                    border-radius: 14px;
+                    border: 1.5px dashed var(--accent-primary);
+                    background: #FFFBF9;
+                    box-shadow: 0 1px 4px rgba(0,0,0,0.02);
+                    cursor: pointer;
+                    overflow: hidden;
+                    position: relative;
+                    display: flex;
+                    flex-direction: column;
+                    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+                ">
+                    <div style="height: 120px; background: linear-gradient(135deg, #FF6B6B 0%, #D97757 100%); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 0.65rem; text-align: center; color: #FFF;">
+                        <div style="font-size: 1.5rem; margin-bottom: 0.15rem;">🚀</div>
+                        <div style="font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: 0.88rem; color: #FFF;">Direct Publish & Automate</div>
+                        <div style="font-size: 0.7rem; color: rgba(255,255,255,0.9); margin-top: 0.1rem;">Post to Instagram & Arm Funnel</div>
+                    </div>
+
+                    <div style="padding: 0.75rem; flex: 1;">
+                        <div style="font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 0.82rem; color: var(--text-primary);">Publish New Reel / Post</div>
+                        <div style="font-size: 0.72rem; color: var(--text-secondary); margin-top: 0.15rem; line-height: 1.35;">Upload media, write caption, and auto-arm Follow-First DM funnel in 1 click</div>
+                    </div>
+
+                    <div style="background: #F2E3D5; color: var(--accent-primary); font-size: 0.7rem; font-weight: 800; text-align: center; padding: 4px 8px; letter-spacing: 0.04em;">
+                        + OPEN DIRECT STUDIO
+                    </div>
                 </div>
         `;
 
@@ -421,7 +687,7 @@ window['new-automation'] = {
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 0.85rem; flex-wrap:wrap; gap:0.65rem;">
                     <div>
                         <h2 style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 1.15rem; font-weight: 800; color: var(--text-primary); margin: 0;">Step 1: Pick a Target Reel or Post</h2>
-                        <p style="font-size: 0.82rem; color: var(--text-secondary); margin-top: 0.1rem;">Select which specific Instagram content item this comment-to-DM automation rule will monitor.</p>
+                        <p style="font-size: 0.82rem; color: var(--text-secondary); margin-top: 0.1rem;">Select which specific Instagram content item this comment-to-DM automation rule will monitor, or publish a new one directly.</p>
                     </div>
 
                     <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
@@ -437,12 +703,15 @@ window['new-automation'] = {
                 </div>
 
                 <!-- SUB TABS FOR STEP 1 -->
-                <div style="display: flex; gap: 0.5rem; margin-bottom: 0.75rem;">
+                <div style="display: flex; gap: 0.5rem; margin-bottom: 0.75rem; flex-wrap: wrap;">
                     <button type="button" onclick="window['new-automation'].setStep1Filter('reels')" style="padding: 0.35rem 0.85rem; font-size: 0.78rem; font-weight: ${this.step1Filter === 'reels' ? '800' : '600'}; border-radius: 8px; background: ${this.step1Filter === 'reels' ? 'var(--accent-primary)' : '#FFFFFF'}; color: ${this.step1Filter === 'reels' ? '#FFFFFF' : 'var(--text-secondary)'}; border: ${this.step1Filter === 'reels' ? 'none' : '1px solid var(--border-color)'}; cursor: pointer;">
                         🎬 Reels Only (${reelsCount})
                     </button>
                     <button type="button" onclick="window['new-automation'].setStep1Filter('all')" style="padding: 0.35rem 0.85rem; font-size: 0.78rem; font-weight: ${this.step1Filter === 'all' ? '800' : '600'}; border-radius: 8px; background: ${this.step1Filter === 'all' ? 'var(--accent-primary)' : '#FFFFFF'}; color: ${this.step1Filter === 'all' ? '#FFFFFF' : 'var(--text-secondary)'}; border: ${this.step1Filter === 'all' ? 'none' : '1px solid var(--border-color)'}; cursor: pointer;">
                         📁 All Content (${totalCount})
+                    </button>
+                    <button type="button" onclick="window['new-automation'].setStep1Filter('direct')" style="padding: 0.35rem 0.85rem; font-size: 0.78rem; font-weight: ${this.step1Filter === 'direct' ? '800' : '600'}; border-radius: 8px; background: ${this.step1Filter === 'direct' ? 'var(--accent-primary)' : '#FFFFFF'}; color: ${this.step1Filter === 'direct' ? '#FFFFFF' : 'var(--text-secondary)'}; border: ${this.step1Filter === 'direct' ? 'none' : '1px solid var(--border-color)'}; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+                        🚀 Direct Publish New Reel / Post <span style="background:${this.step1Filter === 'direct' ? 'rgba(255,255,255,0.25)' : '#FAF0EA'}; color:${this.step1Filter === 'direct' ? '#FFF' : 'var(--accent-primary)'}; font-size:0.65rem; padding: 1px 6px; border-radius: 4px; font-weight: 800;">1-Click</span>
                     </button>
                 </div>
 
@@ -453,7 +722,222 @@ window['new-automation'] = {
         `;
     },
 
+    renderDirectPublishStudio(container) {
+        this.isDirectPublish = true;
+        this.selectedMediaId = 'direct_publish';
+
+        const isReel = this.directMediaType === 'REELS';
+        const mediaUrl = this.directLocalFileUrl || this.directMediaUrl || '';
+        const caption = this.directCaption || '';
+        const charCount = caption.length;
+        const intel = this.extractCaptionIntelligence(caption);
+        this.detectedKeyword = intel.keyword || this.detectedKeyword || 'DRAG';
+        this.detectedUrl = intel.url || this.detectedUrl || '';
+
+        const reelsCount = (this.mediaList || []).filter(m => 
+            m.media_product_type === 'REELS' || m.media_type === 'REEL' || (m.media_type === 'VIDEO' && m.media_product_type !== 'FEED')
+        ).length;
+        const totalCount = (this.mediaList || []).length;
+
+        container.innerHTML = `
+            <div style="width: 100%;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 0.85rem; flex-wrap:wrap; gap:0.65rem;">
+                    <div>
+                        <h2 style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 1.15rem; font-weight: 800; color: var(--text-primary); margin: 0;">Step 1: Direct Post & Automate Studio</h2>
+                        <p style="font-size: 0.82rem; color: var(--text-secondary); margin-top: 0.1rem;">Upload or specify media, compose caption, and publish directly to Instagram while arming your DM automation.</p>
+                    </div>
+
+                    <div style="display: flex; gap: 0.5rem; align-items: center;">
+                        <span style="font-size: 0.78rem; font-weight: 700; color: #15803D; background: #DCFCE7; padding: 4px 10px; border-radius: 6px; display: inline-flex; align-items: center; gap: 4px;">
+                            ● Connected: @harshparmar007__
+                        </span>
+                    </div>
+                </div>
+
+                <!-- SUB TABS FOR STEP 1 -->
+                <div style="display: flex; gap: 0.5rem; margin-bottom: 0.85rem; flex-wrap: wrap;">
+                    <button type="button" onclick="window['new-automation'].setStep1Filter('reels')" style="padding: 0.35rem 0.85rem; font-size: 0.78rem; font-weight: 600; border-radius: 8px; background: #FFFFFF; color: var(--text-secondary); border: 1px solid var(--border-color); cursor: pointer;">
+                        🎬 Reels Only (${reelsCount})
+                    </button>
+                    <button type="button" onclick="window['new-automation'].setStep1Filter('all')" style="padding: 0.35rem 0.85rem; font-size: 0.78rem; font-weight: 600; border-radius: 8px; background: #FFFFFF; color: var(--text-secondary); border: 1px solid var(--border-color); cursor: pointer;">
+                        📁 All Content (${totalCount})
+                    </button>
+                    <button type="button" onclick="window['new-automation'].setStep1Filter('direct')" style="padding: 0.35rem 0.85rem; font-size: 0.78rem; font-weight: 800; border-radius: 8px; background: var(--accent-primary); color: #FFFFFF; border: none; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+                        🚀 Direct Publish New Reel / Post <span style="background: rgba(255,255,255,0.25); color: #FFF; font-size:0.65rem; padding: 1px 6px; border-radius: 4px; font-weight: 800;">Active</span>
+                    </button>
+                </div>
+
+                <!-- STUDIO WORKSPACE: 2-COLUMNS -->
+                <div style="display: grid; grid-template-columns: minmax(320px, 1.25fr) minmax(280px, 0.75fr); gap: 1.25rem; align-items: start; background: #FAF8F5; border: 1.5px solid var(--border-color); border-radius: 14px; padding: 1.15rem;">
+                    
+                    <!-- LEFT COLUMN: CONTROLS & CAPTION -->
+                    <div style="display: flex; flex-direction: column; gap: 1rem;">
+                        
+                        <!-- 1. FORMAT SELECTOR -->
+                        <div>
+                            <label style="font-size: 0.78rem; font-weight: 800; color: var(--text-primary); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.4rem; display: block;">
+                                1. Select Media Format:
+                            </label>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.65rem;">
+                                <div onclick="window['new-automation'].setDirectMediaType('REELS')" style="
+                                    padding: 0.75rem 0.9rem;
+                                    border-radius: 10px;
+                                    border: ${isReel ? '2px solid var(--accent-primary)' : '1px solid var(--border-color)'};
+                                    background: ${isReel ? '#FFFFFF' : '#FAF8F5'};
+                                    box-shadow: ${isReel ? '0 2px 8px rgba(217,119,87,0.15)' : 'none'};
+                                    cursor: pointer;
+                                    display: flex;
+                                    align-items: center;
+                                    gap: 0.6rem;
+                                ">
+                                    <input type="radio" name="direct_fmt" ${isReel ? 'checked' : ''} style="accent-color: var(--accent-primary);">
+                                    <div>
+                                        <div style="font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: 0.85rem; color: var(--text-primary);">🎬 Instagram Reel</div>
+                                        <div style="font-size: 0.72rem; color: var(--text-secondary);">9:16 Vertical Video (MP4 / MOV)</div>
+                                    </div>
+                                </div>
+
+                                <div onclick="window['new-automation'].setDirectMediaType('IMAGE')" style="
+                                    padding: 0.75rem 0.9rem;
+                                    border-radius: 10px;
+                                    border: ${!isReel ? '2px solid var(--accent-primary)' : '1px solid var(--border-color)'};
+                                    background: ${!isReel ? '#FFFFFF' : '#FAF8F5'};
+                                    box-shadow: ${!isReel ? '0 2px 8px rgba(217,119,87,0.15)' : 'none'};
+                                    cursor: pointer;
+                                    display: flex;
+                                    align-items: center;
+                                    gap: 0.6rem;
+                                ">
+                                    <input type="radio" name="direct_fmt" ${!isReel ? 'checked' : ''} style="accent-color: var(--accent-primary);">
+                                    <div>
+                                        <div style="font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: 0.85rem; color: var(--text-primary);">📸 Feed Post</div>
+                                        <div style="font-size: 0.72rem; color: var(--text-secondary);">Single Photo / Graphic (JPG / PNG)</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 2. MEDIA SOURCE & PRESETS -->
+                        <div>
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 0.35rem;">
+                                <label style="font-size: 0.78rem; font-weight: 800; color: var(--text-primary); text-transform: uppercase; letter-spacing: 0.04em;">
+                                    2. Media File or URL:
+                                </label>
+                                <div style="display:flex; gap:0.35rem;">
+                                    <button type="button" onclick="window['new-automation'].setDirectSamplePreset('video')" style="font-size:0.72rem; font-weight:700; padding:2px 7px; background:#FFF; border:1px solid var(--border-color); border-radius:5px; cursor:pointer;">▶️ Preset Reel</button>
+                                    <button type="button" onclick="window['new-automation'].setDirectSamplePreset('image')" style="font-size:0.72rem; font-weight:700; padding:2px 7px; background:#FFF; border:1px solid var(--border-color); border-radius:5px; cursor:pointer;">🖼️ Preset Photo</button>
+                                </div>
+                            </div>
+
+                            <input type="url" id="direct-media-url" value="${this.directMediaUrl || ''}" oninput="window['new-automation'].onDirectMediaUrlChange(this.value)" placeholder="Enter public Video URL (.mp4) or Photo URL (.jpg, .png)..." style="width: 100%; padding: 0.65rem 0.9rem; font-size: 0.85rem; font-weight: 500; border-radius: 8px; border: 1.5px solid #D1C9BE; background: #FFFFFF; outline: none;">
+
+                            <div style="margin-top: 0.45rem; display: flex; align-items: center; gap: 0.65rem; flex-wrap: wrap;">
+                                <label for="direct-media-file-input" style="font-size: 0.76rem; font-weight: 700; color: var(--accent-primary); background: #FFFFFF; border: 1.5px dashed var(--accent-primary); padding: 0.35rem 0.85rem; border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; gap: 0.4rem;">
+                                    📁 Choose File From Computer
+                                </label>
+                                <input type="file" id="direct-media-file-input" accept="video/mp4,video/quicktime,video/webm,image/*" onchange="window['new-automation'].onDirectLocalFileSelected(this)" style="display: none;">
+                                <span id="direct-file-name-label" style="font-size: 0.75rem; color: var(--text-secondary); font-style: italic;">${this.directFileName || 'No local file chosen (using URL)'}</span>
+                            </div>
+                        </div>
+
+                        <!-- 3. INSTAGRAM CAPTION & AGENTIC KEYWORD PARSER -->
+                        <div>
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 0.35rem;">
+                                <label style="font-size: 0.78rem; font-weight: 800; color: var(--text-primary); text-transform: uppercase; letter-spacing: 0.04em;">
+                                    3. Instagram Caption & Call to Action:
+                                </label>
+                                <span id="direct-caption-counter" style="font-size: 0.74rem; font-weight: 600; color: var(--text-secondary);">
+                                    ${charCount} / 2,200 chars
+                                </span>
+                            </div>
+
+                            <textarea id="direct-caption-input" rows="4" oninput="window['new-automation'].onDirectCaptionChange(this.value)" placeholder="Write or copy your Instagram caption here... e.g. Want our 2026 AI Agent blueprint? Comment &quot;DRAG&quot; below and I'll send it directly to your DMs! 🚀" style="width: 100%; padding: 0.65rem 0.9rem; font-size: 0.88rem; font-family: inherit; font-weight: 500; border-radius: 8px; border: 1.5px solid #D1C9BE; background: #FFFFFF; outline: none; line-height: 1.45;">${caption}</textarea>
+
+                            <!-- LIVE NLP DETECTION BADGE -->
+                            <div id="direct-nlp-info" style="margin-top: 0.45rem; padding: 0.65rem 0.85rem; background: #FFFFFF; border: 1.5px solid #E5E0D8; border-radius: 10px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem;">
+                                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <span style="font-size: 1.1rem;">🤖</span>
+                                    <div>
+                                        <div style="font-size: 0.76rem; font-weight: 800; color: var(--text-primary);">
+                                            Autonomous Keyword Intelligence:
+                                        </div>
+                                        <div style="font-size: 0.74rem; color: var(--text-secondary);">
+                                            ${this.detectedKeyword 
+                                                ? `<span style="color: #15803D; font-weight: 800;">Target Keyword Detected: "${this.detectedKeyword}"</span>` 
+                                                : '<span style="color: #736E68;">Type "Comment [KEYWORD] below" in caption to auto-detect</span>'}
+                                            ${this.detectedUrl ? ` &bull; <span style="color: var(--accent-primary); font-weight: 700;">Link: ${this.detectedUrl}</span>` : ''}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                ${this.detectedKeyword ? `
+                                    <button type="button" class="btn btn-sm btn-primary" onclick="window['new-automation'].applyDetectedKeyword()" style="font-size: 0.72rem; padding: 3px 9px; font-weight: 800;">
+                                        ✓ Auto-Apply "${this.detectedKeyword}"
+                                    </button>
+                                ` : ''}
+                            </div>
+
+                            <!-- QUICK SNIPPET BUTTONS -->
+                            <div style="margin-top: 0.45rem; display: flex; gap: 0.4rem; flex-wrap: wrap; align-items: center;">
+                                <span style="font-size: 0.72rem; font-weight: 700; color: var(--text-secondary);">Add CTA:</span>
+                                <button type="button" onclick="window['new-automation'].appendCaptionCta('DRAG')" style="padding: 2px 7px; font-size: 0.72rem; font-weight: 700; background: #FFF; border: 1px solid var(--border-color); border-radius: 6px; cursor: pointer;">+ "Comment DRAG below"</button>
+                                <button type="button" onclick="window['new-automation'].appendCaptionCta('PLAYBOOK')" style="padding: 2px 7px; font-size: 0.72rem; font-weight: 700; background: #FFF; border: 1px solid var(--border-color); border-radius: 6px; cursor: pointer;">+ "Comment PLAYBOOK"</button>
+                                <button type="button" onclick="window['new-automation'].appendCaptionCta('PDF')" style="padding: 2px 7px; font-size: 0.72rem; font-weight: 700; background: #FFF; border: 1px solid var(--border-color); border-radius: 6px; cursor: pointer;">+ "Comment PDF"</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- RIGHT COLUMN: SMARTPHONE MOCKUP -->
+                    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                        <div style="font-size: 0.74rem; font-weight: 800; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.45rem;">
+                            📱 Live Instagram Preview
+                        </div>
+
+                        <!-- PHONE SHELL -->
+                        <div style="width: 270px; height: 460px; background: #000; border-radius: 32px; border: 6px solid #2B2825; box-shadow: 0 10px 30px rgba(0,0,0,0.2); position: relative; overflow: hidden; display: flex; flex-direction: column; color: #FFF;">
+                            
+                            <!-- TOP INSTAGRAM BAR -->
+                            <div style="padding: 8px 12px 6px 12px; display: flex; align-items: center; justify-content: space-between; z-index: 5; background: linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, transparent 100%);">
+                                <div style="display: flex; align-items: center; gap: 6px;">
+                                    <div style="width: 24px; height: 24px; border-radius: 50%; background: linear-gradient(45deg, #F58529, #DD2A7B, #8134AF); padding: 1.5px;">
+                                        <div style="width: 100%; height: 100%; border-radius: 50%; background: #1C1917; display: flex; align-items: center; justify-content: center; font-size: 0.6rem; font-weight: 800;">HP</div>
+                                    </div>
+                                    <div>
+                                        <div style="font-size: 0.7rem; font-weight: 800; line-height: 1.1;">harshparmar007__</div>
+                                        <div style="font-size: 0.58rem; color: rgba(255,255,255,0.75);">${isReel ? 'Original audio' : 'Photo Post'}</div>
+                                    </div>
+                                </div>
+                                <div style="font-size: 0.8rem; font-weight: 800; color: #FFF;">•••</div>
+                            </div>
+
+                            <!-- MEDIA DISPLAY CONTAINER -->
+                            <div id="phone-preview-media-container" style="flex: 1; position: relative; background: #18181b; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                                ${this.renderPhoneMediaContent(isReel, mediaUrl)}
+                            </div>
+
+                            <!-- OVERLAY ACTION ICONS & LIVE CAPTION -->
+                            <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 10px 10px 12px 10px; background: linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.45) 70%, transparent 100%); z-index: 5;">
+                                <div style="font-size: 0.7rem; font-weight: 600; line-height: 1.35; margin-bottom: 6px; text-shadow: 0 1px 3px rgba(0,0,0,0.8); max-height: 52px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">
+                                    <strong style="color: #FFF; margin-right: 4px;">harshparmar007__</strong>
+                                    <span id="phone-caption-text">${caption}</span>
+                                </div>
+
+                                <!-- SIMULATED AUTOMATION RESPONSE PREVIEW -->
+                                <div id="phone-funnel-preview" style="background: rgba(255,255,255,0.16); backdrop-filter: blur(8px); border-radius: 7px; padding: 4px 7px; border: 1px solid rgba(255,255,255,0.22); font-size: 0.62rem;">
+                                    <div style="color: #FFD166; font-weight: 800;">💬 Comment: "${this.detectedKeyword || 'KEYWORD'}"</div>
+                                    <div style="color: #A7F3D0; font-weight: 700; margin-top: 1px;">🤖 InstaAuto: DM link sent! 📩</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        `;
+    },
+
     selectReel(id, el) {
+        this.isDirectPublish = false;
         this.selectedMediaId = String(id);
         this.renderStep1(document.getElementById('new-automation-content'));
     },
@@ -836,6 +1320,53 @@ window['new-automation'] = {
         const responseText = actionType === 'follow_first'
             ? (buttonsConfig.step3_text || this.savedResponseText || 'Dost appko document bejhdiya hai bahut mehnat sa bnaya hai please follow')
             : (this.savedResponseText || document.getElementById('auto_response_text')?.value || 'Here is your resource link!');
+
+        if (this.isDirectPublish || this.selectedMediaId === 'direct_publish') {
+            const btnDeploy = document.getElementById('btn-flow-deploy');
+            if (btnDeploy) {
+                btnDeploy.disabled = true;
+                btnDeploy.innerHTML = '<span class="spinner"></span> 🚀 Step 1/2: Publishing to Instagram...';
+            }
+
+            const publishPayload = {
+                media_type: this.directMediaType || 'REELS',
+                media_url: this.directMediaUrl || this.directLocalFileUrl || 'https://assets.mixkit.co/videos/preview/mixkit-vertical-view-of-a-neon-sign-at-night-42721-large.mp4',
+                caption: this.directCaption || `Check this out! Comment ${triggerWord} below 👇`,
+                trigger_keyword: triggerWord,
+                action_type: actionType,
+                response_text: responseText,
+                link_url: this.savedLinkUrl || document.getElementById('auto_link_url')?.value || 'https://example.com/guide.pdf',
+                follow_prompt: this.savedFollowPrompt || document.getElementById('auto_follow_prompt')?.value || 'Please follow us first!',
+                public_reply: this.savedPublicReply || document.getElementById('auto_public_reply')?.value || 'Sent! Check your DMs 📩',
+                delay_seconds: this.savedDelay !== undefined ? this.savedDelay : 5,
+                buttons_config_json: JSON.stringify(buttonsConfig),
+                simulate: false
+            };
+
+            try {
+                if (btnDeploy) {
+                    btnDeploy.innerHTML = '<span class="spinner"></span> ⚡ Step 2/2: Arming Follow-First DM Funnel...';
+                }
+                const res = await App.apiCall('POST', '/api/rules/publish-and-create', publishPayload);
+
+                if (res.live) {
+                    App.showToast('🎉 Content published LIVE to Instagram & automation armed!', 'success');
+                } else if (res.warning) {
+                    App.showToast(res.warning, 'info');
+                } else {
+                    App.showToast('✅ Post published & automation armed successfully!', 'success');
+                }
+
+                App.navigate('workflows');
+            } catch (err) {
+                App.showToast(err.message || 'Publishing failed', 'error');
+                if (btnDeploy) {
+                    btnDeploy.disabled = false;
+                    btnDeploy.innerHTML = '🚀 Publish to Instagram & Arm Automation';
+                }
+            }
+            return;
+        }
 
         const payload = {
             media_id: this.selectedMediaId,
