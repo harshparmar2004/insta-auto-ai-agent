@@ -1,127 +1,126 @@
 /**
- * Instagram Autonomous AI Agent Route
- * Handles 1-Click Research -> Lead Magnet -> Reel Publishing -> Rule Provisioning
+ * Instagram Autonomous Sentinel & External Agent Bridge Routes
+ * Connects external content creation platforms to InstaAuto:
+ * - Inbound Webhook Bridge (/api/agent/bridge)
+ * - Feed Auto-Detect Sentinel (/api/agent/scan-feed)
+ * - Live Follower Comment Simulation & DM Gates
  */
 
 const express = require('express');
 const router = express.Router();
-const { getDb, saveAgentCampaign, getAgentCampaigns } = require('../database');
-const { conductResearch } = require('../services/researchAgent');
-const { generateLeadMagnet } = require('../services/leadMagnetGenerator');
-const { publishReel } = require('../services/instagramPublisher');
+const { getDb, getAgentCampaigns, getConfig } = require('../database');
+const { processExternalPost, scanAndArmFeed } = require('../services/postSentinel');
 const { processCommentEvent } = require('../services/automation');
 
-// 1. Full 1-Click Autonomous Campaign Runner
-router.post('/run', async (req, res) => {
+// 1. Inbound Webhook Bridge for External Content Platform
+router.post('/bridge', async (req, res) => {
     try {
-        const { topic, video_url, simulate = false } = req.body || {};
-        const baseUrl = `${req.protocol}://${req.get('host')}`;
+        const { media_id, caption, deliverable_url, trigger_keyword, lead_magnet_title, secret } = req.body || {};
 
-        console.log('\n======================================================');
-        console.log('[Agent] 🚀 Starting 1-Click Autonomous Growth Campaign');
-        console.log('======================================================');
-
-        // Step 1: Research & Scripting
-        const research = await conductResearch(topic);
-
-        // Step 2: Generate Companion Lead Magnet Doc & Link
-        const leadMagnet = await generateLeadMagnet(research, baseUrl);
-
-        // Step 3: Publish Reel to Instagram (Live or Simulation)
-        const publishResult = await publishReel({
-            videoUrl: video_url || null,
-            caption: research.caption,
-            simulate: simulate === true || simulate === 'true'
-        });
-
-        // Step 4: Provision InstaAuto DM Automation Rule (Zero Clicks Required)
-        const db = getDb();
-        const buttonConfig = {
-            step1_button: "Send me the access",
-            step2_text: "Almost there !\\nPlease visit my profile and tap follow to continue 😄",
-            step2_profile_button: "Visit Profile",
-            step2_confirm_button: "I'm following ✅",
-            step3_button: "Open Resource Pass 📄"
-        };
-
-        // Ensure media entry exists so foreign keys and analytics link cleanly
-        let resolvedMediaId = null;
-        if (publishResult.mediaId) {
-            try {
-                db.prepare("INSERT INTO media (ig_media_id, caption, synced_at) VALUES (?, 'Instagram Reel', ?) ON CONFLICT(ig_media_id) DO NOTHING").run(publishResult.mediaId, new Date().toISOString());
-                const mNew = db.prepare("SELECT id FROM media WHERE ig_media_id = ?").get(publishResult.mediaId);
-                resolvedMediaId = mNew ? mNew.id : null;
-            } catch(e) {}
+        if (!media_id) {
+            return res.status(400).json({
+                error: 'media_id is required from external posting platform'
+            });
         }
 
-        const now = new Date().toISOString();
-        const insertStmt = db.prepare(`
-            INSERT INTO rules (
-                media_id,
-                trigger_keyword,
-                action_type,
-                response_text,
-                link_url,
-                public_reply,
-                is_active,
-                buttons_config_json,
-                created_at,
-                updated_at
-            ) VALUES (?, ?, 'follow_first', ?, ?, ?, 1, ?, ?, ?)
-        `);
+        console.log('\n======================================================');
+        console.log('[Agent Bridge] 📡 Received Post Notification from External Platform');
+        console.log(`[Agent Bridge] Media ID: ${media_id}`);
+        console.log('======================================================');
 
-        const ruleResult = insertStmt.run(
-            resolvedMediaId,
-            research.keyword.toUpperCase().trim(),
-            'Hey! Here is your personal access pass to the ' + research.lead_magnet_title + '! Tap the button below to open:',
-            leadMagnet.deliverableUrl,
-            'Sent you a DM with the access link! Check your message requests 🙌',
-            JSON.stringify(buttonConfig),
-            now,
-            now
-        );
-
-        const ruleId = ruleResult.lastInsertRowid;
-
-        // Step 5: Save in agent_campaigns table for permanent tracking
-        const campaignId = saveAgentCampaign({
-            topic: research.topic,
-            keyword: research.keyword,
-            leadMagnetTitle: research.lead_magnet_title,
-            deliverableUrl: leadMagnet.deliverableUrl,
-            mediaId: publishResult.mediaId,
-            ruleId: ruleId,
-            caption: research.caption
+        const result = await processExternalPost({
+            media_id,
+            caption: caption || '',
+            deliverable_url: deliverable_url || null,
+            trigger_keyword: trigger_keyword || null,
+            lead_magnet_title: lead_magnet_title || null,
+            source: 'external_bridge'
         });
-
-        console.log('[Agent] 🎯 Auto-provisioned Rule #' + ruleId + ' for Reel ' + publishResult.mediaId + '!');
-        console.log('[Agent] 🔗 Deliverable bound: ' + leadMagnet.deliverableUrl);
-        console.log('[Agent] 💬 Trigger keyword: ' + research.keyword);
-        console.log('======================================================\n');
 
         res.json({
             success: true,
-            message: '1-Click Autonomous Campaign Live! Keyword "' + research.keyword + '" is now armed on Reel ' + publishResult.mediaId + '.',
-            campaign: {
-                id: campaignId,
-                ruleId: ruleId,
-                mediaId: publishResult.mediaId,
-                keyword: research.keyword,
-                topic: research.topic,
-                leadMagnetTitle: research.lead_magnet_title,
-                deliverableUrl: leadMagnet.deliverableUrl,
-                caption: research.caption,
-                live: publishResult.live || false,
-                warning: publishResult.warning || null
-            }
+            message: `Post ${media_id} received and Follow-First automation armed with keyword "${result.keyword}"!`,
+            post: result
         });
     } catch (err) {
-        console.error('[Agent Error]:', err);
+        console.error('[Agent Bridge Error]:', err);
         res.status(500).json({ error: err.message });
     }
 });
 
-// 2. Get All Autonomous Campaigns
+// 2. Autonomous Instagram Feed Sentinel (Scans live feed for newly published posts)
+router.post('/scan-feed', async (req, res) => {
+    try {
+        const userId = req.user?.id || null;
+        console.log('[Agent Sentinel] 🚀 Manual feed scan triggered');
+        const scanResult = await scanAndArmFeed(userId);
+
+        res.json({
+            success: true,
+            message: `Scanned ${scanResult.scanned} posts from Instagram feed. Auto-armed ${scanResult.armedCount} new posts.`,
+            scanned: scanResult.scanned,
+            armedCount: scanResult.armedCount,
+            armed: scanResult.armed
+        });
+    } catch (err) {
+        console.error('[Agent Sentinel Error]:', err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// 3. Bridge Configuration & Integration Snippets
+router.get('/bridge-config', (req, res) => {
+    const host = req.get('host');
+    const protocol = req.protocol;
+    const webhookUrl = `${protocol}://${host}/api/agent/bridge`;
+    const apiKey = process.env.AGENT_BRIDGE_KEY || 'instaauto_live_bridge_key';
+
+    res.json({
+        engine: 'InstaAuto External Sentinel & Bridge',
+        status: 'active',
+        webhookUrl,
+        apiKey,
+        connectedInstagram: {
+            username: getConfig('ig_username') || process.env.INSTAGRAM_USERNAME || '@harshparmar007__',
+            userId: getConfig('ig_user_id') || process.env.INSTAGRAM_USER_ID
+        },
+        payloadFormat: {
+            media_id: "17841400000000000 (Required)",
+            caption: "Full caption of post with CTA (Optional - AI will parse)",
+            deliverable_url: "https://your-docs-link.com/guide (Optional)",
+            trigger_keyword: "KEYWORD (Optional - AI will extract if omitted)",
+            lead_magnet_title: "Title of Guide (Optional)"
+        },
+        curlExample: `curl -X POST ${webhookUrl} \\
+  -H "Content-Type: application/json" \\
+  -d '{"media_id": "17841409999999999", "caption": "Comment AGENT to get the guide!", "deliverable_url": "https://myapp.com/docs/guide-1"}'`,
+        pythonExample: `import requests
+
+url = "${webhookUrl}"
+payload = {
+    "media_id": published_reel_id,
+    "caption": reel_caption,
+    "deliverable_url": doc_download_link
+}
+requests.post(url, json=payload)`
+    });
+});
+
+// 4. Get All Armed Posts / Campaigns
+router.get('/posts', (req, res) => {
+    try {
+        const posts = getAgentCampaigns();
+        res.json({
+            success: true,
+            count: posts.length,
+            posts
+        });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Alias for backwards compatibility with existing UI callers
 router.get('/campaigns', (req, res) => {
     try {
         const campaigns = getAgentCampaigns();
@@ -135,7 +134,34 @@ router.get('/campaigns', (req, res) => {
     }
 });
 
-// 3. Test Comment Simulator for Autonomous Campaigns
+// 5. Test Simulator for External Inbound Post
+router.post('/simulate-inbound', async (req, res) => {
+    try {
+        const { media_id, caption, deliverable_url, trigger_keyword, lead_magnet_title } = req.body || {};
+        const testMediaId = media_id || 'ext_reel_' + Date.now();
+        const testCaption = caption || "Stop building basic chatbots! 🤖\n\nHere is the exact architecture behind autonomous multi-agent systems in 2026.\n\nComment 'AGENT' below and I'll DM you the complete blueprint and implementation code! 🚀\n\n#aiagents #python";
+        const testUrl = deliverable_url || 'https://notion.so/external-agent-blueprint-docs';
+
+        const result = await processExternalPost({
+            media_id: testMediaId,
+            caption: testCaption,
+            deliverable_url: testUrl,
+            trigger_keyword: trigger_keyword || null,
+            lead_magnet_title: lead_magnet_title || null,
+            source: 'simulator'
+        });
+
+        res.json({
+            success: true,
+            message: `Simulated post from external app armed with keyword "${result.keyword}"!`,
+            post: result
+        });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// 6. Test Comment Simulator
 router.post('/simulate-comment', async (req, res) => {
     try {
         const { media_id, keyword, username } = req.body || {};
@@ -143,7 +169,7 @@ router.post('/simulate-comment', async (req, res) => {
             return res.status(400).json({ error: "media_id and keyword are required" });
         }
 
-        const fakeCommentId = 'sim_agent_' + Date.now();
+        const fakeCommentId = 'sim_ext_' + Date.now();
         const commenterHandle = username || 'test_fan_' + Math.floor(Math.random() * 1000);
         const payload = {
             object: 'instagram',
@@ -171,7 +197,7 @@ router.post('/simulate-comment', async (req, res) => {
 
         res.json({
             success: true,
-            message: `Simulated comment "${keyword}" from @${commenterHandle} on Reel ${media_id}. Follow-First DM funnel triggered!`,
+            message: `Simulated comment "${keyword}" from @${commenterHandle} on post ${media_id}. Follow-First DM funnel triggered!`,
             commentId: fakeCommentId
         });
     } catch (err) {
@@ -179,87 +205,19 @@ router.post('/simulate-comment', async (req, res) => {
     }
 });
 
-// 4. Direct Handoff Endpoint (For External Agents)
-router.post('/provision', async (req, res) => {
-    try {
-        const { media_id, trigger_keyword, deliverable_url, lead_magnet_title, funnel_type } = req.body || {};
-
-        if (!media_id || !trigger_keyword || !deliverable_url) {
-            return res.status(400).json({ error: "media_id, trigger_keyword, and deliverable_url are required" });
-        }
-
-        const db = getDb();
-        const buttonConfig = {
-            step1_button: "Send me the access",
-            step2_text: "Almost there !\\nPlease visit my profile and tap follow to continue 😄",
-            step2_profile_button: "Visit Profile",
-            step2_confirm_button: "I'm following ✅",
-            step3_button: "Open Deliverable 📄"
-        };
-
-        let resolvedMediaId = null;
-        if (media_id) {
-            try {
-                db.prepare("INSERT INTO media (ig_media_id, caption, synced_at) VALUES (?, 'Instagram Content', ?) ON CONFLICT(ig_media_id) DO NOTHING").run(media_id, new Date().toISOString());
-                const mNew = db.prepare("SELECT id FROM media WHERE ig_media_id = ?").get(media_id);
-                resolvedMediaId = mNew ? mNew.id : null;
-            } catch(e) {}
-        }
-
-        const now = new Date().toISOString();
-        const insertStmt = db.prepare(`
-            INSERT INTO rules (
-                media_id,
-                trigger_keyword,
-                action_type,
-                response_text,
-                link_url,
-                public_reply,
-                is_active,
-                buttons_config_json,
-                created_at,
-                updated_at
-            ) VALUES (?, ?, ?, ?, ?, ?, 1, ?, ?, ?)
-        `);
-
-        const result = insertStmt.run(
-            resolvedMediaId,
-            trigger_keyword.toUpperCase().trim(),
-            funnel_type || 'follow_first',
-            'Hey! Here is your access link for ' + (lead_magnet_title || trigger_keyword) + ':',
-            deliverable_url.trim(),
-            'Sent you a DM! Check your inbox 📬',
-            JSON.stringify(buttonConfig),
-            now,
-            now
-        );
-
-        res.json({
-            success: true,
-            rule_id: result.lastInsertRowid,
-            media_id,
-            trigger_keyword: trigger_keyword.toUpperCase().trim(),
-            deliverable_url,
-            message: "Automation rule successfully provisioned by AI Agent"
-        });
-    } catch (err) {
-        console.error('[Agent Provision Error]:', err);
-        res.status(500).json({ error: err.message });
-    }
-});
-
-// 5. Status Endpoint
+// 7. Status Endpoint
 router.get('/status', (req, res) => {
     res.json({
-        engine: 'InstaAuto AI Agent',
-        version: '1.0.0',
+        engine: 'InstaAuto External Sentinel & Bridge',
+        version: '2.0.0',
         active: true,
+        mode: 'external_content_platform_listener',
         capabilities: [
-            'autonomous_research',
-            'lead_magnet_generation',
-            'reel_publishing',
-            'follow_first_funnel_provisioning',
-            'live_comment_simulation'
+            'inbound_webhook_bridge',
+            'caption_ai_keyword_extraction',
+            'feed_sentinel_auto_detection',
+            'follow_first_dm_funnel_provisioning',
+            'live_comment_and_click_tracking'
         ]
     });
 });
