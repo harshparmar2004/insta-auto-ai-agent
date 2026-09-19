@@ -592,6 +592,7 @@ window['new-automation'] = {
                 step2_text: "Almost there !\nPlease visit my profile and tap follow to continue 😄",
                 step2_profile_button: "Visit Profile",
                 step2_confirm_button: "I'm following ✅",
+                not_following_text: "Wait! It looks like you're not following us yet! 👀\n\nPlease visit our profile, tap Follow, and then click \"I'm following ✅\" below to unlock your link!",
                 step3_text: "Dost appko document bejhdiya hai bahut mehnat sa bnaya hai please follow",
                 step3_button: "Click me"
             };
@@ -683,6 +684,16 @@ window['new-automation'] = {
                                         <label style="font-size: 0.72rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Button 2 (Follow Confirmation):</label>
                                         <input type="text" id="wizard_btn_step2_confirm_button" value="${btnCfg.step2_confirm_button}" onchange="window['new-automation'].savedButtonsConfig.step2_confirm_button=this.value" placeholder="I'm following ✅" maxlength="20" style="width: 100%; padding: 0.4rem 0.75rem; font-size: 0.85rem; font-weight: 700; border-radius: 8px; border: 1px solid #D1C9BE; background: #FAF8F5; outline: none;">
                                     </div>
+                                </div>
+                                <div style="margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px dashed #E5E0D8;">
+                                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.25rem;">
+                                        <label style="font-size: 0.74rem; font-weight: 800; color: #B45309; text-transform: uppercase; display: flex; align-items: center; gap: 0.35rem;">
+                                            🛡️ Meta Live Verification Warning:
+                                        </label>
+                                        <span style="font-size: 0.68rem; font-weight: 700; color: #15803D; background: #DCFCE7; padding: 2px 7px; border-radius: 4px;">Enforced via Meta Graph API</span>
+                                    </div>
+                                    <p style="font-size: 0.74rem; color: var(--text-secondary); margin: 0 0 0.4rem 0;">Sent back into DM if follower clicks "I'm following ✅" without actually following.</p>
+                                    <textarea id="wizard_btn_not_following_text" rows="2" onchange="window['new-automation'].savedButtonsConfig.not_following_text=this.value" style="width: 100%; padding: 0.55rem 0.8rem; font-size: 0.84rem; font-family: inherit; font-weight: 500; border-radius: 8px; border: 1.5px solid #FCD34D; background: #FFFBEB; outline: none;">${btnCfg.not_following_text || "Wait! It looks like you're not following us yet! 👀\n\nPlease visit our profile, tap Follow, and then click \"I'm following ✅\" below to unlock your link!"}</textarea>
                                 </div>
                             </div>
 

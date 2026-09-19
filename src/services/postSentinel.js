@@ -109,6 +109,7 @@ async function processExternalPost({ media_id, caption = '', deliverable_url = n
         step2_text: "Almost there !\nPlease visit my profile and tap follow to continue 😄",
         step2_profile_button: "Visit Profile",
         step2_confirm_button: "I'm following ✅",
+        not_following_text: "Wait! It looks like you're not following us yet! 👀\n\nPlease visit our profile, tap Follow, and then click \"I'm following ✅\" below to unlock your link!",
         step3_button: "Open Resource Pass 📄"
     };
 
