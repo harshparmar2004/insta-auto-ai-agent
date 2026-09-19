@@ -1,0 +1,473 @@
+const express = require('express');
+const { getDb, getConfig, backupRules } = require('../database');
+const auth = require('../middleware/auth');
+const { getMediaComments } = require('../services/instagram');
+const { enqueue } = require('../services/queue');
+const { v4: uuidv4 } = require('uuid');
+const config = require('../config');
+
+const router = express.Router();
+
+router.get('/rules', auth, (req, res) => {
+    try {
+        const db = getDb();
+
+        // If any rule has an IG media ID string as media_id, resolve it to local media.id if present
+        try {
+            const rulesWithIgId = db.prepare("SELECT r.id, m.id as real_media_id FROM rules r JOIN media m ON r.media_id = m.ig_media_id WHERE r.media_id != m.id").all();
+            for (const r of rulesWithIgId) {
+                db.prepare("UPDATE rules SET media_id = ? WHERE id = ?").run(r.real_media_id, r.id);
+            }
+        } catch(e) {}
+
+        const { media_id } = req.query;
+        const userId = req.user?.id;
+        const isSuperAdmin = req.user?.role === 'super_admin' && !req.isImpersonating;
+
+        let query = `
+            SELECT r.*, r.trigger_keyword as trigger_word, m.ig_media_id, m.thumbnail_url 
+            FROM rules r 
+            LEFT JOIN media m ON (r.media_id = m.id OR r.media_id = m.ig_media_id)
+        `;
+        const whereClauses = [];
+        const params = [];
+
+        if (!isSuperAdmin && userId) {
+            whereClauses.push('(r.user_id = ? OR r.user_id IS NULL)');
+            params.push(userId);
+        }
+
+        if (media_id === 'global') {
+            whereClauses.push('r.media_id IS NULL');
+        } else if (media_id && media_id !== 'all') {
+            whereClauses.push('(r.media_id = ? OR m.ig_media_id = ?)');
+            params.push(media_id, media_id);
+        }
+
+        if (whereClauses.length > 0) {
+            query += ' WHERE ' + whereClauses.join(' AND ');
+        }
+
+        query += ' ORDER BY r.created_at DESC';
+        
+        const rules = db.prepare(query).all(...params);
+        res.json(rules);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+router.get('/rules/:id', auth, (req, res) => {
+    try {
+        const db = getDb();
+        const { id } = req.params;
+        const rule = db.prepare(`
+            SELECT r.*, r.trigger_keyword as trigger_word, m.ig_media_id, m.thumbnail_url, m.caption, m.permalink
+            FROM rules r 
+            LEFT JOIN media m ON (r.media_id = m.id OR r.media_id = m.ig_media_id)
+            WHERE r.id = ?
+        `).get(id);
+
+        if (!rule) {
+            return res.status(404).json({ error: 'Rule not found' });
+        }
+        res.json(rule);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+function cleanUrl(url) {
+    if (!url) return null;
+    let trimmed = String(url).trim();
+    if (!trimmed) return null;
+    if (!/^https?:\/\//i.test(trimmed)) {
+        trimmed = 'https://' + trimmed;
+    }
+    return trimmed;
+}
+
+router.post('/rules', auth, (req, res) => {
+    try {
+        const db = getDb();
+        const { media_id, trigger_keyword, trigger_word, action_type, response_text, link_url, follow_prompt, public_reply, delay_seconds, variations_json, buttons_config_json } = req.body;
+        const keyword = trigger_keyword || trigger_word;
+
+        if (!keyword || !action_type) {
+            return res.status(400).json({ error: 'trigger_keyword and action_type are required' });
+        }
+
+        let resolvedMediaId = null;
+        if (media_id && media_id !== 'global') {
+            const mRow = db.prepare("SELECT id FROM media WHERE id = ? OR ig_media_id = ?").get(media_id, media_id);
+            if (mRow) {
+                resolvedMediaId = mRow.id;
+            } else if (typeof media_id === 'string' && media_id.length > 5) {
+                try {
+                    db.prepare("INSERT INTO media (ig_media_id, caption, synced_at) VALUES (?, 'Instagram Content', ?) ON CONFLICT(ig_media_id) DO NOTHING").run(media_id, new Date().toISOString());
+                    const mNew = db.prepare("SELECT id FROM media WHERE ig_media_id = ?").get(media_id);
+                    resolvedMediaId = mNew ? mNew.id : null;
+                } catch(e) {
+                    resolvedMediaId = null;
+                }
+            }
+        }
+
+        const sanitizedUrl = cleanUrl(link_url);
+
+        const userId = req.user?.id || null;
+
+        const result = db.prepare(`
+            INSERT INTO rules (media_id, trigger_keyword, action_type, response_text, link_url, follow_prompt, public_reply, delay_seconds, variations_json, buttons_config_json, created_at, updated_at, user_id)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `).run(
+            resolvedMediaId, 
+            keyword, 
+            action_type, 
+            response_text || null, 
+            sanitizedUrl, 
+            follow_prompt || null, 
+            public_reply || null,
+            parseInt(delay_seconds || 0),
+            variations_json || null,
+            buttons_config_json || null,
+            new Date().toISOString(), 
+            new Date().toISOString(),
+            userId
+        );
+
+        try { backupRules(db); } catch(e) { console.error('Error backing up rules:', e); }
+
+        res.json({ id: result.lastInsertRowid, success: true });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+router.put('/rules/:id', auth, (req, res) => {
+    try {
+        const db = getDb();
+        const { id } = req.params;
+        const { media_id, trigger_keyword, trigger_word, action_type, response_text, link_url, follow_prompt, public_reply, delay_seconds, variations_json, buttons_config_json } = req.body;
+        const keyword = trigger_keyword || trigger_word;
+        const sanitizedUrl = cleanUrl(link_url);
+
+        // Resolve media_id if provided (same logic as POST /rules)
+        let resolvedMediaId = undefined; // undefined = don't update media_id
+        if (media_id !== undefined) {
+            if (!media_id || media_id === 'global') {
+                resolvedMediaId = null;
+            } else {
+                const mRow = db.prepare("SELECT id FROM media WHERE id = ? OR ig_media_id = ?").get(media_id, media_id);
+                resolvedMediaId = mRow ? mRow.id : null;
+            }
+        }
+
+        if (resolvedMediaId !== undefined) {
+            db.prepare(`
+                UPDATE rules SET 
+                    media_id = ?,
+                    trigger_keyword = ?, 
+                    action_type = ?, 
+                    response_text = ?, 
+                    link_url = ?, 
+                    follow_prompt = ?, 
+                    public_reply = ?,
+                    delay_seconds = ?,
+                    variations_json = ?,
+                    buttons_config_json = ?,
+                    updated_at = ?
+                WHERE id = ?
+            `).run(
+                resolvedMediaId,
+                keyword, 
+                action_type, 
+                response_text || null, 
+                sanitizedUrl, 
+                follow_prompt || null, 
+                public_reply || null, 
+                parseInt(delay_seconds || 0),
+                variations_json || null,
+                buttons_config_json || null,
+                new Date().toISOString(), 
+                id
+            );
+        } else {
+            db.prepare(`
+                UPDATE rules SET 
+                    trigger_keyword = ?, 
+                    action_type = ?, 
+                    response_text = ?, 
+                    link_url = ?, 
+                    follow_prompt = ?, 
+                    public_reply = ?,
+                    delay_seconds = ?,
+                    variations_json = ?,
+                    buttons_config_json = ?,
+                    updated_at = ?
+                WHERE id = ?
+            `).run(
+                keyword, 
+                action_type, 
+                response_text || null, 
+                sanitizedUrl, 
+                follow_prompt || null, 
+                public_reply || null, 
+                parseInt(delay_seconds || 0),
+                variations_json || null,
+                buttons_config_json || null,
+                new Date().toISOString(), 
+                id
+            );
+        }
+
+        try { backupRules(db); } catch(e) { console.error('Error backing up rules:', e); }
+
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+router.post('/rules/test', auth, (req, res) => {
+    try {
+        const db = getDb();
+        const { comment_text, media_id } = req.body;
+        if (!comment_text) return res.status(400).json({ error: 'comment_text is required' });
+
+        const textLower = comment_text.toLowerCase();
+        const rules = db.prepare(`
+            SELECT r.*, m.ig_media_id 
+            FROM rules r 
+            LEFT JOIN media m ON r.media_id = m.id 
+            WHERE r.is_active = 1
+        `).all();
+
+        let matchedRule = null;
+        for (const rule of rules) {
+            if (rule.trigger_keyword) {
+                const keywords = rule.trigger_keyword.split(',').map(k => k.trim().toLowerCase()).filter(Boolean);
+                const hasMatch = keywords.some(kw => textLower.match(new RegExp(`\\b${kw.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&')}\\b`, 'i')));
+                if (hasMatch) {
+                    if (media_id && rule.media_id == media_id) {
+                        matchedRule = rule;
+                        break;
+                    }
+                    if (!rule.media_id && !matchedRule) {
+                        matchedRule = rule;
+                    }
+                }
+            }
+        }
+
+        if (!matchedRule) {
+            return res.json({ matched: false, message: 'No active rule matched this comment text.' });
+        }
+
+        res.json({
+            matched: true,
+            rule: {
+                id: matchedRule.id,
+                trigger_keyword: matchedRule.trigger_keyword,
+                action_type: matchedRule.action_type,
+                response_text: matchedRule.response_text,
+                link_url: matchedRule.link_url,
+                follow_prompt: matchedRule.follow_prompt,
+                public_reply: matchedRule.public_reply,
+                delay_seconds: matchedRule.delay_seconds || 0,
+                variations_json: matchedRule.variations_json
+            }
+        });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+router.patch('/rules/:id/toggle', auth, (req, res) => {
+    try {
+        const db = getDb();
+        const { id } = req.params;
+        
+        const rule = db.prepare('SELECT is_active FROM rules WHERE id = ?').get(id);
+        if (!rule) return res.status(404).json({ error: 'Not found' });
+
+        const newStatus = rule.is_active === 1 ? 0 : 1;
+        db.prepare('UPDATE rules SET is_active = ?, updated_at = ? WHERE id = ?').run(newStatus, new Date().toISOString(), id);
+
+        try { backupRules(db); } catch(e) { console.error('Error backing up rules:', e); }
+
+        res.json({ success: true, is_active: newStatus });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+router.delete('/rules/:id', auth, (req, res) => {
+    try {
+        const db = getDb();
+        const { id } = req.params;
+        db.prepare('DELETE FROM events WHERE rule_id = ?').run(id);
+        db.prepare('DELETE FROM conversations WHERE rule_id = ?').run(id);
+        db.prepare('DELETE FROM rules WHERE id = ?').run(id);
+
+        try { backupRules(db); } catch(e) { console.error('Error backing up rules:', e); }
+
+        res.json({ success: true, message: 'Rule and its trigger history deleted successfully' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+router.post('/rules/:id/backfill', auth, async (req, res) => {
+    try {
+        const db = getDb();
+        const rule = db.prepare(`
+            SELECT r.*, 
+                   COALESCE(m.ig_media_id, (SELECT ig_media_id FROM media WHERE id = r.media_id OR ig_media_id = r.media_id LIMIT 1)) as ig_media_id
+            FROM rules r 
+            LEFT JOIN media m ON (r.media_id = m.id OR r.media_id = m.ig_media_id)
+            WHERE r.id = ?
+        `).get(req.params.id);
+
+        if (!rule) {
+            return res.status(404).json({ error: 'Automation rule not found' });
+        }
+
+        const token = getConfig('access_token');
+        if (!token) {
+            return res.status(400).json({ error: 'Instagram access token is not connected in Settings' });
+        }
+
+        const targetMediaId = rule.ig_media_id;
+        if (!targetMediaId) {
+            return res.status(400).json({ error: 'This rule is not linked to a specific Reel ID' });
+        }
+
+        console.log(`[Backfill] Fetching existing comments for Reel ${targetMediaId}...`);
+        const comments = await getMediaComments(token, targetMediaId, 100);
+        console.log(`[Backfill] Found ${comments.length} existing comments on Instagram`);
+
+        let matchedCount = 0;
+        let queuedCount = 0;
+
+        // Process from oldest to newest (first user to last user)
+        const sortedComments = [...comments].reverse();
+
+        for (let i = 0; i < sortedComments.length; i++) {
+            const comment = sortedComments[i];
+            const commentId = comment.id;
+            const text = (comment.text || '').trim();
+            const from = comment.from;
+
+            if (!from) continue;
+
+            // Skip if already processed in events
+            const alreadyProcessed = db.prepare("SELECT id FROM events WHERE comment_id = ?").get(commentId);
+            if (alreadyProcessed) continue;
+
+            // Check keyword match
+            const textClean = text.toLowerCase();
+            const keywords = (rule.trigger_keyword || '').split(',').map(k => k.replace(/['"]/g, '').trim().toLowerCase()).filter(Boolean);
+            const isMatch = keywords.length === 0 || keywords.some(kw => kw === '*' || kw === 'any' || textClean.includes(kw));
+
+            if (isMatch) {
+                matchedCount++;
+
+                // Space out by 1.5 seconds per message so Meta anti-spam won't throttle
+                const delayMs = queuedCount * 1500;
+                const processAt = Date.now() + delayMs;
+
+                let messageToSend = (rule.response_text || '').trim();
+                const directLink = (rule.link_url || '').trim();
+                let trackingId = null;
+
+                if (rule.action_type === 'link_dm') {
+                    if (directLink) {
+                        if (messageToSend.includes(directLink)) {
+                            // Link already embedded in text
+                        } else {
+                            messageToSend = messageToSend ? `${messageToSend}\n${directLink}` : directLink;
+                        }
+                    } else if (!messageToSend) {
+                        messageToSend = 'Here is your resource link!';
+                    }
+                } else if (rule.action_type === 'follow_first') {
+                    let btnCfg = null;
+                    if (rule.buttons_config_json) {
+                        try { btnCfg = JSON.parse(rule.buttons_config_json); } catch(e) {}
+                    }
+                    const isButtonMode = !btnCfg || btnCfg.gate_type !== 'text';
+                    if (isButtonMode) {
+                        const step1Text = btnCfg?.step1_text || "Hey there! Glad you're here ☺️\n\nTap below and I'll send you the access in just a moment ✨";
+                        const step1Button = (btnCfg?.step1_button || "Send me the access").slice(0, 20);
+                        messageToSend = step1Text;
+                        messagePayload = {
+                            attachment: {
+                                type: 'template',
+                                payload: {
+                                    template_type: 'button',
+                                    text: step1Text,
+                                    buttons: [
+                                        {
+                                            type: 'postback',
+                                            title: step1Button,
+                                            payload: 'REQ_ACCESS'
+                                        }
+                                    ]
+                                }
+                            }
+                        };
+                    } else {
+                        messageToSend = rule.follow_prompt || `Hey @${from.username || 'friend'}! Please follow us first, then reply "DONE" to unlock your link!`;
+                    }
+                }
+
+                const eventRes = db.prepare(`
+                    INSERT INTO events (rule_id, comment_id, comment_text, commenter_ig_id, commenter_username, media_ig_id, tracking_id, created_at)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                `).run(rule.id, commentId, text, from.id, from.username || 'user', targetMediaId, trackingId, new Date().toISOString());
+
+                const eventId = eventRes.lastInsertRowid;
+
+                if (rule.action_type === 'follow_first') {
+                    let btnCfg = null;
+                    if (rule.buttons_config_json) {
+                        try { btnCfg = JSON.parse(rule.buttons_config_json); } catch(e) {}
+                    }
+                    const isButtonMode = !btnCfg || btnCfg.gate_type !== 'text';
+                    const initialState = isButtonMode ? 'awaiting_access_tap' : 'awaiting_reply';
+                    db.prepare(`
+                        INSERT INTO conversations (commenter_ig_id, rule_id, event_id, state, created_at)
+                        VALUES (?, ?, ?, ?, ?)
+                    `).run(from.id, rule.id, eventId, initialState, new Date().toISOString());
+                }
+
+                enqueue({
+                    type: 'private_reply',
+                    commentId: commentId,
+                    commenterId: from.id,
+                    messagePayload: messagePayload || messageToSend,
+                    messageText: messageToSend,
+                    publicReply: rule.public_reply || null,
+                    eventId: eventId,
+                    processAt
+                });
+
+                queuedCount++;
+            }
+        }
+
+        res.json({
+            success: true,
+            totalComments: comments.length,
+            matched: matchedCount,
+            queued: queuedCount,
+            message: `Found ${comments.length} existing comments. Successfully queued DMs for ${queuedCount} commenters (paced safely over ${(queuedCount * 1.5).toFixed(0)} seconds)!`
+        });
+    } catch (err) {
+        console.error('[Backfill] Error processing past comments:', err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+module.exports = router;
