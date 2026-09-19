@@ -10,9 +10,10 @@ window['new-automation'] = {
     // Direct Publish & Automate Studio State
     isDirectPublish: false,
     directMediaType: 'REELS', // 'REELS' or 'IMAGE'
-    directMediaUrl: 'https://assets.mixkit.co/videos/preview/mixkit-vertical-view-of-a-neon-sign-at-night-42721-large.mp4',
+    directMediaUrl: '',
     directLocalFileUrl: '',
     directFileName: '',
+    directFileSize: '',
     directCaption: 'Want our complete 2026 AI Playbook? Comment "DRAG" below and I will send it right to your DMs! 🚀',
     detectedKeyword: 'DRAG',
     detectedUrl: '',
@@ -167,11 +168,12 @@ window['new-automation'] = {
         if (!file) return;
 
         this.directFileName = file.name;
-        const label = document.getElementById('direct-file-name-label');
-        if (label) label.textContent = `📁 ${file.name}`;
+        const sizeMb = (file.size / (1024 * 1024)).toFixed(2);
+        this.directFileSize = `${sizeMb} MB`;
 
         const blobUrl = URL.createObjectURL(file);
         this.directLocalFileUrl = blobUrl;
+        this.directMediaUrl = blobUrl;
         
         if (file.type && file.type.startsWith('image/')) {
             this.directMediaType = 'IMAGE';
@@ -179,11 +181,11 @@ window['new-automation'] = {
             this.directMediaType = 'REELS';
         }
 
-        const container = document.getElementById('phone-preview-media-container');
+        const container = document.getElementById('new-automation-content');
         if (container) {
-            const isReel = this.directMediaType === 'REELS';
-            container.innerHTML = this.renderPhoneMediaContent(isReel, blobUrl);
+            this.renderDirectPublishStudio(container);
         }
+        App.showToast(`✅ Selected "${file.name}" (${this.directMediaType === 'REELS' ? 'Reel Video' : 'Photo Post'})`, 'success');
     },
 
     setDirectMediaType(type) {
@@ -231,13 +233,35 @@ window['new-automation'] = {
 
     renderPhoneMediaContent(isReel, url) {
         if (!url) {
-            return `<div style="color: #888; font-size: 0.78rem; text-align: center; padding: 1rem;">No media selected<br><span style="font-size:0.68rem; color:#666;">Enter URL or pick a preset</span></div>`;
+            return `
+                <div onclick="document.getElementById('direct-media-file-input')?.click()" style="color: #FFF; font-size: 0.8rem; text-align: center; padding: 1.5rem; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%;">
+                    <div style="width: 52px; height: 52px; border-radius: 50%; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; font-size: 2rem; font-weight: 900; line-height: 1; margin-bottom: 0.5rem; box-shadow: 0 4px 14px rgba(0,0,0,0.3); border: 2px solid rgba(255,255,255,0.4);">
+                        +
+                    </div>
+                    <div style="font-weight: 800; font-size: 0.85rem;">No Media Selected</div>
+                    <div style="font-size: 0.7rem; color: rgba(255,255,255,0.75); margin-top: 0.25rem;">Click to choose Reel or Photo from computer gallery</div>
+                    <div style="margin-top: 0.65rem; background: var(--accent-primary); color: #FFF; font-size: 0.72rem; font-weight: 800; padding: 4px 12px; border-radius: 6px;">
+                        📁 Choose from Computer
+                    </div>
+                </div>
+            `;
         }
         if (isReel) {
             return `<video src="${url}" autoplay loop muted playsinline style="width: 100%; height: 100%; object-fit: cover;"></video>`;
         } else {
             return `<img src="${url}" alt="Post preview" style="width: 100%; height: 100%; object-fit: cover;">`;
         }
+    },
+
+    openDirectGalleryPicker() {
+        this.step1Filter = 'direct';
+        this.isDirectPublish = true;
+        this.selectedMediaId = 'direct_publish';
+        this.renderStep1(document.getElementById('new-automation-content'));
+        setTimeout(() => {
+            const fileInput = document.getElementById('direct-media-file-input');
+            if (fileInput) fileInput.click();
+        }, 80);
     },
 
     async render(container) {
@@ -367,8 +391,9 @@ window['new-automation'] = {
             if (this.isDirectPublish || this.step1Filter === 'direct') {
                 this.isDirectPublish = true;
                 const mediaUrl = (this.directMediaUrl || this.directLocalFileUrl || '').trim();
-                if (!mediaUrl) {
-                    this.setDirectSamplePreset(this.directMediaType === 'IMAGE' ? 'image' : 'video');
+                if (!mediaUrl && !this.directFileName) {
+                    App.showToast('Please choose a Reel or Post from your computer gallery to continue', 'warning');
+                    return;
                 }
                 if (!this.directCaption || !this.directCaption.trim()) {
                     App.showToast('Please enter an Instagram caption for your post', 'warning');
@@ -554,7 +579,42 @@ window['new-automation'] = {
         let gridHtml = `
             <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0.85rem; width: 100%;">
                 
-                <!-- GLOBAL OPTION -->
+                <!-- 1. DIRECT PUBLISH FROM COMPUTER (FIRST IN GRID WITH PROMINENT PLUS ICON) -->
+                <div class="reel-card-item" onclick="window['new-automation'].openDirectGalleryPicker()" style="
+                    border-radius: 14px;
+                    border: 2px dashed var(--accent-primary);
+                    background: #FFFBF9;
+                    box-shadow: 0 2px 10px rgba(217, 119, 87, 0.08);
+                    cursor: pointer;
+                    overflow: hidden;
+                    position: relative;
+                    display: flex;
+                    flex-direction: column;
+                    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+                ">
+                    <div style="height: 120px; background: linear-gradient(135deg, #FF6B6B 0%, #D97757 100%); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 0.65rem; text-align: center; color: #FFF; position: relative;">
+                        <div style="width: 42px; height: 42px; border-radius: 50%; background: #FFFFFF; color: var(--accent-primary); display: flex; align-items: center; justify-content: center; font-size: 1.6rem; font-weight: 900; margin-bottom: 0.35rem; box-shadow: 0 4px 12px rgba(0,0,0,0.25);">
+                            +
+                        </div>
+                        <div style="font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: 0.88rem; color: #FFF;">Publish New Reel / Post</div>
+                        <div style="font-size: 0.68rem; color: rgba(255,255,255,0.95); margin-top: 0.1rem;">Choose from Computer Gallery</div>
+                    </div>
+
+                    <div style="padding: 0.75rem; flex: 1; display: flex; flex-direction: column; justify-content: space-between;">
+                        <div>
+                            <div style="font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: 0.84rem; color: var(--text-primary); display: flex; align-items: center; gap: 4px;">
+                                <span>➕ Select Reel or Post</span>
+                            </div>
+                            <div style="font-size: 0.72rem; color: var(--text-secondary); margin-top: 0.25rem; line-height: 1.35;">Pick video or photo from your computer gallery to post directly & auto-arm DM automation</div>
+                        </div>
+                    </div>
+
+                    <div style="background: var(--accent-primary); color: #FFFFFF; font-size: 0.72rem; font-weight: 800; text-align: center; padding: 6px 8px; letter-spacing: 0.04em; display: flex; align-items: center; justify-content: center; gap: 4px;">
+                        📁 CHOOSE FROM COMPUTER
+                    </div>
+                </div>
+
+                <!-- 2. GLOBAL ACCOUNT-WIDE RULE -->
                 <div class="reel-card-item ${isGlobalSelected ? 'selected' : ''}" onclick="window['new-automation'].selectReel('global', this)" style="
                     border-radius: 14px;
                     border: ${isGlobalSelected ? '2.5px solid var(--accent-primary)' : '1.5px solid var(--border-color)'};
@@ -587,35 +647,6 @@ window['new-automation'] = {
                             ✓ SELECTED
                         </div>
                     ` : ''}
-                </div>
-
-                <!-- DIRECT PUBLISH HERO CARD -->
-                <div class="reel-card-item" onclick="window['new-automation'].setStep1Filter('direct')" style="
-                    border-radius: 14px;
-                    border: 1.5px dashed var(--accent-primary);
-                    background: #FFFBF9;
-                    box-shadow: 0 1px 4px rgba(0,0,0,0.02);
-                    cursor: pointer;
-                    overflow: hidden;
-                    position: relative;
-                    display: flex;
-                    flex-direction: column;
-                    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-                ">
-                    <div style="height: 120px; background: linear-gradient(135deg, #FF6B6B 0%, #D97757 100%); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 0.65rem; text-align: center; color: #FFF;">
-                        <div style="font-size: 1.5rem; margin-bottom: 0.15rem;">🚀</div>
-                        <div style="font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: 0.88rem; color: #FFF;">Direct Publish & Automate</div>
-                        <div style="font-size: 0.7rem; color: rgba(255,255,255,0.9); margin-top: 0.1rem;">Post to Instagram & Arm Funnel</div>
-                    </div>
-
-                    <div style="padding: 0.75rem; flex: 1;">
-                        <div style="font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 0.82rem; color: var(--text-primary);">Publish New Reel / Post</div>
-                        <div style="font-size: 0.72rem; color: var(--text-secondary); margin-top: 0.15rem; line-height: 1.35;">Upload media, write caption, and auto-arm Follow-First DM funnel in 1 click</div>
-                    </div>
-
-                    <div style="background: #F2E3D5; color: var(--accent-primary); font-size: 0.7rem; font-weight: 800; text-align: center; padding: 4px 8px; letter-spacing: 0.04em;">
-                        + OPEN DIRECT STUDIO
-                    </div>
                 </div>
         `;
 
@@ -704,14 +735,15 @@ window['new-automation'] = {
 
                 <!-- SUB TABS FOR STEP 1 -->
                 <div style="display: flex; gap: 0.5rem; margin-bottom: 0.75rem; flex-wrap: wrap;">
-                    <button type="button" onclick="window['new-automation'].setStep1Filter('reels')" style="padding: 0.35rem 0.85rem; font-size: 0.78rem; font-weight: ${this.step1Filter === 'reels' ? '800' : '600'}; border-radius: 8px; background: ${this.step1Filter === 'reels' ? 'var(--accent-primary)' : '#FFFFFF'}; color: ${this.step1Filter === 'reels' ? '#FFFFFF' : 'var(--text-secondary)'}; border: ${this.step1Filter === 'reels' ? 'none' : '1px solid var(--border-color)'}; cursor: pointer;">
-                        🎬 Reels Only (${reelsCount})
+                    <button type="button" onclick="window['new-automation'].openDirectGalleryPicker()" style="padding: 0.38rem 0.95rem; font-size: 0.8rem; font-weight: ${this.step1Filter === 'direct' ? '800' : '700'}; border-radius: 8px; background: ${this.step1Filter === 'direct' ? 'var(--accent-primary)' : '#FFFFFF'}; color: ${this.step1Filter === 'direct' ? '#FFFFFF' : 'var(--accent-primary)'}; border: ${this.step1Filter === 'direct' ? 'none' : '1.5px solid var(--accent-primary)'}; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 1px 4px rgba(217,119,87,0.15);">
+                        <span>➕ Publish New Reel / Post</span>
+                        <span style="background:${this.step1Filter === 'direct' ? 'rgba(255,255,255,0.25)' : '#FAF0EA'}; color:${this.step1Filter === 'direct' ? '#FFF' : 'var(--accent-primary)'}; font-size:0.65rem; padding: 1px 6px; border-radius: 4px; font-weight: 800;">From Computer</span>
                     </button>
-                    <button type="button" onclick="window['new-automation'].setStep1Filter('all')" style="padding: 0.35rem 0.85rem; font-size: 0.78rem; font-weight: ${this.step1Filter === 'all' ? '800' : '600'}; border-radius: 8px; background: ${this.step1Filter === 'all' ? 'var(--accent-primary)' : '#FFFFFF'}; color: ${this.step1Filter === 'all' ? '#FFFFFF' : 'var(--text-secondary)'}; border: ${this.step1Filter === 'all' ? 'none' : '1px solid var(--border-color)'}; cursor: pointer;">
+                    <button type="button" onclick="window['new-automation'].setStep1Filter('reels')" style="padding: 0.38rem 0.85rem; font-size: 0.78rem; font-weight: ${this.step1Filter === 'reels' ? '800' : '600'}; border-radius: 8px; background: ${this.step1Filter === 'reels' ? 'var(--accent-primary)' : '#FFFFFF'}; color: ${this.step1Filter === 'reels' ? '#FFFFFF' : 'var(--text-secondary)'}; border: ${this.step1Filter === 'reels' ? 'none' : '1px solid var(--border-color)'}; cursor: pointer;">
+                        🎬 Existing Reels (${reelsCount})
+                    </button>
+                    <button type="button" onclick="window['new-automation'].setStep1Filter('all')" style="padding: 0.38rem 0.85rem; font-size: 0.78rem; font-weight: ${this.step1Filter === 'all' ? '800' : '600'}; border-radius: 8px; background: ${this.step1Filter === 'all' ? 'var(--accent-primary)' : '#FFFFFF'}; color: ${this.step1Filter === 'all' ? '#FFFFFF' : 'var(--text-secondary)'}; border: ${this.step1Filter === 'all' ? 'none' : '1px solid var(--border-color)'}; cursor: pointer;">
                         📁 All Content (${totalCount})
-                    </button>
-                    <button type="button" onclick="window['new-automation'].setStep1Filter('direct')" style="padding: 0.35rem 0.85rem; font-size: 0.78rem; font-weight: ${this.step1Filter === 'direct' ? '800' : '600'}; border-radius: 8px; background: ${this.step1Filter === 'direct' ? 'var(--accent-primary)' : '#FFFFFF'}; color: ${this.step1Filter === 'direct' ? '#FFFFFF' : 'var(--text-secondary)'}; border: ${this.step1Filter === 'direct' ? 'none' : '1px solid var(--border-color)'}; cursor: pointer; display: flex; align-items: center; gap: 4px;">
-                        🚀 Direct Publish New Reel / Post <span style="background:${this.step1Filter === 'direct' ? 'rgba(255,255,255,0.25)' : '#FAF0EA'}; color:${this.step1Filter === 'direct' ? '#FFF' : 'var(--accent-primary)'}; font-size:0.65rem; padding: 1px 6px; border-radius: 4px; font-weight: 800;">1-Click</span>
                     </button>
                 </div>
 
@@ -756,14 +788,15 @@ window['new-automation'] = {
 
                 <!-- SUB TABS FOR STEP 1 -->
                 <div style="display: flex; gap: 0.5rem; margin-bottom: 0.85rem; flex-wrap: wrap;">
-                    <button type="button" onclick="window['new-automation'].setStep1Filter('reels')" style="padding: 0.35rem 0.85rem; font-size: 0.78rem; font-weight: 600; border-radius: 8px; background: #FFFFFF; color: var(--text-secondary); border: 1px solid var(--border-color); cursor: pointer;">
-                        🎬 Reels Only (${reelsCount})
+                    <button type="button" onclick="window['new-automation'].openDirectGalleryPicker()" style="padding: 0.38rem 0.95rem; font-size: 0.8rem; font-weight: 800; border-radius: 8px; background: var(--accent-primary); color: #FFFFFF; border: none; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 1px 4px rgba(217,119,87,0.2);">
+                        <span>➕ Publish New Reel / Post</span>
+                        <span style="background: rgba(255,255,255,0.25); color: #FFF; font-size:0.65rem; padding: 1px 6px; border-radius: 4px; font-weight: 800;">Active</span>
                     </button>
-                    <button type="button" onclick="window['new-automation'].setStep1Filter('all')" style="padding: 0.35rem 0.85rem; font-size: 0.78rem; font-weight: 600; border-radius: 8px; background: #FFFFFF; color: var(--text-secondary); border: 1px solid var(--border-color); cursor: pointer;">
+                    <button type="button" onclick="window['new-automation'].setStep1Filter('reels')" style="padding: 0.38rem 0.85rem; font-size: 0.78rem; font-weight: 600; border-radius: 8px; background: #FFFFFF; color: var(--text-secondary); border: 1px solid var(--border-color); cursor: pointer;">
+                        🎬 Existing Reels (${reelsCount})
+                    </button>
+                    <button type="button" onclick="window['new-automation'].setStep1Filter('all')" style="padding: 0.38rem 0.85rem; font-size: 0.78rem; font-weight: 600; border-radius: 8px; background: #FFFFFF; color: var(--text-secondary); border: 1px solid var(--border-color); cursor: pointer;">
                         📁 All Content (${totalCount})
-                    </button>
-                    <button type="button" onclick="window['new-automation'].setStep1Filter('direct')" style="padding: 0.35rem 0.85rem; font-size: 0.78rem; font-weight: 800; border-radius: 8px; background: var(--accent-primary); color: #FFFFFF; border: none; cursor: pointer; display: flex; align-items: center; gap: 4px;">
-                        🚀 Direct Publish New Reel / Post <span style="background: rgba(255,255,255,0.25); color: #FFF; font-size:0.65rem; padding: 1px 6px; border-radius: 4px; font-weight: 800;">Active</span>
                     </button>
                 </div>
 
@@ -817,26 +850,58 @@ window['new-automation'] = {
                             </div>
                         </div>
 
-                        <!-- 2. MEDIA SOURCE & PRESETS -->
+                        <!-- 2. CHOOSE FROM COMPUTER GALLERY (ONLY OPTION) -->
                         <div>
-                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 0.35rem;">
-                                <label style="font-size: 0.78rem; font-weight: 800; color: var(--text-primary); text-transform: uppercase; letter-spacing: 0.04em;">
-                                    2. Media File or URL:
-                                </label>
-                                <div style="display:flex; gap:0.35rem;">
-                                    <button type="button" onclick="window['new-automation'].setDirectSamplePreset('video')" style="font-size:0.72rem; font-weight:700; padding:2px 7px; background:#FFF; border:1px solid var(--border-color); border-radius:5px; cursor:pointer;">▶️ Preset Reel</button>
-                                    <button type="button" onclick="window['new-automation'].setDirectSamplePreset('image')" style="font-size:0.72rem; font-weight:700; padding:2px 7px; background:#FFF; border:1px solid var(--border-color); border-radius:5px; cursor:pointer;">🖼️ Preset Photo</button>
-                                </div>
-                            </div>
+                            <label style="font-size: 0.78rem; font-weight: 800; color: var(--text-primary); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.4rem; display: block;">
+                                2. Choose from Computer Gallery:
+                            </label>
 
-                            <input type="url" id="direct-media-url" value="${this.directMediaUrl || ''}" oninput="window['new-automation'].onDirectMediaUrlChange(this.value)" placeholder="Enter public Video URL (.mp4) or Photo URL (.jpg, .png)..." style="width: 100%; padding: 0.65rem 0.9rem; font-size: 0.85rem; font-weight: 500; border-radius: 8px; border: 1.5px solid #D1C9BE; background: #FFFFFF; outline: none;">
+                            <input type="file" id="direct-media-file-input" accept="video/mp4,video/quicktime,video/webm,image/*" onchange="window['new-automation'].onDirectLocalFileSelected(this)" style="display: none;">
 
-                            <div style="margin-top: 0.45rem; display: flex; align-items: center; gap: 0.65rem; flex-wrap: wrap;">
-                                <label for="direct-media-file-input" style="font-size: 0.76rem; font-weight: 700; color: var(--accent-primary); background: #FFFFFF; border: 1.5px dashed var(--accent-primary); padding: 0.35rem 0.85rem; border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; gap: 0.4rem;">
-                                    📁 Choose File From Computer
-                                </label>
-                                <input type="file" id="direct-media-file-input" accept="video/mp4,video/quicktime,video/webm,image/*" onchange="window['new-automation'].onDirectLocalFileSelected(this)" style="display: none;">
-                                <span id="direct-file-name-label" style="font-size: 0.75rem; color: var(--text-secondary); font-style: italic;">${this.directFileName || 'No local file chosen (using URL)'}</span>
+                            <div onclick="document.getElementById('direct-media-file-input').click()" style="
+                                border: 2px dashed ${this.directFileName ? '#15803D' : 'var(--accent-primary)'};
+                                background: ${this.directFileName ? '#F0FDF4' : '#FFFFFF'};
+                                border-radius: 12px;
+                                padding: 1.25rem 1rem;
+                                cursor: pointer;
+                                text-align: center;
+                                transition: all 0.2s ease;
+                                display: flex;
+                                flex-direction: column;
+                                align-items: center;
+                                justify-content: center;
+                                gap: 0.45rem;
+                            ">
+                                ${this.directFileName ? `
+                                    <div style="width: 44px; height: 44px; border-radius: 50%; background: #DCFCE7; color: #15803D; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; font-weight: 800; box-shadow: 0 2px 6px rgba(21,128,61,0.2);">
+                                        ✓
+                                    </div>
+                                    <div style="font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: 0.92rem; color: #15803D;">
+                                        File Selected from Computer Gallery
+                                    </div>
+                                    <div style="font-size: 0.82rem; font-weight: 700; color: var(--text-primary); word-break: break-all;">
+                                        📁 ${this.directFileName} ${this.directFileSize ? `(${this.directFileSize})` : ''}
+                                    </div>
+                                    <div style="font-size: 0.72rem; color: var(--text-secondary);">
+                                        Format: <strong>${this.directMediaType === 'REELS' ? '🎬 Instagram Reel (Video)' : '📸 Feed Post (Photo)'}</strong> &bull; Click anywhere to choose a different file
+                                    </div>
+                                    <div style="margin-top: 0.25rem; background: #FFFFFF; border: 1.5px solid #86EFAC; color: #15803D; font-size: 0.75rem; font-weight: 700; padding: 4px 14px; border-radius: 6px;">
+                                        🔄 Change File
+                                    </div>
+                                ` : `
+                                    <div style="width: 48px; height: 48px; border-radius: 50%; background: #FAF0EA; color: var(--accent-primary); display: flex; align-items: center; justify-content: center; font-size: 1.6rem; font-weight: 900; box-shadow: 0 2px 8px rgba(217,119,87,0.15);">
+                                        +
+                                    </div>
+                                    <div style="font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: 0.92rem; color: var(--accent-primary);">
+                                        Click to Choose from Computer Gallery
+                                    </div>
+                                    <div style="font-size: 0.76rem; color: var(--text-secondary);">
+                                        Select Reel (video: .mp4, .mov) or Post (photo: .jpg, .png)
+                                    </div>
+                                    <div style="margin-top: 0.25rem; background: var(--accent-primary); color: #FFF; font-size: 0.76rem; font-weight: 800; padding: 5px 14px; border-radius: 8px; display: inline-flex; align-items: center; gap: 6px;">
+                                        📁 Browse Computer Gallery
+                                    </div>
+                                `}
                             </div>
                         </div>
 
@@ -1330,7 +1395,7 @@ window['new-automation'] = {
 
             const publishPayload = {
                 media_type: this.directMediaType || 'REELS',
-                media_url: this.directMediaUrl || this.directLocalFileUrl || 'https://assets.mixkit.co/videos/preview/mixkit-vertical-view-of-a-neon-sign-at-night-42721-large.mp4',
+                media_url: this.directLocalFileUrl || this.directMediaUrl || 'local_file_upload.mp4',
                 caption: this.directCaption || `Check this out! Comment ${triggerWord} below 👇`,
                 trigger_keyword: triggerWord,
                 action_type: actionType,

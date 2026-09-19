@@ -33,7 +33,7 @@ async function publishReel({ videoUrl = null, caption = '', igUserId = null, acc
     const { token, igId } = resolveCredentials({ userId, accessToken, igUserId });
 
     // 1. Instant Sandbox / Simulation Mode
-    if (simulate || !token || !igId || !videoUrl || videoUrl.includes('example.com')) {
+    if (simulate || !token || !igId || !videoUrl || videoUrl.includes('example.com') || videoUrl.startsWith('blob:') || videoUrl.startsWith('data:') || videoUrl.startsWith('local_file_')) {
         const mockMediaId = 'reel_' + Date.now();
         console.log(`[Publisher] 🧪 [Simulation Mode] Generated Reel Media ID: ${mockMediaId}`);
         return {
@@ -136,7 +136,7 @@ async function publishPhoto({ imageUrl = null, caption = '', igUserId = null, ac
     const { token, igId } = resolveCredentials({ userId, accessToken, igUserId });
 
     // 1. Instant Sandbox / Simulation Mode
-    if (simulate || !token || !igId || !imageUrl || imageUrl.includes('example.com')) {
+    if (simulate || !token || !igId || !imageUrl || imageUrl.includes('example.com') || imageUrl.startsWith('blob:') || imageUrl.startsWith('data:') || imageUrl.startsWith('local_file_')) {
         const mockMediaId = 'post_' + Date.now();
         console.log(`[Publisher] 🧪 [Simulation Mode] Generated Photo Post ID: ${mockMediaId}`);
         return {
