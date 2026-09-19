@@ -325,6 +325,7 @@ const App = {
             if (this.state.currentView === 'history') currentObj = window.monthlyHistory;
             if (this.state.currentView === 'about') currentObj = window.aboutHandbook;
             if (this.state.currentView === 'admin') currentObj = window.adminView;
+            if (this.state.currentView === 'agent') currentObj = window.agentView;
 
             if (currentObj && typeof currentObj.refresh === 'function') {
                 currentObj.refresh();
@@ -356,6 +357,7 @@ const App = {
             if (view === 'history') targetObj = window.monthlyHistory;
             if (view === 'about') targetObj = window.aboutHandbook;
             if (view === 'admin') targetObj = window.adminView;
+            if (view === 'agent') targetObj = window.agentView;
 
             if (targetObj && typeof targetObj.render === 'function') {
                 targetObj.render(this.elements.viewContainer);

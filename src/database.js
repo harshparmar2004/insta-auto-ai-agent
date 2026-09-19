@@ -150,6 +150,19 @@ function getDb() {
       created_at TEXT,
       updated_at TEXT
     );
+
+    CREATE TABLE IF NOT EXISTS agent_campaigns (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      topic TEXT NOT NULL,
+      keyword TEXT NOT NULL,
+      lead_magnet_title TEXT,
+      deliverable_url TEXT NOT NULL,
+      media_id TEXT NOT NULL,
+      rule_id INTEGER,
+      caption TEXT,
+      status TEXT DEFAULT 'active',
+      created_at TEXT
+    );
   `);
 
   // Safe migrations
@@ -705,6 +718,40 @@ function getAdminMetrics() {
   };
 }
 
+function saveAgentCampaign({ topic, keyword, leadMagnetTitle, deliverableUrl, mediaId, ruleId, caption }) {
+  const database = getDb();
+  const stmt = database.prepare(`
+    INSERT INTO agent_campaigns (
+      topic, keyword, lead_magnet_title, deliverable_url, media_id, rule_id, caption, status, created_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, 'active', ?)
+  `);
+  const result = stmt.run(
+    topic,
+    keyword.toUpperCase().trim(),
+    leadMagnetTitle || topic,
+    deliverableUrl,
+    mediaId,
+    ruleId,
+    caption,
+    new Date().toISOString()
+  );
+  return result.lastInsertRowid;
+}
+
+function getAgentCampaigns() {
+  const database = getDb();
+  return database.prepare(`
+    SELECT ac.*,
+      COALESCE(m.views_count, 0) as views_count,
+      (SELECT COUNT(*) FROM events e WHERE e.rule_id = ac.rule_id OR e.media_ig_id = ac.media_id) as comments_count,
+      (SELECT COUNT(*) FROM events e WHERE (e.rule_id = ac.rule_id OR e.media_ig_id = ac.media_id) AND e.dm_status IN ('sent', 'delivered')) as dms_sent,
+      (SELECT COUNT(*) FROM clicks c JOIN events e ON c.event_id = e.id WHERE e.rule_id = ac.rule_id OR e.media_ig_id = ac.media_id) as clicks_count
+    FROM agent_campaigns ac
+    LEFT JOIN media m ON ac.media_id = m.ig_media_id
+    ORDER BY ac.id DESC
+  `).all();
+}
+
 module.exports = {
   getDb,
   getConfig,
@@ -727,5 +774,7 @@ module.exports = {
   getAllUsers,
   updateUserStatus,
   deleteUser,
-  getAdminMetrics
+  getAdminMetrics,
+  saveAgentCampaign,
+  getAgentCampaigns
 };
