@@ -990,9 +990,62 @@ await axios.post('${batchBridgeUrl}', {
         `;
     },
 
+        formatSetupTimestamp(isoString) {
+        if (!isoString) {
+            return {
+                datePart: 'Recently Configured',
+                timePart: '',
+                exact: 'Recently Configured',
+                timeAgo: 'Active'
+            };
+        }
+        const d = new Date(isoString);
+        if (isNaN(d.getTime())) {
+            return {
+                datePart: String(isoString),
+                timePart: '',
+                exact: String(isoString),
+                timeAgo: 'Active'
+            };
+        }
+
+        const datePart = d.toLocaleDateString('en-US', {
+            weekday: 'short',
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
+        });
+
+        const timePart = d.toLocaleTimeString('en-US', {
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: true
+        });
+
+        const diffMs = Date.now() - d.getTime();
+        const diffSec = Math.max(0, Math.floor(diffMs / 1000));
+        const diffMin = Math.floor(diffSec / 60);
+        const diffHour = Math.floor(diffMin / 60);
+        const diffDay = Math.floor(diffHour / 24);
+
+        let timeAgo = 'Just now';
+        if (diffDay > 0) timeAgo = `${diffDay}d ago`;
+        else if (diffHour > 0) timeAgo = `${diffHour}h ago`;
+        else if (diffMin > 0) timeAgo = `${diffMin}m ago`;
+        else if (diffSec > 5) timeAgo = `${diffSec}s ago`;
+
+        return {
+            datePart,
+            timePart,
+            exact: `${datePart} at ${timePart}`,
+            timeAgo
+        };
+    },
+
     renderReelCard(p) {
         const isSim = p.media_id && (p.media_id.startsWith('reel_') || p.media_id.startsWith('ext_reel_') || p.media_id.startsWith('batch_reel_'));
-        const dateStr = p.created_at ? new Date(p.created_at).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'Recently detected';
+        const ts = this.formatSetupTimestamp(p.created_at);
         
         let sourceLabel = '📡 Webhook Bridge';
         let sourceBg = '#EEF2FF';
@@ -1015,108 +1068,146 @@ await axios.post('${batchBridgeUrl}', {
         const captionPreview = (p.caption || 'No caption available').replace(/\n/g, ' ');
         const highlightedCaption = captionPreview.replace(
             new RegExp(`(${keyword})`, 'gi'),
-            `<strong style="background: #FAF0EC; color: #D97757; padding: 1px 5px; border-radius: 4px; border: 1px solid rgba(217,119,87,0.3);">$1</strong>`
+            `<strong style="background: #FAF0EC; color: #D97757; padding: 2px 6px; border-radius: 5px; border: 1px solid rgba(217,119,87,0.3);">$1</strong>`
         );
 
+        let docDomain = 'Document Link';
+        let docIcon = '📄';
+        if (p.deliverable_url) {
+            if (p.deliverable_url.includes('docs.google.com')) {
+                docDomain = 'Google Docs Deliverable';
+                docIcon = '📘';
+            } else if (p.deliverable_url.includes('notion.so')) {
+                docDomain = 'Notion Blueprint';
+                docIcon = '📓';
+            } else if (p.deliverable_url.endsWith('.pdf')) {
+                docDomain = 'PDF Guide';
+                docIcon = '📕';
+            }
+        }
+
         return `
-            <div class="card reel-visual-card" style="border-radius: 16px; border: 1.5px solid #E6E1D8; background: #FFFFFF; padding: 1.35rem; box-shadow: 0 3px 14px rgba(0,0,0,0.03); display: flex; flex-direction: column; justify-content: space-between; transition: transform 0.15s ease, box-shadow 0.15s ease;">
+            <div class="card reel-visual-card" style="border-radius: 16px; border: 1.5px solid #E6E1D8; background: #FFFFFF; padding: 1.45rem; box-shadow: 0 4px 18px rgba(0,0,0,0.03); display: flex; flex-direction: column; justify-content: space-between; transition: all 0.2s ease; position: relative;">
                 
                 <div>
-                    <!-- TOP BAR: MEDIA ID + SOURCE + LIVE STATUS -->
+                    <!-- TOP BAR: MEDIA ID + RULE PILL + SOURCE + LIVE STATUS -->
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.85rem; flex-wrap: wrap; gap: 0.5rem;">
                         <div style="display: flex; align-items: center; gap: 0.5rem;">
-                            <span style="font-size: 1.15rem;">🎬</span>
-                            <span style="font-size: 0.82rem; font-weight: 800; color: #2C2A29; font-family: monospace;">
+                            <span style="font-size: 1.2rem;">🎬</span>
+                            <span style="font-size: 0.84rem; font-weight: 800; color: #2C2A29; font-family: monospace; letter-spacing: -0.02em;">
                                 #${p.media_id}
                             </span>
-                            <button onclick="agentView.copyToClipboard('${p.media_id}', 'Media ID')" style="background: none; border: none; color: #96918A; cursor: pointer; font-size: 0.72rem; padding: 0;" title="Copy Media ID">
+                            <button onclick="agentView.copyToClipboard('${p.media_id}', 'Media ID')" style="background: none; border: none; color: #96918A; cursor: pointer; font-size: 0.76rem; padding: 0;" title="Copy Media ID">
                                 📋
                             </button>
+                            <span style="font-size: 0.69rem; font-weight: 700; color: #736E68; background: #FAF8F5; border: 1px solid #E6E1D8; padding: 1px 6px; border-radius: 5px;">
+                                Rule #${p.rule_id || 'Auto'}
+                            </span>
                         </div>
 
                         <div style="display: flex; align-items: center; gap: 0.4rem;">
-                            <span style="font-size: 0.7rem; font-weight: 700; color: ${sourceColor}; background: ${sourceBg}; padding: 0.2rem 0.55rem; border-radius: 6px;">
+                            <span style="font-size: 0.7rem; font-weight: 700; color: ${sourceColor}; background: ${sourceBg}; padding: 0.22rem 0.6rem; border-radius: 6px;">
                                 ${sourceLabel}
                             </span>
-                            <span style="font-size: 0.7rem; font-weight: 800; color: #2E7D32; background: #E8F5E9; padding: 0.2rem 0.6rem; border-radius: 999px; display: flex; align-items: center; gap: 4px;">
-                                <span style="width: 6px; height: 6px; border-radius: 50%; background: #2E7D32; display: inline-block;"></span>
+                            <span style="font-size: 0.7rem; font-weight: 800; color: #2E7D32; background: #E8F5E9; padding: 0.22rem 0.65rem; border-radius: 999px; display: flex; align-items: center; gap: 4px; box-shadow: 0 1px 4px rgba(46,125,50,0.15);">
+                                <span style="width: 7px; height: 7px; border-radius: 50%; background: #2E7D32; display: inline-block;"></span>
                                 ARMED
                             </span>
                         </div>
                     </div>
 
-                    <!-- VISUAL END-TO-END TRIGGER CONNECTION BAR -->
-                    <div style="background: #FAF8F5; border-radius: 10px; border: 1.5px solid #E6E1D8; padding: 0.65rem 0.85rem; margin-bottom: 0.95rem; display: flex; align-items: center; justify-content: space-between; gap: 0.4rem; font-size: 0.76rem;">
-                        <div style="display: flex; align-items: center; gap: 5px;">
-                            <span style="font-size: 0.9rem;">🎬</span>
-                            <span style="font-weight: 700; color: #2C2A29;">Reel Detected</span>
+                    <!-- PROMINENT DEDICATED SETUP DATE & TIME FIELD -->
+                    <div style="background: #FAF8F5; border: 1.5px solid #EAE5DC; border-radius: 10px; padding: 0.65rem 0.85rem; margin-bottom: 0.95rem; display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <div style="width: 28px; height: 28px; border-radius: 7px; background: #FAF0EC; display: flex; align-items: center; justify-content: center; font-size: 0.95rem; color: #D97757; flex-shrink: 0;">
+                                📅
+                            </div>
+                            <div>
+                                <div style="font-size: 0.68rem; font-weight: 800; color: #8C827A; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 1px;">
+                                    Automation Set Up By Agent
+                                </div>
+                                <div style="font-size: 0.83rem; font-weight: 800; color: #2C2A29; font-family: 'SFMono-Regular', Consolas, monospace;">
+                                    ${ts.exact}
+                                </div>
+                            </div>
                         </div>
-                        <span style="color: #D97757; font-weight: 900; font-size: 0.85rem;">──►</span>
-                        <div style="display: flex; align-items: center; gap: 5px; background: #FAF0EC; padding: 0.2rem 0.55rem; border-radius: 6px; border: 1px solid rgba(217,119,87,0.3);">
+                        <div style="display: flex; align-items: center; gap: 6px;">
+                            <span style="font-size: 0.72rem; font-weight: 800; color: #D97757; background: #FAF0EC; border: 1px solid rgba(217,119,87,0.25); padding: 2px 8px; border-radius: 999px;">
+                                ⏱️ ${ts.timeAgo}
+                            </span>
+                            <span style="font-size: 0.68rem; font-weight: 800; color: #2E7D32; background: #E8F5E9; padding: 2px 7px; border-radius: 6px;">
+                                ⚡ Live
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- ENHANCED VISUAL END-TO-END TRIGGER CONNECTION BAR -->
+                    <div style="background: #FFFFFF; border-radius: 10px; border: 1.5px solid #E6E1D8; padding: 0.65rem 0.85rem; margin-bottom: 0.95rem; display: flex; align-items: center; justify-content: space-between; gap: 0.4rem; font-size: 0.76rem;">
+                        <div style="display: flex; align-items: center; gap: 5px;">
+                            <span style="font-size: 0.95rem;">🎬</span>
+                            <span style="font-weight: 700; color: #2C2A29;">Reel Ingested</span>
+                        </div>
+                        <svg width="18" height="12" viewBox="0 0 18 12" fill="none" style="flex-shrink: 0;"><path d="M1 6H15M15 6L10.5 1.5M15 6L10.5 10.5" stroke="#D97757" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        <div style="display: flex; align-items: center; gap: 5px; background: #FAF0EC; padding: 0.25rem 0.65rem; border-radius: 6px; border: 1.5px solid #D97757; box-shadow: 0 1px 4px rgba(217,119,87,0.15);">
                             <span style="font-size: 0.85rem;">🎯</span>
-                            <span style="font-weight: 800; color: #D97757; letter-spacing: 0.03em;">TRIGGER: ${keyword}</span>
+                            <span style="font-weight: 800; color: #D97757; letter-spacing: 0.04em;">TRIGGER: ${keyword}</span>
                         </div>
-                        <span style="color: #D97757; font-weight: 900; font-size: 0.85rem;">──►</span>
+                        <svg width="18" height="12" viewBox="0 0 18 12" fill="none" style="flex-shrink: 0;"><path d="M1 6H15M15 6L10.5 1.5M15 6L10.5 10.5" stroke="#D97757" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                         <div style="display: flex; align-items: center; gap: 5px;">
-                            <span style="font-size: 0.9rem;">📄</span>
+                            <span style="font-size: 0.95rem;">${docIcon}</span>
                             <span style="font-weight: 700; color: #0288D1;">Doc Linked</span>
                         </div>
                     </div>
 
                     <!-- TOPIC & TITLE -->
-                    <h3 style="font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: 1.05rem; margin: 0 0 0.35rem 0; color: #2C2A29; line-height: 1.35;">
+                    <h3 style="font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: 1.1rem; margin: 0 0 0.45rem 0; color: #2C2A29; line-height: 1.35;">
                         ${p.lead_magnet_title || p.topic || 'Instagram Autonomous Funnel'}
                     </h3>
 
-                    <!-- CAPTION PREVIEW -->
-                    <div style="font-size: 0.8rem; color: #6B6762; margin-bottom: 0.85rem; line-height: 1.45; max-height: 50px; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">
+                    <!-- REFINED CAPTION QUOTE CONTAINER -->
+                    <div style="border-left: 3.5px solid #D97757; background: #FAF8F5; padding: 0.65rem 0.85rem; border-radius: 0 8px 8px 0; margin-bottom: 0.95rem; font-size: 0.81rem; color: #55504A; line-height: 1.45; max-height: 54px; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">
                         ${highlightedCaption}
                     </div>
 
                     <!-- COMPANION DELIVERABLE LINK ROW -->
-                    <div style="margin-bottom: 1rem; background: #FFFFFF; border: 1px solid #E6E1D8; border-radius: 8px; padding: 0.5rem 0.75rem; display: flex; justify-content: space-between; align-items: center;">
+                    <div style="margin-bottom: 1rem; background: #FFFFFF; border: 1.5px solid #EAE5DC; border-radius: 9px; padding: 0.55rem 0.8rem; display: flex; justify-content: space-between; align-items: center;">
                         <div style="display: flex; align-items: center; gap: 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 320px;">
-                            <span style="font-size: 0.9rem;">🔗</span>
-                            <a href="${p.deliverable_url}" target="_blank" style="font-size: 0.78rem; font-weight: 700; color: #D97757; text-decoration: none; overflow: hidden; text-overflow: ellipsis;">
+                            <span style="font-size: 0.95rem;">${docIcon}</span>
+                            <a href="${p.deliverable_url}" target="_blank" style="font-size: 0.79rem; font-weight: 700; color: #D97757; text-decoration: none; overflow: hidden; text-overflow: ellipsis;">
                                 ${p.deliverable_url || 'No deliverable link bound'}
                             </a>
                         </div>
-                        <a href="${p.deliverable_url}" target="_blank" style="font-size: 0.72rem; font-weight: 800; color: #736E68; text-decoration: none; background: #FAF8F5; padding: 2px 7px; border-radius: 4px; border: 1px solid #E6E1D8;">
-                            Open ↗
+                        <a href="${p.deliverable_url}" target="_blank" style="font-size: 0.73rem; font-weight: 800; color: #2C2A29; text-decoration: none; background: #FAF8F5; padding: 3px 8px; border-radius: 5px; border: 1px solid #E6E1D8; display: flex; align-items: center; gap: 3px;">
+                            <span>Open</span> ↗
                         </a>
                     </div>
                 </div>
 
                 <div>
                     <!-- LIVE PERFORMANCE STATS ROW -->
-                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; background: #FAF8F5; border-radius: 8px; padding: 0.6rem; margin-bottom: 1rem; text-align: center;">
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; background: #FAF8F5; border-radius: 10px; border: 1px solid #EAE5DC; padding: 0.65rem; margin-bottom: 1rem; text-align: center;">
                         <div>
-                            <div style="font-size: 0.7rem; font-weight: 700; color: #736E68;">Comments</div>
-                            <div style="font-size: 0.95rem; font-weight: 800; color: #2C2A29;">💬 ${p.comments_count || 0}</div>
+                            <div style="font-size: 0.69rem; font-weight: 700; color: #736E68; text-transform: uppercase; letter-spacing: 0.03em;">Comments</div>
+                            <div style="font-size: 1rem; font-weight: 800; color: #2C2A29;">💬 ${p.comments_count || 0}</div>
                         </div>
                         <div>
-                            <div style="font-size: 0.7rem; font-weight: 700; color: #736E68;">DMs Sent</div>
-                            <div style="font-size: 0.95rem; font-weight: 800; color: #2E7D32;">📬 ${p.dms_sent || 0}</div>
+                            <div style="font-size: 0.69rem; font-weight: 700; color: #736E68; text-transform: uppercase; letter-spacing: 0.03em;">DMs Sent</div>
+                            <div style="font-size: 1rem; font-weight: 800; color: #2E7D32;">📬 ${p.dms_sent || 0}</div>
                         </div>
                         <div>
-                            <div style="font-size: 0.7rem; font-weight: 700; color: #736E68;">Doc Clicks</div>
-                            <div style="font-size: 0.95rem; font-weight: 800; color: #0288D1;">🔗 ${p.clicks_count || 0}</div>
+                            <div style="font-size: 0.69rem; font-weight: 700; color: #736E68; text-transform: uppercase; letter-spacing: 0.03em;">Doc Clicks</div>
+                            <div style="font-size: 1rem; font-weight: 800; color: #0288D1;">🔗 ${p.clicks_count || 0}</div>
                         </div>
                     </div>
 
                     <!-- CARD ACTION BUTTONS -->
                     <div style="display: flex; gap: 0.5rem; align-items: center;">
-                        <button class="btn btn-primary btn-sm" style="flex: 1; font-weight: 800; font-size: 0.8rem; padding: 0.55rem; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 5px; box-shadow: 0 2px 8px rgba(217,119,87,0.25);" onclick="agentView.simulateComment('${p.media_id}', '${keyword}')">
-                            <span>🧪</span> Test Trigger & Gate
+                        <button class="btn btn-primary btn-sm" style="flex: 1; font-weight: 800; font-size: 0.82rem; padding: 0.6rem; border-radius: 9px; display: flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 3px 10px rgba(217,119,87,0.25);" onclick="agentView.simulateComment('${p.media_id}', '${keyword}')">
+                            <span>🧪</span> Test Trigger & Follow Gate
                         </button>
-                        <button class="btn btn-secondary btn-sm" style="font-weight: 700; font-size: 0.8rem; padding: 0.55rem 0.85rem; border-radius: 8px; display: flex; align-items: center; gap: 4px;" onclick="agentView.inspectPayload('${p.media_id}')" title="Inspect Ingested JSON Payload">
+                        <button class="btn btn-secondary btn-sm" style="font-weight: 700; font-size: 0.82rem; padding: 0.6rem 0.95rem; border-radius: 9px; display: flex; align-items: center; gap: 5px;" onclick="agentView.inspectPayload('${p.media_id}')" title="Inspect Ingested JSON Payload">
                             <span>📋</span> Payload
                         </button>
-                    </div>
-
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.75rem; font-size: 0.72rem; color: #96918A;">
-                        <span>Rule #${p.rule_id || 'Auto'}</span>
-                        <span>${dateStr}</span>
                     </div>
                 </div>
 
@@ -1132,6 +1223,7 @@ await axios.post('${batchBridgeUrl}', {
                     <thead>
                         <tr style="background: #FAF8F5; border-bottom: 1.5px solid #E6E1D8; color: #736E68; font-weight: 800; font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.04em;">
                             <th style="padding: 0.85rem 1rem;">Status</th>
+                            <th style="padding: 0.85rem 1rem;">Setup Date & Time</th>
                             <th style="padding: 0.85rem 1rem;">Reel Media ID</th>
                             <th style="padding: 0.85rem 1rem;">Trigger Keyword</th>
                             <th style="padding: 0.85rem 1rem;">Topic & Caption CTA</th>
@@ -1143,12 +1235,21 @@ await axios.post('${batchBridgeUrl}', {
                     <tbody>
                         ${this.filteredPosts.map(p => {
                             const keyword = (p.keyword || 'AUTOMATED').toUpperCase();
+                            const ts = this.formatSetupTimestamp(p.created_at);
                             return `
                                 <tr style="border-bottom: 1px solid #F0ECE4; transition: background 0.15s ease;">
                                     <td style="padding: 0.85rem 1rem; vertical-align: middle;">
                                         <span style="font-size: 0.72rem; font-weight: 800; color: #2E7D32; background: #E8F5E9; padding: 2px 7px; border-radius: 999px; white-space: nowrap;">
                                             🟢 Armed & Live
                                         </span>
+                                    </td>
+                                    <td style="padding: 0.85rem 1rem; vertical-align: middle; white-space: nowrap;">
+                                        <div style="font-family: monospace; font-weight: 800; color: #2C2A29; font-size: 0.8rem;">
+                                            ${ts.datePart}
+                                        </div>
+                                        <div style="font-size: 0.72rem; color: #736E68;">
+                                            ${ts.timePart} <span style="color: #D97757; font-weight: 700;">(${ts.timeAgo})</span>
+                                        </div>
                                     </td>
                                     <td style="padding: 0.85rem 1rem; vertical-align: middle; font-family: monospace; font-weight: 700; color: #2C2A29;">
                                         <div style="display: flex; align-items: center; gap: 4px;">
@@ -1161,7 +1262,7 @@ await axios.post('${batchBridgeUrl}', {
                                             ${keyword}
                                         </span>
                                     </td>
-                                    <td style="padding: 0.85rem 1rem; vertical-align: middle; max-width: 280px;">
+                                    <td style="padding: 0.85rem 1rem; vertical-align: middle; max-width: 260px;">
                                         <div style="font-weight: 800; color: #2C2A29; margin-bottom: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
                                             ${p.lead_magnet_title || p.topic || 'Reel Funnel'}
                                         </div>
@@ -1169,7 +1270,7 @@ await axios.post('${batchBridgeUrl}', {
                                             ${(p.caption || '').replace(/\n/g, ' ')}
                                         </div>
                                     </td>
-                                    <td style="padding: 0.85rem 1rem; vertical-align: middle; max-width: 220px;">
+                                    <td style="padding: 0.85rem 1rem; vertical-align: middle; max-width: 200px;">
                                         <a href="${p.deliverable_url}" target="_blank" style="color: #D97757; font-weight: 700; font-size: 0.78rem; text-decoration: none; overflow: hidden; text-overflow: ellipsis; display: block; white-space: nowrap;">
                                             📄 ${p.deliverable_url ? p.deliverable_url.replace(/^https?:\/\//, '') : 'None'} ↗
                                         </a>
