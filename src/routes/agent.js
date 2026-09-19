@@ -1,18 +1,20 @@
 /**
  * Instagram Autonomous Sentinel & External Agent Bridge Routes
  * Connects external content creation platforms to InstaAuto:
- * - Inbound Webhook Bridge (/api/agent/bridge)
- * - Feed Auto-Detect Sentinel (/api/agent/scan-feed)
+ * - Single & Batch Inbound Webhook Bridge (/api/agent/bridge & /api/agent/bridge/batch)
+ * - Google Sheets Deliverables Auto-Sync (/api/agent/sync-sheet)
+ * - Autonomous Feed Auto-Detect Sentinel (/api/agent/scan-feed)
+ * - Background Auto-Pilot State Management (/api/agent/auto-pilot/toggle)
  * - Live Follower Comment Simulation & DM Gates
  */
 
 const express = require('express');
 const router = express.Router();
-const { getDb, getAgentCampaigns, getConfig } = require('../database');
-const { processExternalPost, scanAndArmFeed } = require('../services/postSentinel');
+const { getDb, getAgentCampaigns, getConfig, setConfig } = require('../database');
+const { processExternalPost, processBatchExternalPosts, syncFromGoogleSheet, scanAndArmFeed } = require('../services/postSentinel');
 const { processCommentEvent } = require('../services/automation');
 
-// 1. Inbound Webhook Bridge for External Content Platform
+// 1. Inbound Webhook Bridge (Single Post from External Platform)
 router.post('/bridge', async (req, res) => {
     try {
         const { media_id, caption, deliverable_url, trigger_keyword, lead_magnet_title, secret } = req.body || {};
@@ -39,7 +41,7 @@ router.post('/bridge', async (req, res) => {
 
         res.json({
             success: true,
-            message: `Post ${media_id} received and Follow-First automation armed with keyword "${result.keyword}"!`,
+            message: `Post ${media_id} armed with keyword "${result.keyword}"!`,
             post: result
         });
     } catch (err) {
@@ -48,7 +50,79 @@ router.post('/bridge', async (req, res) => {
     }
 });
 
-// 2. Autonomous Instagram Feed Sentinel (Scans live feed for newly published posts)
+// 2. High-Throughput Batch Inbound Bridge (For 10, 50, 100+ Reels at Once)
+router.post('/bridge/batch', async (req, res) => {
+    try {
+        const { posts } = req.body || {};
+
+        if (!Array.isArray(posts) || posts.length === 0) {
+            return res.status(400).json({
+                error: 'posts must be a non-empty array of objects ({ media_id, caption, deliverable_url, trigger_keyword })'
+            });
+        }
+
+        console.log(`[Agent Bridge Batch] 📦 Ingesting batch of ${posts.length} posts from external platform...`);
+        const batchResult = await processBatchExternalPosts(posts, 'external_bridge_batch');
+
+        res.json({
+            success: true,
+            message: `Successfully processed batch: ${batchResult.armedCount}/${batchResult.total} posts armed with unique Follow-First funnels!`,
+            total: batchResult.total,
+            armedCount: batchResult.armedCount,
+            results: batchResult.results
+        });
+    } catch (err) {
+        console.error('[Agent Bridge Batch Error]:', err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// 3. Google Sheets Deliverables Sync Endpoint
+router.post('/sync-sheet', async (req, res) => {
+    try {
+        const { sheet_url } = req.body || {};
+        const syncResult = await syncFromGoogleSheet(sheet_url || null);
+
+        res.json({
+            success: true,
+            message: `Google Sheet sync complete! Armed ${syncResult.armedCount || 0} reels with their companion doc links.`,
+            details: syncResult
+        });
+    } catch (err) {
+        console.error('[Google Sheet Sync Error]:', err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// 4. Background Auto-Pilot State Management
+router.post('/auto-pilot/toggle', (req, res) => {
+    try {
+        const current = getConfig('agent_auto_pilot') || '0';
+        const nextState = current === '1' ? '0' : '1';
+        setConfig('agent_auto_pilot', nextState);
+
+        res.json({
+            success: true,
+            autoPilot: nextState === '1',
+            message: nextState === '1' 
+                ? 'Autonomous Auto-Pilot ENABLED: InstaAuto will automatically monitor @harshparmar007__ every 10 mins and auto-arm every new reel posted!' 
+                : 'Autonomous Auto-Pilot PAUSED.'
+        });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+router.get('/auto-pilot/status', (req, res) => {
+    const isAutoPilot = (getConfig('agent_auto_pilot') || '0') === '1';
+    res.json({
+        autoPilot: isAutoPilot,
+        intervalMinutes: 10,
+        targetAccount: getConfig('ig_username') || process.env.INSTAGRAM_USERNAME || '@harshparmar007__'
+    });
+});
+
+// 5. Autonomous Instagram Feed Sentinel (Manual Instant Scan)
 router.post('/scan-feed', async (req, res) => {
     try {
         const userId = req.user?.id || null;
@@ -68,32 +142,40 @@ router.post('/scan-feed', async (req, res) => {
     }
 });
 
-// 3. Bridge Configuration & Integration Snippets
+// 6. Bridge Configuration & Integration Snippets
 router.get('/bridge-config', (req, res) => {
     const host = req.get('host');
     const protocol = req.protocol;
     const webhookUrl = `${protocol}://${host}/api/agent/bridge`;
-    const apiKey = process.env.AGENT_BRIDGE_KEY || 'instaauto_live_bridge_key';
+    const batchWebhookUrl = `${protocol}://${host}/api/agent/bridge/batch`;
+    const isAutoPilot = (getConfig('agent_auto_pilot') || '0') === '1';
+    const googleSheetWebhook = getConfig('google_sheet_webhook_url') || '';
 
     res.json({
-        engine: 'InstaAuto External Sentinel & Bridge',
+        engine: 'InstaAuto External Sentinel & Bridge Engine',
+        version: '2.1.0',
         status: 'active',
+        autoPilot: isAutoPilot,
         webhookUrl,
-        apiKey,
+        batchWebhookUrl,
+        googleSheetWebhook,
         connectedInstagram: {
             username: getConfig('ig_username') || process.env.INSTAGRAM_USERNAME || '@harshparmar007__',
             userId: getConfig('ig_user_id') || process.env.INSTAGRAM_USER_ID
         },
         payloadFormat: {
-            media_id: "17841400000000000 (Required)",
-            caption: "Full caption of post with CTA (Optional - AI will parse)",
-            deliverable_url: "https://your-docs-link.com/guide (Optional)",
-            trigger_keyword: "KEYWORD (Optional - AI will extract if omitted)",
+            media_id: "17841400000000000 (Required: Reel ID or Instagram Link)",
+            caption: "Full caption of post with CTA (e.g. Comment 'AGENT' or Comment DRAG)",
+            deliverable_url: "https://your-docs-link.com/guide (Required for deliverable pass)",
+            trigger_keyword: "KEYWORD (Optional - AI automatically extracts from caption if omitted)",
             lead_magnet_title: "Title of Guide (Optional)"
         },
         curlExample: `curl -X POST ${webhookUrl} \\
   -H "Content-Type: application/json" \\
-  -d '{"media_id": "17841409999999999", "caption": "Comment AGENT to get the guide!", "deliverable_url": "https://myapp.com/docs/guide-1"}'`,
+  -d '{"media_id": "18049102948201948", "caption": "Comment AGENT to get the guide!", "deliverable_url": "https://myapp.com/docs/guide-1"}'`,
+        curlBatchExample: `curl -X POST ${batchWebhookUrl} \\
+  -H "Content-Type: application/json" \\
+  -d '{"posts": [{"media_id": "180491...", "caption": "Comment RAG...", "deliverable_url": "https://..."}]}'`,
         pythonExample: `import requests
 
 url = "${webhookUrl}"
@@ -106,7 +188,7 @@ requests.post(url, json=payload)`
     });
 });
 
-// 4. Get All Armed Posts / Campaigns
+// 7. Get All Armed Posts / Campaigns
 router.get('/posts', (req, res) => {
     try {
         const posts = getAgentCampaigns();
@@ -120,7 +202,6 @@ router.get('/posts', (req, res) => {
     }
 });
 
-// Alias for backwards compatibility with existing UI callers
 router.get('/campaigns', (req, res) => {
     try {
         const campaigns = getAgentCampaigns();
@@ -134,7 +215,7 @@ router.get('/campaigns', (req, res) => {
     }
 });
 
-// 5. Test Simulator for External Inbound Post
+// 8. Test Simulator for External Inbound Post
 router.post('/simulate-inbound', async (req, res) => {
     try {
         const { media_id, caption, deliverable_url, trigger_keyword, lead_magnet_title } = req.body || {};
@@ -161,7 +242,7 @@ router.post('/simulate-inbound', async (req, res) => {
     }
 });
 
-// 6. Test Comment Simulator
+// 9. Test Comment Simulator
 router.post('/simulate-comment', async (req, res) => {
     try {
         const { media_id, keyword, username } = req.body || {};
@@ -205,17 +286,20 @@ router.post('/simulate-comment', async (req, res) => {
     }
 });
 
-// 7. Status Endpoint
+// 10. Status Endpoint
 router.get('/status', (req, res) => {
     res.json({
-        engine: 'InstaAuto External Sentinel & Bridge',
-        version: '2.0.0',
+        engine: 'InstaAuto External Sentinel & Bridge Engine',
+        version: '2.1.0',
         active: true,
-        mode: 'external_content_platform_listener',
+        mode: 'high_scale_external_listener',
+        autoPilot: (getConfig('agent_auto_pilot') || '0') === '1',
         capabilities: [
             'inbound_webhook_bridge',
+            'batch_post_ingestion',
+            'google_sheets_deliverables_sync',
+            'continuous_auto_pilot_sentinel',
             'caption_ai_keyword_extraction',
-            'feed_sentinel_auto_detection',
             'follow_first_dm_funnel_provisioning',
             'live_comment_and_click_tracking'
         ]

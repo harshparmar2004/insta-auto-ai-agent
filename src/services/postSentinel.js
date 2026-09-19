@@ -1,18 +1,32 @@
 /**
  * Instagram Post Sentinel & Autonomous Bridge
- * Intercepts newly published Instagram posts from external platforms or the live account feed.
+ * Intercepts newly published Instagram posts from external platforms, Google Sheets, or live feed.
  * Uses Caption Intelligence to extract trigger keywords & deliverable links, and auto-arms Follow-First DM funnels.
+ * Built for high-volume scale (supports 100s of reels with per-reel keyword/doc isolation).
  */
 
+const axios = require('axios');
 const { getDb, saveAgentCampaign, getConfig, getUserInstagramAccount } = require('../database');
 const { parseCaptionIntelligence } = require('./captionParserAgent');
 const { getMedia } = require('./instagram');
 
-async function processExternalPost({ media_id, caption, deliverable_url, trigger_keyword, lead_magnet_title, source = 'external_bridge' }) {
+function extractMediaId(input) {
+    if (!input || typeof input !== 'string') return String(input || '');
+    const clean = input.trim();
+    // Check if input is full Instagram URL: https://www.instagram.com/reel/C8XyZ123/
+    const urlMatch = clean.match(/instagram\.com\/(?:reel|p)\/([^/?#&]+)/i);
+    if (urlMatch && urlMatch[1]) {
+        return urlMatch[1];
+    }
+    return clean;
+}
+
+async function processExternalPost({ media_id, caption = '', deliverable_url = null, trigger_keyword = null, lead_magnet_title = null, source = 'external_bridge' }) {
     if (!media_id) {
         throw new Error('media_id is required');
     }
 
+    const cleanMediaId = extractMediaId(media_id);
     const db = getDb();
 
     // 1. Run Autonomous Caption Intelligence
@@ -21,9 +35,9 @@ async function processExternalPost({ media_id, caption, deliverable_url, trigger
     const finalDeliverableUrl = parsed.deliverableUrl;
     const finalTitle = lead_magnet_title || parsed.title;
 
-    console.log(`[Sentinel] 🤖 Processing post ${media_id} from ${source}`);
-    console.log(`[Sentinel] 💬 Extracted Trigger Keyword: ${finalKeyword}`);
-    console.log(`[Sentinel] 🔗 Bound Deliverable URL: ${finalDeliverableUrl}`);
+    console.log(`[Sentinel] 🤖 Processing Reel ${cleanMediaId} (Source: ${source})`);
+    console.log(`[Sentinel] 💬 Trigger Keyword: ${finalKeyword}`);
+    console.log(`[Sentinel] 🔗 Deliverable Doc Link: ${finalDeliverableUrl}`);
 
     // 2. Upsert into Media Table
     const now = new Date().toISOString();
@@ -32,19 +46,19 @@ async function processExternalPost({ media_id, caption, deliverable_url, trigger
             INSERT INTO media (ig_media_id, caption, synced_at, status)
             VALUES (?, ?, ?, 'active')
             ON CONFLICT(ig_media_id) DO UPDATE SET caption = excluded.caption
-        `).run(media_id, caption || 'External Instagram Post', now);
+        `).run(cleanMediaId, caption || 'Instagram Content', now);
     } catch (e) {
         console.warn('[Sentinel] Media upsert notice:', e.message);
     }
 
-    const mediaRow = db.prepare("SELECT id FROM media WHERE ig_media_id = ?").get(media_id);
+    const mediaRow = db.prepare("SELECT id FROM media WHERE ig_media_id = ?").get(cleanMediaId);
     const resolvedMediaId = mediaRow ? mediaRow.id : null;
 
-    // 3. Check for existing rule on this media
+    // 3. Check for existing rule strictly bound to this media
     let existingRule = db.prepare(`
         SELECT * FROM rules 
         WHERE media_id = ? OR media_id = ?
-    `).get(resolvedMediaId, media_id);
+    `).get(resolvedMediaId, cleanMediaId);
 
     let ruleId = existingRule ? existingRule.id : null;
 
@@ -76,7 +90,7 @@ async function processExternalPost({ media_id, caption, deliverable_url, trigger
         const ruleRes = insertRuleStmt.run(
             resolvedMediaId,
             finalKeyword,
-            `Hey! Here is your exclusive access to "${finalTitle}"! Tap the button below to open:`,
+            `Hey! Here is your personal access pass to "${finalTitle}"! Tap below to open:`,
             finalDeliverableUrl,
             `Sent you a DM with the access link! Check your message requests 🙌`,
             JSON.stringify(buttonConfig),
@@ -85,9 +99,17 @@ async function processExternalPost({ media_id, caption, deliverable_url, trigger
         );
 
         ruleId = ruleRes.lastInsertRowid;
-        console.log(`[Sentinel] 🎯 Auto-provisioned Rule #${ruleId} for Media ${media_id}!`);
+        console.log(`[Sentinel] 🎯 Auto-provisioned Rule #${ruleId} for Media ${cleanMediaId} with Keyword "${finalKeyword}"!`);
     } else {
-        console.log(`[Sentinel] ℹ️ Media ${media_id} already has active Rule #${ruleId}`);
+        // Update existing rule's deliverable link and keyword if updated from bridge
+        try {
+            db.prepare(`
+                UPDATE rules 
+                SET trigger_keyword = ?, link_url = ?, updated_at = ?
+                WHERE id = ?
+            `).run(finalKeyword, finalDeliverableUrl, now, ruleId);
+            console.log(`[Sentinel] 🔄 Updated existing Rule #${ruleId} with Keyword "${finalKeyword}"`);
+        } catch (e) {}
     }
 
     // 5. Save/Update Campaign Tracking
@@ -96,7 +118,7 @@ async function processExternalPost({ media_id, caption, deliverable_url, trigger
         keyword: finalKeyword,
         leadMagnetTitle: finalTitle,
         deliverableUrl: finalDeliverableUrl,
-        mediaId: media_id,
+        mediaId: cleanMediaId,
         ruleId: ruleId,
         caption: caption
     });
@@ -105,7 +127,7 @@ async function processExternalPost({ media_id, caption, deliverable_url, trigger
         success: true,
         campaign_id: campaignId,
         rule_id: ruleId,
-        media_id: media_id,
+        media_id: cleanMediaId,
         keyword: finalKeyword,
         deliverable_url: finalDeliverableUrl,
         title: finalTitle,
@@ -114,6 +136,119 @@ async function processExternalPost({ media_id, caption, deliverable_url, trigger
     };
 }
 
+/**
+ * Process a batch of posts (e.g. 50, 100+ reels in a single call)
+ */
+async function processBatchExternalPosts(postsArray, source = 'external_bridge_batch') {
+    if (!Array.isArray(postsArray)) {
+        throw new Error('postsArray must be an array');
+    }
+
+    console.log(`[Sentinel] 📦 Processing batch of ${postsArray.length} posts from ${source}...`);
+    const results = [];
+
+    for (const p of postsArray) {
+        try {
+            const res = await processExternalPost({
+                media_id: p.media_id || p.id || p.reel_id,
+                caption: p.caption || '',
+                deliverable_url: p.deliverable_url || p.doc_url || p.link || null,
+                trigger_keyword: p.trigger_keyword || p.keyword || null,
+                lead_magnet_title: p.lead_magnet_title || p.title || null,
+                source
+            });
+            results.push(res);
+        } catch (err) {
+            console.warn(`[Sentinel] ⚠️ Batch item error for ${p.media_id}: ${err.message}`);
+            results.push({
+                media_id: p.media_id,
+                success: false,
+                error: err.message
+            });
+        }
+    }
+
+    const armedCount = results.filter(r => r.success).length;
+    console.log(`[Sentinel] ✅ Batch complete! Successfully armed ${armedCount}/${postsArray.length} posts.`);
+
+    return {
+        total: postsArray.length,
+        armedCount,
+        results
+    };
+}
+
+/**
+ * Syncs deliverable doc links and reel mappings directly from Google Sheets
+ */
+async function syncFromGoogleSheet(customUrl = null) {
+    const sheetUrl = customUrl || getConfig('google_sheet_webhook_url');
+    if (!sheetUrl) {
+        throw new Error('No Google Sheet URL or Webhook configured in Settings');
+    }
+
+    console.log(`[Sentinel] 📊 Syncing deliverable mappings from Google Sheet: ${sheetUrl}...`);
+
+    let rows = [];
+
+    // Case 1: Google Apps Script Webhook
+    if (sheetUrl.includes('script.google.com')) {
+        try {
+            const res = await axios.get(sheetUrl, {
+                params: { action: 'get_reels' },
+                timeout: 10000
+            });
+            if (Array.isArray(res.data)) {
+                rows = res.data;
+            } else if (res.data?.reels && Array.isArray(res.data.reels)) {
+                rows = res.data.reels;
+            }
+        } catch (e) {
+            console.warn('[Sentinel] Apps script get_reels notice:', e.message);
+        }
+    }
+
+    // Case 2: Published Google Sheet CSV
+    if (rows.length === 0 && (sheetUrl.includes('docs.google.com/spreadsheets') || sheetUrl.includes('output=csv') || sheetUrl.includes('.csv'))) {
+        try {
+            const csvUrl = sheetUrl.includes('output=csv') ? sheetUrl : sheetUrl.replace(/\/edit.*$/, '/export?format=csv');
+            const res = await axios.get(csvUrl, { timeout: 10000 });
+            const lines = res.data.split('\n').map(l => l.trim()).filter(Boolean);
+            if (lines.length > 1) {
+                const headers = lines[0].split(',').map(h => h.toLowerCase().replace(/['"\s_]/g, ''));
+                for (let i = 1; i < lines.length; i++) {
+                    const cols = lines[i].split(',').map(c => c.replace(/^["']|["']$/g, '').trim());
+                    const rowObj = {};
+                    headers.forEach((h, idx) => {
+                        if (h.includes('id') || h.includes('reel') || h.includes('media')) rowObj.media_id = cols[idx];
+                        if (h.includes('key') || h.includes('trigger')) rowObj.trigger_keyword = cols[idx];
+                        if (h.includes('link') || h.includes('doc') || h.includes('url')) rowObj.deliverable_url = cols[idx];
+                        if (h.includes('cap') || h.includes('text')) rowObj.caption = cols[idx];
+                        if (h.includes('title') || h.includes('topic')) rowObj.lead_magnet_title = cols[idx];
+                    });
+                    if (rowObj.media_id) rows.push(rowObj);
+                }
+            }
+        } catch (csvErr) {
+            console.warn('[Sentinel] CSV sync notice:', csvErr.message);
+        }
+    }
+
+    if (rows.length === 0) {
+        return {
+            success: true,
+            totalRows: 0,
+            armedCount: 0,
+            message: 'No unautomated rows found in Google Sheet or sheet is currently empty.'
+        };
+    }
+
+    return await processBatchExternalPosts(rows, 'google_sheet_sync');
+}
+
+/**
+ * Scans connected Instagram account's live feed
+ */
 async function scanAndArmFeed(userId = null) {
     let token = null;
     if (userId) {
@@ -129,7 +264,7 @@ async function scanAndArmFeed(userId = null) {
     }
 
     console.log('[Sentinel] 🔍 Scanning live Instagram feed for newly published posts...');
-    const mediaRes = await getMedia(token, null, 25);
+    const mediaRes = await getMedia(token, null, 50);
     const items = mediaRes?.data || [];
 
     const db = getDb();
@@ -167,5 +302,7 @@ async function scanAndArmFeed(userId = null) {
 
 module.exports = {
     processExternalPost,
+    processBatchExternalPosts,
+    syncFromGoogleSheet,
     scanAndArmFeed
 };

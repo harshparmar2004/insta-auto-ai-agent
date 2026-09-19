@@ -112,6 +112,23 @@ cron.schedule('*/30 * * * *', async () => {
   }
 });
 
+// Autonomous Agent Auto-Pilot Sentinel: checks every 10 minutes
+cron.schedule('*/10 * * * *', async () => {
+  const { getConfig } = require('./src/database');
+  if (getConfig('agent_auto_pilot') === '1') {
+    console.log('[Cron] Running Autonomous Agent Auto-Pilot Feed Sentinel...');
+    try {
+      const { scanAndArmFeed } = require('./src/services/postSentinel');
+      const res = await scanAndArmFeed();
+      if (res.armedCount > 0) {
+        console.log(`[Cron] ⚡ Auto-Pilot Sentinel armed ${res.armedCount} new reel automation funnels!`);
+      }
+    } catch (err) {
+      console.warn('[Cron] Auto-Pilot Sentinel notice:', err.message);
+    }
+  }
+});
+
 if (require.main === module) {
   app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
