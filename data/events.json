@@ -1,5 +1,20 @@
 [
   {
+    "id": 85,
+    "rule_id": 48,
+    "comment_id": "sim_ext_1789808505404",
+    "comment_text": "BLUEPRINT",
+    "commenter_ig_id": "sim_user_984228",
+    "commenter_username": "follower_562",
+    "media_ig_id": "batch_reel_102",
+    "dm_status": "failed",
+    "dm_message_id": null,
+    "tracking_id": "8f219f57-bedd-4274-adfc-4008c929d280",
+    "created_at": "2026-09-19T09:01:45.406Z",
+    "synced_to_sheet": 0,
+    "user_id": 1
+  },
+  {
     "id": 84,
     "rule_id": 47,
     "comment_id": "sim_ext_1789808208227",
@@ -12,7 +27,7 @@
     "tracking_id": "faf32465-09d5-4fc1-b9a5-a389faceaa0c",
     "created_at": "2026-09-19T08:56:48.230Z",
     "synced_to_sheet": 0,
-    "user_id": null
+    "user_id": 1
   },
   {
     "id": 64,

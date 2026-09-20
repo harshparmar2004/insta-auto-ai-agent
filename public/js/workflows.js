@@ -233,6 +233,14 @@ window.workflows = {
                 const clicks = rule.total_clicks !== undefined && rule.total_clicks !== null ? rule.total_clicks : 0;
                 const ctr = dmsSent > 0 ? Math.round((clicks / dmsSent) * 100) : 0;
                 const isActive = rule.is_active !== 0;
+                const rawDate = rule.created_at || item.created_at || item.timestamp;
+                let setupDateStr = '';
+                if (rawDate) {
+                    const d = new Date(rawDate);
+                    if (!isNaN(d.getTime())) {
+                        setupDateStr = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) + ' at ' + d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+                    }
+                }
 
                 html += `
                     <!-- FULL-SCREEN WIDE WORKFLOW CONTAINER (ZERO PILLS) -->
@@ -240,13 +248,18 @@ window.workflows = {
                         
                         <!-- CARD HEADER BAR -->
                         <div style="padding: 0.85rem 1.5rem; background: #FAF8F5; border-bottom: 1px solid var(--border-color); display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:1rem;">
-                            <div style="display:flex; align-items:center; gap:0.75rem;">
+                            <div style="display:flex; align-items:center; gap:0.75rem; flex-wrap:wrap;">
                                 <span style="font-family:'Plus Jakarta Sans', sans-serif; font-size:0.85rem; font-weight:800; color:var(--text-primary); text-transform:uppercase; letter-spacing:0.04em;">AUTOMATION RULE #${rule.id}</span>
                                 <span style="color:var(--border-color);">•</span>
                                 <span style="font-size:0.85rem; font-weight:800; color:${isActive ? '#1B5E20' : '#B45309'}; display: inline-flex; align-items: center; gap: 0.35rem; background: ${isActive ? '#E8F5E9' : '#FEF3C7'}; padding: 3px 8px; border-radius: 6px;">
                                     <span>${isActive ? '🟢' : '⏸️'}</span>
                                     <span>${isActive ? 'Active & Listening' : 'Paused'}</span>
                                 </span>
+                                ${setupDateStr ? `
+                                <span style="font-size:0.78rem; font-weight:700; color:#736E68; background:#FFFFFF; border:1px solid var(--border-color); padding: 3px 8px; border-radius: 6px; display: inline-flex; align-items: center; gap: 4px;" title="Automation creation timestamp">
+                                    <span>🕒</span>
+                                    <span>${setupDateStr}</span>
+                                </span>` : ''}
                                 ${isButtonFunnel ? `
                                 <span style="font-size:0.8rem; font-weight:800; color:#1D4ED8; display: inline-flex; align-items: center; gap: 0.35rem; background:#EFF6FF; border:1px solid #BFDBFE; padding: 3px 8px; border-radius: 6px;">
                                     <span>🔘 Interactive Button Funnel</span>

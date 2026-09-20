@@ -106,104 +106,201 @@ window.agentView = {
                     </div>
                 </div>
 
-                <!-- END-TO-END INBOUND WEB BRIDGE PIPELINE GRAPHIC -->
-                <div class="card" style="border-radius: 16px; border: 1.5px solid #E6E1D8; background: #FFFFFF; padding: 1.5rem; margin-bottom: 2rem; box-shadow: 0 4px 20px rgba(0,0,0,0.03);">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 0.5rem;">
-                        <div>
-                            <div style="display: flex; align-items: center; gap: 0.5rem;">
-                                <span style="font-size: 1.2rem;">⚡</span>
-                                <h3 style="font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: 1.18rem; margin: 0; color: #2C2A29;">
-                                    End-to-End Inbound Web Bridge Pipeline
-                                </h3>
-                                <span style="font-size: 0.72rem; font-weight: 800; color: #2E7D32; background: #E8F5E9; padding: 0.2rem 0.6rem; border-radius: 6px;">
-                                    LIVE FLOW
-                                </span>
+                <!-- ========================================================================= -->
+                <!-- AESTHETIC AI AGENT WORKFLOW & END-TO-END PIPELINE VISUALIZER              -->
+                <!-- ========================================================================= -->
+                <div class="card workflow-pipeline-card" style="border-radius: 20px; border: 1.5px solid #E6E1D8; background: radial-gradient(circle at 10% 15%, #FFFDFB 0%, #FFFFFF 100%); padding: 1.85rem; margin-bottom: 2rem; box-shadow: 0 4px 25px rgba(44, 42, 41, 0.04); position: relative; overflow: hidden;">
+                    
+                    <!-- WORKFLOW SECTION HEADER -->
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.6rem; flex-wrap: wrap; gap: 1rem;">
+                        <div style="display: flex; align-items: center; gap: 0.95rem;">
+                            <div style="width: 46px; height: 46px; border-radius: 14px; background: linear-gradient(135deg, #FAF0EC 0%, #F5E5DF 100%); border: 1.5px solid rgba(217,119,87,0.35); display: flex; align-items: center; justify-content: center; font-size: 1.4rem; color: #D97757; box-shadow: 0 3px 12px rgba(217,119,87,0.18); flex-shrink: 0;">
+                                ⚡
                             </div>
-                            <p style="font-size: 0.83rem; color: #736E68; margin: 0.25rem 0 0 0;">
-                                Trace your content lifecycle from external AI research generation down to verified Instagram follower link delivery.
-                            </p>
+                            <div>
+                                <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+                                    <h3 style="font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: 1.35rem; letter-spacing: -0.02em; margin: 0; color: #2C2A29;">
+                                        Autonomous AI Agent Workflow Pipeline
+                                    </h3>
+                                    <span class="workflow-pulse-circuit">
+                                        <span class="dot"></span>
+                                        Continuous Loop Active
+                                    </span>
+                                </div>
+                                <p style="font-size: 0.86rem; color: #6B6762; margin: 0.3rem 0 0 0; line-height: 1.45;">
+                                    End-to-end continuous loop: External AI research generation ➔ Inbound bridge ➔ Sentinel detection ➔ Follow-First DM funnel delivery.
+                                </p>
+                            </div>
                         </div>
-                        <div style="font-size: 0.78rem; font-weight: 700; color: #D97757; background: #FAF0EC; padding: 0.35rem 0.85rem; border-radius: 8px;">
-                            Autonomous Ingestion & Arming Active
+
+                        <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+                            <span style="font-size: 0.76rem; font-weight: 800; color: #D97757; background: #FAF0EC; border: 1.5px solid rgba(217,119,87,0.3); padding: 0.4rem 0.85rem; border-radius: 8px; display: inline-flex; align-items: center; gap: 5px;">
+                                <span>⚡</span> Zero-Delay Bridge
+                            </span>
+                            <button class="btn btn-secondary btn-sm" onclick="agentView.showResearchModal()" style="font-size: 0.78rem; font-weight: 700; border-radius: 8px; padding: 0.4rem 0.85rem; border: 1.5px solid #E6E1D8;">
+                                🧠 Research Specs
+                            </button>
+                            <button class="btn btn-secondary btn-sm" onclick="agentView.scanFeed()" style="font-size: 0.78rem; font-weight: 700; border-radius: 8px; padding: 0.4rem 0.85rem;">
+                                🔍 Scan Feed
+                            </button>
                         </div>
                     </div>
 
-                    <!-- 4 STAGE HORIZONTAL FLOW DIAGRAM -->
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; position: relative;">
+                    <!-- CONNECTED 4-STAGE PIPELINE GRID WITH FLOW CHEVRONS -->
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.15rem; position: relative;">
                         
-                        <!-- STAGE 1 -->
-                        <div style="background: #FAF8F5; border: 1.5px solid #E6E1D8; border-radius: 12px; padding: 1.15rem; position: relative;">
-                            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem;">
-                                <span style="font-size: 1.4rem;">🧠</span>
-                                <span style="font-size: 0.7rem; font-weight: 800; color: #6B6762; background: #EDE8DE; padding: 2px 7px; border-radius: 5px;">STEP 1</span>
+                        <!-- STAGE 1: EXTERNAL AI RESEARCH -->
+                        <div class="workflow-stage-card" onclick="agentView.showResearchModal()" style="background: #FAF8F5; border: 1.5px solid #E6E1D8; border-radius: 14px; padding: 1.35rem 1.2rem; display: flex; flex-direction: column; justify-content: space-between; position: relative;" title="Click to view OmniResearch AI agent specifications">
+                            <div class="workflow-connector-chevron">➔</div>
+                            <div>
+                                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem;">
+                                    <div style="width: 40px; height: 40px; border-radius: 10px; background: #EEF2FF; border: 1px solid #C7D2FE; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">
+                                        🧠
+                                    </div>
+                                    <span style="font-size: 0.68rem; font-weight: 800; color: #4338CA; background: #EEF2FF; border: 1px solid rgba(67,56,202,0.25); padding: 2.5px 8px; border-radius: 999px; letter-spacing: 0.05em;">
+                                        STAGE 01
+                                    </span>
+                                </div>
+                                <div style="font-size: 0.72rem; font-weight: 800; color: #6366F1; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.2rem;">
+                                    Cloud Research App
+                                </div>
+                                <h4 style="font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: 1.02rem; margin: 0 0 0.35rem 0; color: #2C2A29;">
+                                    External AI Research Engine
+                                </h4>
+                                <p style="font-size: 0.8rem; color: #6B6762; margin: 0 0 0.85rem 0; line-height: 1.45;">
+                                    Conducts deep multi-source research, synthesizes companion Google Doc guides, and renders Reels with single-word CTA keywords.
+                                </p>
                             </div>
-                            <h4 style="font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: 0.95rem; margin: 0 0 0.3rem 0; color: #2C2A29;">
-                                External AI Research Platform
-                            </h4>
-                            <p style="font-size: 0.78rem; color: #736E68; margin: 0 0 0.65rem 0; line-height: 1.4;">
-                                Autonomous cloud app researches topic, generates companion Google Doc/Notion guide, and renders Reels/posts with CTA keywords (e.g. <code>DRAG</code>, <code>RAG</code>).
-                            </p>
-                            <div style="display: flex; flex-wrap: wrap; gap: 4px;">
-                                <span style="font-size: 0.7rem; font-weight: 700; color: #4338CA; background: #EEF2FF; padding: 2px 6px; border-radius: 4px;">External Engine</span>
-                                <span style="font-size: 0.7rem; font-weight: 700; color: #0288D1; background: #E1F5FE; padding: 2px 6px; border-radius: 4px;">Docs & Reels</span>
-                            </div>
-                        </div>
-
-                        <!-- STAGE 2 -->
-                        <div style="background: #FAF8F5; border: 1.5px solid #E6E1D8; border-radius: 12px; padding: 1.15rem; position: relative;">
-                            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem;">
-                                <span style="font-size: 1.4rem;">📡</span>
-                                <span style="font-size: 0.7rem; font-weight: 800; color: #D97757; background: #FAF0EC; padding: 2px 7px; border-radius: 5px;">STEP 2</span>
-                            </div>
-                            <h4 style="font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: 0.95rem; margin: 0 0 0.3rem 0; color: #2C2A29;">
-                                Inbound Webhook & Sheets Bridge
-                            </h4>
-                            <p style="font-size: 0.78rem; color: #736E68; margin: 0 0 0.65rem 0; line-height: 1.4;">
-                                Instantly receives published Reels via Single/Batch Webhook (<code>/api/agent/bridge</code>) or Google Sheets sync. Zero rate limits on batch payloads.
-                            </p>
-                            <div style="display: flex; flex-wrap: wrap; gap: 4px;">
-                                <span style="font-size: 0.7rem; font-weight: 700; color: #2E7D32; background: #E8F5E9; padding: 2px 6px; border-radius: 4px;">⚡ Webhook POST</span>
-                                <span style="font-size: 0.7rem; font-weight: 700; color: #0D47A1; background: #E3F2FD; padding: 2px 6px; border-radius: 4px;">📊 Sheets Sync</span>
+                            <div>
+                                <div style="display: flex; flex-wrap: wrap; gap: 5px; padding-top: 0.65rem; border-top: 1px solid #EAE5DC; margin-bottom: 0.65rem;">
+                                    <span style="font-size: 0.7rem; font-weight: 700; color: #4338CA; background: #EEF2FF; padding: 2px 7px; border-radius: 5px;">Docs & Guides</span>
+                                    <span style="font-size: 0.7rem; font-weight: 700; color: #0288D1; background: #E1F5FE; padding: 2px 7px; border-radius: 5px;">CTA Hooks</span>
+                                </div>
+                                <div style="display: flex; justify-content: flex-end;">
+                                    <span class="workflow-stage-action-hint" style="color: #4338CA;">OmniResearch Docs ↗</span>
+                                </div>
                             </div>
                         </div>
 
-                        <!-- STAGE 3 -->
-                        <div style="background: #FAF8F5; border: 1.5px solid #E6E1D8; border-radius: 12px; padding: 1.15rem; position: relative;">
-                            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem;">
-                                <span style="font-size: 1.4rem;">🤖</span>
-                                <span style="font-size: 0.7rem; font-weight: 800; color: #2E7D32; background: #E8F5E9; padding: 2px 7px; border-radius: 5px;">STEP 3</span>
+                        <!-- STAGE 2: INBOUND GATEWAY -->
+                        <div class="workflow-stage-card" onclick="agentView.jumpToGateway('webhook')" style="background: #FAF8F5; border: 1.5px solid #E6E1D8; border-radius: 14px; padding: 1.35rem 1.2rem; display: flex; flex-direction: column; justify-content: space-between; position: relative;" title="Click to view inbound webhook and sheets bridge endpoints">
+                            <div class="workflow-connector-chevron">➔</div>
+                            <div>
+                                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem;">
+                                    <div style="width: 40px; height: 40px; border-radius: 10px; background: #FAF0EC; border: 1px solid rgba(217,119,87,0.3); display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">
+                                        📡
+                                    </div>
+                                    <span style="font-size: 0.68rem; font-weight: 800; color: #D97757; background: #FAF0EC; border: 1px solid rgba(217,119,87,0.3); padding: 2.5px 8px; border-radius: 999px; letter-spacing: 0.05em;">
+                                        STAGE 02
+                                    </span>
+                                </div>
+                                <div style="font-size: 0.72rem; font-weight: 800; color: #D97757; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.2rem;">
+                                    Zero-Delay Ingestion
+                                </div>
+                                <h4 style="font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: 1.02rem; margin: 0 0 0.35rem 0; color: #2C2A29;">
+                                    Inbound Webhook & Sheets Bridge
+                                </h4>
+                                <p style="font-size: 0.8rem; color: #6B6762; margin: 0 0 0.85rem 0; line-height: 1.45;">
+                                    Instantly captures published Reels via Single/Batch Webhook (<code>/api/agent/bridge</code>) or automated Google Sheets sync with 0 rate limits.
+                                </p>
                             </div>
-                            <h4 style="font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: 0.95rem; margin: 0 0 0.3rem 0; color: #2C2A29;">
-                                Sentinel Detection & Isolation
-                            </h4>
-                            <p style="font-size: 0.78rem; color: #736E68; margin: 0 0 0.65rem 0; line-height: 1.4;">
-                                Sentinel registers Reel ID, auto-extracts or binds trigger keyword, binds companion doc deliverable, and provisions an isolated rule funnel for that exact post.
-                            </p>
-                            <div style="display: flex; flex-wrap: wrap; gap: 4px;">
-                                <span style="font-size: 0.7rem; font-weight: 700; color: #E65100; background: #FFF3E0; padding: 2px 6px; border-radius: 4px;">Per-Reel Isolated</span>
-                                <span style="font-size: 0.7rem; font-weight: 700; color: #558B2F; background: #F1F8E9; padding: 2px 6px; border-radius: 4px;">Auto-Armed</span>
+                            <div>
+                                <div style="display: flex; flex-wrap: wrap; gap: 5px; padding-top: 0.65rem; border-top: 1px solid #EAE5DC; margin-bottom: 0.65rem;">
+                                    <span style="font-size: 0.7rem; font-weight: 700; color: #D97757; background: #FAF0EC; padding: 2px 7px; border-radius: 5px;">⚡ Webhook POST</span>
+                                    <span style="font-size: 0.7rem; font-weight: 700; color: #0D47A1; background: #E3F2FD; padding: 2px 7px; border-radius: 5px;">📊 Sheets Sync</span>
+                                </div>
+                                <div style="display: flex; justify-content: flex-end;">
+                                    <span class="workflow-stage-action-hint" style="color: #D97757;">Configure Endpoints ➔</span>
+                                </div>
                             </div>
                         </div>
 
-                        <!-- STAGE 4 -->
-                        <div style="background: #FAF8F5; border: 1.5px solid #81C784; border-radius: 12px; padding: 1.15rem; position: relative; box-shadow: 0 2px 10px rgba(46,125,50,0.06);">
-                            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem;">
-                                <span style="font-size: 1.4rem;">🎯</span>
-                                <span style="font-size: 0.7rem; font-weight: 800; color: #1B5E20; background: #C8E6C9; padding: 2px 7px; border-radius: 5px;">STEP 4</span>
+                        <!-- STAGE 3: SENTINEL ENGINE -->
+                        <div class="workflow-stage-card" onclick="agentView.jumpToArmedReels()" style="background: #FAF8F5; border: 1.5px solid #E6E1D8; border-radius: 14px; padding: 1.35rem 1.2rem; display: flex; flex-direction: column; justify-content: space-between; position: relative;" title="Click to view armed and live reels">
+                            <div class="workflow-connector-chevron">➔</div>
+                            <div>
+                                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem;">
+                                    <div style="width: 40px; height: 40px; border-radius: 10px; background: #E8F5E9; border: 1px solid #A5D6A7; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">
+                                        🤖
+                                    </div>
+                                    <span style="font-size: 0.68rem; font-weight: 800; color: #2E7D32; background: #E8F5E9; border: 1px solid rgba(46,125,50,0.25); padding: 2.5px 8px; border-radius: 999px; letter-spacing: 0.05em;">
+                                        STAGE 03
+                                    </span>
+                                </div>
+                                <div style="font-size: 0.72rem; font-weight: 800; color: #2E7D32; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.2rem;">
+                                    Autonomous Sentinel
+                                </div>
+                                <h4 style="font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: 1.02rem; margin: 0 0 0.35rem 0; color: #2C2A29;">
+                                    Sentinel Detection & Isolation
+                                </h4>
+                                <p style="font-size: 0.8rem; color: #6B6762; margin: 0 0 0.85rem 0; line-height: 1.45;">
+                                    Registers Reel ID, isolates trigger keyword (e.g. <code>DRAG</code>), binds companion guide link, and provisions an isolated per-reel funnel.
+                                </p>
                             </div>
-                            <h4 style="font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: 0.95rem; margin: 0 0 0.3rem 0; color: #1B5E20;">
-                                Follow-First Gate & DM Link
-                            </h4>
-                            <p style="font-size: 0.78rem; color: #2E7D32; margin: 0 0 0.65rem 0; line-height: 1.4;">
-                                User comments keyword on Reel ──► Sentinel verifies follower status ──► dispatches instant direct deliverable doc link and tracks clicks!
-                            </p>
-                            <div style="display: flex; flex-wrap: wrap; gap: 4px;">
-                                <span style="font-size: 0.7rem; font-weight: 700; color: #1B5E20; background: #C8E6C9; padding: 2px 6px; border-radius: 4px;">🟢 Live Trigger Armed</span>
-                                <span style="font-size: 0.7rem; font-weight: 700; color: #2E7D32; background: #E8F5E9; padding: 2px 6px; border-radius: 4px;">Conversion Tracked</span>
+                            <div>
+                                <div style="display: flex; flex-wrap: wrap; gap: 5px; padding-top: 0.65rem; border-top: 1px solid #EAE5DC; margin-bottom: 0.65rem;">
+                                    <span style="font-size: 0.7rem; font-weight: 700; color: #E65100; background: #FFF3E0; padding: 2px 7px; border-radius: 5px;">Auto-Keyword Parsing</span>
+                                    <span style="font-size: 0.7rem; font-weight: 700; color: #2E7D32; background: #E8F5E9; padding: 2px 7px; border-radius: 5px;">Multi-Reel Isolated</span>
+                                </div>
+                                <div style="display: flex; justify-content: flex-end;">
+                                    <span class="workflow-stage-action-hint" style="color: #2E7D32;">View Armed Reels ➔</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- STAGE 4: FOLLOW GATE & DM FUNNEL -->
+                        <div class="workflow-stage-card" onclick="agentView.jumpToGateway('simulator')" style="background: #FAF8F5; border: 1.5px solid #81C784; border-radius: 14px; padding: 1.35rem 1.2rem; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 3px 12px rgba(46,125,50,0.08); position: relative;" title="Click to test the Follow-First DM funnel in simulator">
+                            <div>
+                                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem;">
+                                    <div style="width: 40px; height: 40px; border-radius: 10px; background: #C8E6C9; border: 1px solid #81C784; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">
+                                        🎯
+                                    </div>
+                                    <span style="font-size: 0.68rem; font-weight: 800; color: #1B5E20; background: #C8E6C9; border: 1px solid rgba(27,94,32,0.3); padding: 2.5px 8px; border-radius: 999px; letter-spacing: 0.05em;">
+                                        STAGE 04
+                                    </span>
+                                </div>
+                                <div style="font-size: 0.72rem; font-weight: 800; color: #1B5E20; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.2rem;">
+                                    Verified Delivery
+                                </div>
+                                <h4 style="font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: 1.02rem; margin: 0 0 0.35rem 0; color: #1B5E20;">
+                                    Follow-First Gate & DM Link
+                                </h4>
+                                <p style="font-size: 0.8rem; color: #2E7D32; margin: 0 0 0.85rem 0; line-height: 1.45;">
+                                    Follower comments keyword on Reel ──► Sentinel verifies follower status ──► delivers guide link instantly and tracks clicks & leads!
+                                </p>
+                            </div>
+                            <div>
+                                <div style="display: flex; flex-wrap: wrap; gap: 5px; padding-top: 0.65rem; border-top: 1px solid #C8E6C9; margin-bottom: 0.65rem;">
+                                    <span style="font-size: 0.7rem; font-weight: 800; color: #1B5E20; background: #C8E6C9; padding: 2px 7px; border-radius: 5px;">🟢 Live Trigger Armed</span>
+                                    <span style="font-size: 0.7rem; font-weight: 700; color: #2E7D32; background: #E8F5E9; padding: 2px 7px; border-radius: 5px;">Conversion Tracked</span>
+                                </div>
+                                <div style="display: flex; justify-content: flex-end;">
+                                    <span class="workflow-stage-action-hint" style="color: #1B5E20;">Test DM Gate ➔</span>
+                                </div>
                             </div>
                         </div>
 
                     </div>
+
+                    <!-- BOTTOM WORKFLOW EXECUTION RIBBON -->
+                    <div style="margin-top: 1.35rem; background: #FAF8F5; border: 1.5px solid #EAE5DC; border-radius: 12px; padding: 0.85rem 1.25rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.85rem;">
+                        <div style="display: flex; align-items: center; gap: 10px; font-size: 0.82rem; color: #6B6762;">
+                            <span style="font-size: 1.15rem;">💡</span>
+                            <span><strong>End-to-End Autonomous Circuit:</strong> External AI app posts Reel ➔ Sentinel catches Media ID & binds keyword ➔ Follower comments ➔ Follow Gate verifies & delivers DM link.</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+                            <span style="font-size: 0.74rem; font-weight: 700; color: #2E7D32; background: #E8F5E9; padding: 0.35rem 0.75rem; border-radius: 6px; display: inline-flex; align-items: center; gap: 4px;">
+                                <span>⚡</span> Sub-200ms Latency
+                            </span>
+                            <button class="btn btn-secondary btn-sm" onclick="agentView.jumpToGateway('sheets')" style="font-weight: 700; font-size: 0.78rem; padding: 0.4rem 0.85rem; border-radius: 8px;">
+                                📊 Sheets Sync
+                            </button>
+                            <button class="btn btn-primary btn-sm" onclick="agentView.simulateInboundPost()" style="font-weight: 800; font-size: 0.78rem; padding: 0.4rem 1rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(217,119,87,0.25);">
+                                ⚡ Test Ingestion Flow
+                            </button>
+                        </div>
+                    </div>
+
                 </div>
 
                 <!-- INBOUND GATEWAY INTEGRATION CONSOLE (TABBED INTERFACE) -->
@@ -492,6 +589,78 @@ window.agentView = {
                 panel.style.display = (t === tab) ? 'block' : 'none';
             }
         });
+    },
+
+    // Smooth navigation helpers for workflow pipeline stages
+    jumpToGateway(tab) {
+        this.switchGatewayTab(tab);
+        const target = document.getElementById('gw-tab-' + tab);
+        if (target) {
+            target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    },
+
+    jumpToArmedReels() {
+        this.setStatusFilter('armed');
+        const target = document.getElementById('agent-posts-list');
+        if (target) {
+            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    },
+
+    showResearchModal() {
+        const modalHtml = `
+            <div style="font-family: 'Inter', sans-serif; color: #2C2A29;">
+                <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 1.25rem;">
+                    <div style="width: 48px; height: 48px; border-radius: 14px; background: #EEF2FF; border: 1.5px solid #C7D2FE; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; flex-shrink: 0;">
+                        🧠
+                    </div>
+                    <div>
+                        <h3 style="font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: 1.25rem; margin: 0; color: #2C2A29;">
+                            OmniResearch AI Agent Integration Specs
+                        </h3>
+                        <p style="font-size: 0.84rem; color: #736E68; margin: 0.15rem 0 0 0;">
+                            Stage 01: Deep Research Engine & Companion Deliverables
+                        </p>
+                    </div>
+                </div>
+
+                <div style="background: #FAF8F5; border-radius: 14px; border: 1.5px solid #E6E1D8; padding: 1.25rem; margin-bottom: 1.25rem;">
+                    <div style="font-weight: 800; font-size: 0.92rem; margin-bottom: 0.5rem; color: #4338CA; display: flex; align-items: center; gap: 6px;">
+                        <span>⚡</span> Interconnected Architecture Overview
+                    </div>
+                    <p style="font-size: 0.84rem; color: #6B6762; line-height: 1.5; margin-bottom: 0.75rem;">
+                        Your external OmniResearch agent autonomous pipeline conducts multi-source research, synthesizes companion Google Doc guides, and renders Reels with single-word CTA keywords. The reel and companion guide are passed into InstaAuto Sentinel via:
+                    </p>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem; font-size: 0.82rem;">
+                        <div style="background: #FFFFFF; border: 1.5px solid #E6E1D8; border-radius: 10px; padding: 0.85rem;">
+                            <strong style="color: #D97757; display: block; margin-bottom: 4px; font-size: 0.86rem;">📡 Option A: Direct Webhook POST</strong>
+                            POST JSON payload to <code>/api/agent/bridge</code> with <code>media_id</code>, <code>caption</code>, and <code>deliverable_url</code>.
+                        </div>
+                        <div style="background: #FFFFFF; border: 1.5px solid #E6E1D8; border-radius: 10px; padding: 0.85rem;">
+                            <strong style="color: #0D47A1; display: block; margin-bottom: 4px; font-size: 0.86rem;">📊 Option B: Google Sheets Sync</strong>
+                            Auto-sync columns: <code>Reel ID</code> | <code>Keyword</code> | <code>Deliverable Link</code> | <code>Topic Title</code>.
+                        </div>
+                    </div>
+                </div>
+
+                <div style="background: #FAF0EC; border-radius: 12px; border: 1px solid rgba(217,119,87,0.3); padding: 0.9rem 1.15rem; margin-bottom: 1.25rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+                    <div style="font-size: 0.82rem; color: #2C2A29;">
+                        📄 <strong>OmniResearch Master Blueprint:</strong> Master PRD and kickoff prompts are saved in <code>OMNIRESEARCH_AI_MASTER_PROMPT.md</code>.
+                    </div>
+                </div>
+
+                <div style="display: flex; justify-content: flex-end; gap: 0.65rem;">
+                    <button class="btn btn-secondary btn-sm" onclick="App.closeModal()" style="font-weight: 700; border-radius: 8px; padding: 0.5rem 1.2rem;">
+                        Close
+                    </button>
+                    <button class="btn btn-primary btn-sm" onclick="App.closeModal(); agentView.jumpToGateway('webhook');" style="font-weight: 800; border-radius: 8px; padding: 0.5rem 1.25rem; box-shadow: 0 2px 8px rgba(217,119,87,0.25);">
+                        View Inbound Endpoints ➔
+                    </button>
+                </div>
+            </div>
+        `;
+        App.openModal('OmniResearch Integration Specs', modalHtml);
     },
 
     switchTab(tab) {
