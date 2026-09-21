@@ -9,101 +9,101 @@ const adminView = {
 
     async render(container) {
         container.innerHTML = `
-            <div style="padding: 1.5rem; max-width: 1200px; margin: 0 auto;">
+            <div class="view" id="admin-view" style="width: 100%; max-width: 100%; margin: 0; display: flex; flex-direction: column; gap: 1.6rem; padding-bottom: 3rem;">
                 <!-- Header -->
-                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.25rem; flex-wrap: wrap; gap: 1.25rem;">
                     <div>
-                        <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.35rem;">
-                            <span style="font-size: 1.5rem;">👑</span>
-                            <h1 style="font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: 1.6rem; color: #2C2A29; letter-spacing: -0.02em; margin: 0;">Super Admin Portal</h1>
-                            <span style="background: #FEF3C7; color: #B45309; font-size: 0.72rem; font-weight: 800; text-transform: uppercase; padding: 2px 8px; border-radius: 6px; letter-spacing: 0.04em;">Platform Control</span>
+                        <div style="display: flex; align-items: center; gap: 0.65rem; margin-bottom: 0.4rem;">
+                            <span style="font-size: 1.85rem;">👑</span>
+                            <h1 style="font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: 1.95rem; color: #2C2A29; letter-spacing: -0.03em; margin: 0;">Super Admin Portal</h1>
+                            <span style="background: #FEF3C7; color: #B45309; font-size: 0.78rem; font-weight: 800; text-transform: uppercase; padding: 4px 10px; border-radius: 8px; letter-spacing: 0.05em; border: 1px solid #FCD34D;">Platform Control</span>
                         </div>
-                        <p style="font-size: 0.88rem; color: #736E68; margin: 0;">Monitor creator workspaces, manage accounts, configure custom rate limits, and track platform metrics.</p>
+                        <p style="font-size: 0.96rem; color: #6B6762; margin: 0; line-height: 1.5;">Monitor all creator workspaces, manage accounts, configure custom rate limits, and track platform metrics in real-time.</p>
                     </div>
-                    <div style="display: flex; gap: 0.75rem;">
-                        <button onclick="adminView.refresh(false)" class="btn btn-secondary" style="font-size: 0.84rem; padding: 0.55rem 1rem; font-weight: 700; display: flex; align-items: center; gap: 0.4rem;">
-                            <span>↻</span> Refresh Live
+                    <div style="display: flex; gap: 0.85rem; align-items: center;">
+                        <button onclick="adminView.refresh(false)" class="btn btn-secondary" style="font-size: 0.9rem; padding: 0.65rem 1.25rem; font-weight: 700; border-radius: 10px; display: flex; align-items: center; gap: 0.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
+                            <span style="font-size: 1.05rem;">↻</span> Refresh Live
                         </button>
                     </div>
                 </div>
 
-                <!-- Super Admin Personal Rate Limit Banner -->
-                <div id="admin-quota-banner" style="background: linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 100%); border: 1.5px solid #FCD34D; border-radius: 14px; padding: 1.15rem 1.4rem; margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; box-shadow: 0 2px 8px rgba(245, 158, 11, 0.08);">
-                    <div style="display: flex; align-items: center; gap: 0.9rem;">
-                        <div style="width: 42px; height: 42px; border-radius: 10px; background: #D97757; color: #FFF; font-size: 1.3rem; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(217,119,87,0.3); flex-shrink: 0;">
+                <!-- Super Admin Personal Rate Limit Hero Banner -->
+                <div id="admin-quota-banner" style="background: linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 100%); border: 1.5px solid #FCD34D; border-radius: 16px; padding: 1.35rem 1.75rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1.25rem; box-shadow: 0 4px 16px rgba(245, 158, 11, 0.09);">
+                    <div style="display: flex; align-items: center; gap: 1.15rem;">
+                        <div style="width: 50px; height: 50px; border-radius: 12px; background: #D97757; color: #FFF; font-size: 1.55rem; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(217,119,87,0.35); flex-shrink: 0;">
                             👑
                         </div>
                         <div>
-                            <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
-                                <span style="font-weight: 800; font-size: 0.95rem; color: #78350F; font-family: 'Plus Jakarta Sans', sans-serif;">Super Admin Personal Rate Limit:</span>
-                                <span id="admin-quota-badge" style="background: #2E7D32; color: #FFF; font-size: 0.72rem; font-weight: 800; text-transform: uppercase; padding: 2px 8px; border-radius: 6px; letter-spacing: 0.04em;">⚡ UNLIMITED (BYPASS)</span>
+                            <div style="display: flex; align-items: center; gap: 0.65rem; flex-wrap: wrap;">
+                                <span style="font-weight: 800; font-size: 1.05rem; color: #78350F; font-family: 'Plus Jakarta Sans', sans-serif;">Super Admin Personal Rate Limit:</span>
+                                <span id="admin-quota-badge" style="background: #2E7D32; color: #FFF; font-size: 0.8rem; font-weight: 800; text-transform: uppercase; padding: 4px 12px; border-radius: 8px; letter-spacing: 0.04em; box-shadow: 0 2px 6px rgba(46,125,50,0.25);">⚡ UNLIMITED (BYPASS)</span>
                             </div>
-                            <div id="admin-quota-desc" style="font-size: 0.8rem; color: #92400E; margin-top: 0.2rem;">
+                            <div id="admin-quota-desc" style="font-size: 0.92rem; color: #92400E; margin-top: 0.35rem; line-height: 1.45;">
                                 Super Admin automations dispatch at high priority with 0.5s pacing and zero volume limits. You can customize your own limit or grant unlimited status to any creator.
                             </div>
                         </div>
                     </div>
-                    <div style="display: flex; gap: 0.6rem; align-items: center;">
-                        <button onclick="adminView.openSuperAdminQuotaModal()" class="btn btn-secondary" style="font-size: 0.82rem; padding: 0.5rem 0.9rem; font-weight: 700; background: #FFFFFF; border: 1px solid #F59E0B; color: #B45309; display: flex; align-items: center; gap: 0.35rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05); cursor: pointer;">
-                            <span>⚙️</span> Configure My Limit
+                    <div style="display: flex; gap: 0.75rem; align-items: center;">
+                        <button onclick="adminView.openSuperAdminQuotaModal()" class="btn btn-secondary" style="font-size: 0.92rem; padding: 0.7rem 1.35rem; font-weight: 700; border-radius: 10px; background: #FFFFFF; border: 1.5px solid #F59E0B; color: #92400E; display: flex; align-items: center; gap: 0.45rem; box-shadow: 0 2px 6px rgba(0,0,0,0.06); cursor: pointer; transition: all 0.15s ease;">
+                            <span style="font-size: 1.05rem;">⚙️</span> Configure My Limit
                         </button>
                     </div>
                 </div>
 
-                <!-- KPI Metric Cards Grid -->
-                <div id="admin-metrics-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 1rem; margin-bottom: 1.8rem;">
-                    <div class="card" style="padding: 1.25rem; background: #FFFFFF; border-radius: 14px; border: 1px solid #E6E1D8; box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
-                        <div style="font-size: 0.76rem; font-weight: 700; color: #736E68; text-transform: uppercase; margin-bottom: 0.4rem;">Total Users</div>
-                        <div id="metric-total-users" style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 1.8rem; font-weight: 800; color: #2C2A29;">-</div>
-                        <div style="font-size: 0.74rem; color: #2E7D32; font-weight: 600; margin-top: 0.2rem;">Registered Creators</div>
+                <!-- KPI Metric Cards Grid (Full-Width, Spacious, Bold) -->
+                <div id="admin-metrics-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.25rem; width: 100%;">
+                    <div class="card" style="padding: 1.4rem 1.6rem; background: #FFFFFF; border-radius: 16px; border: 1px solid #E6E1D8; box-shadow: 0 2px 10px rgba(0,0,0,0.02);">
+                        <div style="font-size: 0.8rem; font-weight: 800; color: #736E68; text-transform: uppercase; letter-spacing: 0.05em;">Total Users</div>
+                        <div id="metric-total-users" style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 2.35rem; font-weight: 800; color: #2C2A29; margin: 0.35rem 0 0.2rem 0; line-height: 1.1;">-</div>
+                        <div style="font-size: 0.84rem; color: #2E7D32; font-weight: 700;">Registered Creators</div>
                     </div>
 
-                    <div class="card" style="padding: 1.25rem; background: #FFFFFF; border-radius: 14px; border: 1px solid #E6E1D8; box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
-                        <div style="font-size: 0.76rem; font-weight: 700; color: #736E68; text-transform: uppercase; margin-bottom: 0.4rem;">Instagram Connected</div>
-                        <div id="metric-connected-accounts" style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 1.8rem; font-weight: 800; color: #D97757;">-</div>
-                        <div style="font-size: 0.74rem; color: #736E68; font-weight: 600; margin-top: 0.2rem;">Active IG Workspaces</div>
+                    <div class="card" style="padding: 1.4rem 1.6rem; background: #FFFFFF; border-radius: 16px; border: 1px solid #E6E1D8; box-shadow: 0 2px 10px rgba(0,0,0,0.02);">
+                        <div style="font-size: 0.8rem; font-weight: 800; color: #736E68; text-transform: uppercase; letter-spacing: 0.05em;">Instagram Connected</div>
+                        <div id="metric-connected-accounts" style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 2.35rem; font-weight: 800; color: #D97757; margin: 0.35rem 0 0.2rem 0; line-height: 1.1;">-</div>
+                        <div style="font-size: 0.84rem; color: #736E68; font-weight: 600;">Active IG Workspaces</div>
                     </div>
 
-                    <div class="card" style="padding: 1.25rem; background: #FFFFFF; border-radius: 14px; border: 1px solid #E6E1D8; box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
-                        <div style="font-size: 0.76rem; font-weight: 700; color: #736E68; text-transform: uppercase; margin-bottom: 0.4rem;">Active Automations</div>
-                        <div id="metric-active-rules" style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 1.8rem; font-weight: 800; color: #2C2A29;">-</div>
-                        <div style="font-size: 0.74rem; color: #736E68; font-weight: 600; margin-top: 0.2rem;">Live Comment Triggers</div>
+                    <div class="card" style="padding: 1.4rem 1.6rem; background: #FFFFFF; border-radius: 16px; border: 1px solid #E6E1D8; box-shadow: 0 2px 10px rgba(0,0,0,0.02);">
+                        <div style="font-size: 0.8rem; font-weight: 800; color: #736E68; text-transform: uppercase; letter-spacing: 0.05em;">Active Automations</div>
+                        <div id="metric-active-rules" style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 2.35rem; font-weight: 800; color: #2C2A29; margin: 0.35rem 0 0.2rem 0; line-height: 1.1;">-</div>
+                        <div style="font-size: 0.84rem; color: #736E68; font-weight: 600;">Live Comment Triggers</div>
                     </div>
 
-                    <div class="card" style="padding: 1.25rem; background: #FFFFFF; border-radius: 14px; border: 1px solid #E6E1D8; box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
-                        <div style="font-size: 0.76rem; font-weight: 700; color: #736E68; text-transform: uppercase; margin-bottom: 0.4rem;">Total Leads & DMs</div>
-                        <div id="metric-total-leads" style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 1.8rem; font-weight: 800; color: #2E7D32;">-</div>
-                        <div style="font-size: 0.74rem; color: #2E7D32; font-weight: 600; margin-top: 0.2rem;">Dispatched & Tracked</div>
+                    <div class="card" style="padding: 1.4rem 1.6rem; background: #FFFFFF; border-radius: 16px; border: 1px solid #E6E1D8; box-shadow: 0 2px 10px rgba(0,0,0,0.02);">
+                        <div style="font-size: 0.8rem; font-weight: 800; color: #736E68; text-transform: uppercase; letter-spacing: 0.05em;">Total Leads & DMs</div>
+                        <div id="metric-total-leads" style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 2.35rem; font-weight: 800; color: #2E7D32; margin: 0.35rem 0 0.2rem 0; line-height: 1.1;">-</div>
+                        <div style="font-size: 0.84rem; color: #2E7D32; font-weight: 700;">Dispatched & Tracked</div>
                     </div>
                 </div>
 
                 <!-- Token Alerts Section -->
-                <div id="admin-token-alerts" style="margin-bottom: 1.5rem; display: none;">
+                <div id="admin-token-alerts" style="display: none;">
                     <!-- Rendered if any tokens are expiring -->
                 </div>
 
-                <!-- User Management Table Section -->
-                <div class="card" style="background: #FFFFFF; border-radius: 14px; border: 1px solid #E6E1D8; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
-                    <div style="padding: 1.25rem 1.5rem; border-bottom: 1px solid #F5F1EA; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                <!-- User Management Table Section (Full-Width, Non-Scrollable, High Usability) -->
+                <div class="card" style="background: #FFFFFF; border-radius: 16px; border: 1px solid #E6E1D8; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.02); width: 100%;">
+                    <div style="padding: 1.4rem 1.75rem; border-bottom: 1.5px solid #F5F1EA; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1.25rem;">
                         <div>
-                            <h2 style="font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: 1.15rem; color: #2C2A29; margin: 0 0 0.2rem 0;">Creator Directory</h2>
-                            <div style="font-size: 0.8rem; color: #736E68;">Search, inspect, and manage tenant workspaces.</div>
+                            <h2 style="font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: 1.35rem; color: #2C2A29; margin: 0 0 0.25rem 0; letter-spacing: -0.02em;">Creator Directory</h2>
+                            <div style="font-size: 0.92rem; color: #736E68;">Search, inspect, and manage tenant workspaces, privileges, and rate limits.</div>
                         </div>
 
                         <!-- Filter & Search Controls -->
-                        <div style="display: flex; gap: 0.65rem; align-items: center; flex-wrap: wrap;">
+                        <div style="display: flex; gap: 0.85rem; align-items: center; flex-wrap: wrap;">
                             <input 
                                 type="text" 
                                 id="admin-search-input" 
                                 placeholder="Search by name, email, or @handle..." 
                                 value="${this.searchQuery}"
                                 oninput="adminView.handleSearch(this.value)"
-                                style="padding: 0.5rem 0.85rem; font-size: 0.84rem; border-radius: 8px; border: 1.5px solid #E6E1D8; background: #FAF8F5; outline: none; min-width: 250px;"
+                                style="padding: 0.65rem 1.1rem; font-size: 0.92rem; border-radius: 10px; border: 1.5px solid #E6E1D8; background: #FAF8F5; outline: none; min-width: 320px; transition: border-color 0.15s ease;"
                             />
                             <select 
                                 id="admin-status-filter"
                                 onchange="adminView.handleStatusFilter(this.value)"
-                                style="padding: 0.5rem 0.85rem; font-size: 0.84rem; border-radius: 8px; border: 1.5px solid #E6E1D8; background: #FAF8F5; outline: none; cursor: pointer;"
+                                style="padding: 0.65rem 1.1rem; font-size: 0.92rem; border-radius: 10px; border: 1.5px solid #E6E1D8; background: #FAF8F5; outline: none; cursor: pointer; font-weight: 600;"
                             >
                                 <option value="all" ${this.statusFilter === 'all' ? 'selected' : ''}>All Statuses</option>
                                 <option value="active" ${this.statusFilter === 'active' ? 'selected' : ''}>Active Only</option>
@@ -112,27 +112,25 @@ const adminView = {
                         </div>
                     </div>
 
-                    <!-- Table Container -->
-                    <div style="overflow-x: auto;">
-                        <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.86rem;">
+                    <!-- Table Container (Fits 100% width, No Horizontal Scrollbar) -->
+                    <div style="width: 100%; overflow-x: auto;">
+                        <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.92rem;">
                             <thead>
-                                <tr style="background: #FAF8F5; border-bottom: 1px solid #E6E1D8; color: #736E68; font-size: 0.75rem; text-transform: uppercase; font-weight: 700; letter-spacing: 0.03em;">
-                                    <th style="padding: 0.85rem 1.25rem;">Creator / User</th>
-                                    <th style="padding: 0.85rem 1rem;">Role</th>
-                                    <th style="padding: 0.85rem 1rem;">Instagram Account</th>
-                                    <th style="padding: 0.85rem 1rem;">Rules</th>
-                                    <th style="padding: 0.85rem 1rem;">Leads</th>
-                                    <th style="padding: 0.85rem 1rem;">Rate Limit / Tier</th>
-                                    <th style="padding: 0.85rem 1rem;">Status</th>
-                                    <th style="padding: 0.85rem 1rem;">Joined</th>
-                                    <th style="padding: 0.85rem 1.25rem; text-align: right;">Actions</th>
+                                <tr style="background: #FAF8F5; border-bottom: 1.5px solid #E6E1D8; color: #736E68; font-size: 0.8rem; text-transform: uppercase; font-weight: 800; letter-spacing: 0.04em;">
+                                    <th style="padding: 1.1rem 1.5rem;">Creator / User</th>
+                                    <th style="padding: 1.1rem 1.25rem;">Instagram Account</th>
+                                    <th style="padding: 1.1rem 1.25rem;">Role & Status</th>
+                                    <th style="padding: 1.1rem 1.25rem;">Rate Limit / Tier</th>
+                                    <th style="padding: 1.1rem 1.25rem;">Automations & Leads</th>
+                                    <th style="padding: 1.1rem 1.25rem;">Joined</th>
+                                    <th style="padding: 1.1rem 1.5rem; text-align: right; white-space: nowrap;">Actions</th>
                                 </tr>
                             </thead>
                             <tbody id="admin-users-tbody">
                                 <tr>
-                                    <td colspan="9" style="padding: 2.5rem; text-align: center; color: #736E68;">
-                                        <span class="spinner" style="width: 24px; height: 24px; display: inline-block;"></span>
-                                        <div style="margin-top: 0.5rem;">Loading user directory...</div>
+                                    <td colspan="7" style="padding: 3rem; text-align: center; color: #736E68;">
+                                        <span class="spinner" style="width: 28px; height: 28px; display: inline-block;"></span>
+                                        <div style="margin-top: 0.75rem; font-size: 0.95rem; font-weight: 600;">Loading user directory...</div>
                                     </td>
                                 </tr>
                             </tbody>
@@ -252,10 +250,10 @@ const adminView = {
         if (filtered.length === 0) {
             tbody.innerHTML = `
                 <tr>
-                    <td colspan="9" style="padding: 2.5rem; text-align: center; color: #736E68;">
-                        <div style="font-size: 1.2rem; margin-bottom: 0.35rem;">🔍</div>
-                        <div style="font-weight: 600;">No creators found</div>
-                        <div style="font-size: 0.8rem; color: #A09890; margin-top: 0.2rem;">Try adjusting your search query or filters.</div>
+                    <td colspan="7" style="padding: 3rem; text-align: center; color: #736E68;">
+                        <div style="font-size: 1.5rem; margin-bottom: 0.4rem;">🔍</div>
+                        <div style="font-weight: 700; font-size: 1.05rem; color: #2C2A29;">No creators found</div>
+                        <div style="font-size: 0.86rem; color: #A09890; margin-top: 0.25rem;">Try adjusting your search query or filters.</div>
                     </td>
                 </tr>
             `;
@@ -276,86 +274,92 @@ const adminView = {
             const sentHour = user.dms_sent_current_hour || 0;
 
             return `
-                <tr style="border-bottom: 1px solid #F5F1EA; transition: background 0.15s ease;" onmouseover="this.style.background='#FAF8F5'" onmouseout="this.style.background='transparent'">
-                    <td style="padding: 1rem 1.25rem;">
-                        <div style="display: flex; align-items: center; gap: 0.75rem;">
-                            <div style="width: 34px; height: 34px; border-radius: 50%; background: #FAF0EC; color: #D97757; font-weight: 800; font-size: 0.82rem; display: flex; align-items: center; justify-content: center; border: 1px solid #E6E1D8; flex-shrink: 0;">
+                <tr style="border-bottom: 1.5px solid #F5F1EA; transition: background 0.15s ease;" onmouseover="this.style.background='#FAF8F5'" onmouseout="this.style.background='transparent'">
+                    <!-- 1. Creator / User -->
+                    <td style="padding: 1.15rem 1.5rem;">
+                        <div style="display: flex; align-items: center; gap: 0.85rem;">
+                            <div style="width: 42px; height: 42px; border-radius: 50%; background: #FAF0EC; color: #D97757; font-weight: 800; font-size: 0.92rem; display: flex; align-items: center; justify-content: center; border: 1.5px solid #E6E1D8; flex-shrink: 0; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
                                 ${initials}
                             </div>
                             <div style="overflow: hidden;">
-                                <div style="font-weight: 700; color: #2C2A29; line-height: 1.2;">${user.name || 'Unnamed Creator'}</div>
-                                <div style="font-size: 0.76rem; color: #736E68; margin-top: 0.15rem;">${user.email}</div>
+                                <div style="font-weight: 800; font-size: 0.98rem; color: #2C2A29; line-height: 1.25;">${user.name || 'Unnamed Creator'}</div>
+                                <div style="font-size: 0.82rem; color: #736E68; margin-top: 0.15rem;">${user.email}</div>
                             </div>
                         </div>
                     </td>
 
-                    <td style="padding: 1rem;">
-                        <span style="font-size: 0.72rem; font-weight: 800; text-transform: uppercase; padding: 2px 7px; border-radius: 5px; ${isSuper ? 'background: #FEF3C7; color: #B45309;' : 'background: #FAF0EC; color: #D97757;'}">
-                            ${isSuper ? '👑 Super Admin' : 'Creator'}
-                        </span>
-                    </td>
-
-                    <td style="padding: 1rem;">
+                    <!-- 2. Instagram Workspace -->
+                    <td style="padding: 1.15rem 1.25rem;">
                         ${hasIg ? `
-                            <div style="display: flex; align-items: center; gap: 0.35rem; font-weight: 700; color: #2C2A29;">
-                                <span style="color: #2E7D32; font-size: 0.75rem;">●</span>
+                            <div style="display: flex; align-items: center; gap: 0.4rem; font-weight: 700; color: #2C2A29; font-size: 0.92rem;">
+                                <span style="color: #2E7D32; font-size: 0.8rem;">●</span>
                                 <span>@${user.ig_username}</span>
                             </div>
+                            <div style="font-size: 0.74rem; color: #2E7D32; font-weight: 600; margin-top: 2px;">Connected & Active</div>
                         ` : `
-                            <span style="font-size: 0.78rem; color: #A09890; font-style: italic;">Not Connected</span>
+                            <span style="font-size: 0.8rem; color: #A09890; font-style: italic; background: #FAF8F5; padding: 3px 8px; border-radius: 6px; border: 1px solid #E6E1D8;">Not Connected</span>
                         `}
                     </td>
 
-                    <td style="padding: 1rem;">
-                        <span style="font-weight: 700; color: #2C2A29; background: #F5F1EA; padding: 2px 8px; border-radius: 6px; font-size: 0.8rem;">
-                            ${user.rules_count || 0}
-                        </span>
+                    <!-- 3. Role & Status (Stacked for high legibility) -->
+                    <td style="padding: 1.15rem 1.25rem;">
+                        <div style="display: flex; flex-direction: column; gap: 0.35rem; align-items: flex-start;">
+                            <span style="font-size: 0.76rem; font-weight: 800; text-transform: uppercase; padding: 2px 8px; border-radius: 6px; ${isSuper ? 'background: #FEF3C7; color: #B45309; border: 1px solid #FCD34D;' : 'background: #FAF0EC; color: #D97757; border: 1px solid #F4D5CB;'}">
+                                ${isSuper ? '👑 Super Admin' : 'Creator'}
+                            </span>
+                            <span style="font-size: 0.74rem; font-weight: 700; text-transform: uppercase; padding: 2px 7px; border-radius: 5px; ${isActive ? 'background: #E8F5E9; color: #2E7D32;' : 'background: #FEE2E2; color: #DC2626;'}">
+                                ${isActive ? '● Active' : '● Suspended'}
+                            </span>
+                        </div>
                     </td>
 
-                    <td style="padding: 1rem;">
-                        <span style="font-weight: 700; color: #2E7D32; background: #E8F5E9; padding: 2px 8px; border-radius: 6px; font-size: 0.8rem;">
-                            ${user.leads_count || 0}
-                        </span>
-                    </td>
-
-                    <td style="padding: 1rem;">
-                        <div style="display: flex; flex-direction: column; gap: 0.2rem;">
+                    <!-- 4. Rate Limit / Plan Tier -->
+                    <td style="padding: 1.15rem 1.25rem;">
+                        <div style="display: flex; flex-direction: column; gap: 0.25rem;">
                             ${isUnlimited ? `
-                                <span style="background: #E0F2FE; color: #0284C7; font-weight: 800; font-size: 0.72rem; padding: 2px 7px; border-radius: 5px; display: inline-flex; align-items: center; gap: 3px; width: fit-content;">
+                                <span style="background: #E0F2FE; color: #0284C7; font-weight: 800; font-size: 0.78rem; padding: 3px 9px; border-radius: 6px; display: inline-flex; align-items: center; gap: 4px; width: fit-content; border: 1px solid #BAE6FD;">
                                     ⚡ UNLIMITED
                                 </span>
-                                <span style="font-size: 0.7rem; color: #736E68; font-weight: 600;">No restrictions</span>
+                                <span style="font-size: 0.74rem; color: #736E68; font-weight: 600;">Zero restrictions</span>
                             ` : `
-                                <div style="font-weight: 700; color: #2C2A29; font-size: 0.82rem; display: flex; align-items: center; gap: 4px;">
+                                <div style="font-weight: 800; color: #2C2A29; font-size: 0.9rem; display: flex; align-items: center; gap: 4px;">
                                     <span>${hourlyLimit}/hr</span>
                                     <span style="color: #A09890; font-weight: 400;">•</span>
-                                    <span style="color: #736E68; font-size: 0.75rem;">${monthlyLimit}/mo</span>
+                                    <span style="color: #736E68; font-size: 0.8rem;">${monthlyLimit}/mo</span>
                                 </div>
-                                <span style="font-size: 0.69rem; color: #B45309; font-weight: 700; text-transform: uppercase;">
+                                <span style="font-size: 0.72rem; color: #B45309; font-weight: 700; text-transform: uppercase;">
                                     ${planTier} (${sentHour} used/hr)
                                 </span>
                             `}
                         </div>
                     </td>
 
-                    <td style="padding: 1rem;">
-                        <span style="font-size: 0.72rem; font-weight: 800; text-transform: uppercase; padding: 2px 7px; border-radius: 5px; ${isActive ? 'background: #E8F5E9; color: #2E7D32;' : 'background: #FEE2E2; color: #DC2626;'}">
-                            ${isActive ? 'Active' : 'Suspended'}
-                        </span>
+                    <!-- 5. Automations & Leads (Pill summary) -->
+                    <td style="padding: 1.15rem 1.25rem;">
+                        <div style="display: flex; gap: 0.45rem; align-items: center; flex-wrap: wrap;">
+                            <span style="font-weight: 700; color: #2C2A29; background: #F5F1EA; padding: 3px 9px; border-radius: 6px; font-size: 0.82rem; border: 1px solid #E6E1D8;" title="Active Automation Rules">
+                                ⚡ ${user.rules_count || 0} Rules
+                            </span>
+                            <span style="font-weight: 700; color: #2E7D32; background: #E8F5E9; padding: 3px 9px; border-radius: 6px; font-size: 0.82rem; border: 1px solid #C8E6C9;" title="Dispatched Leads">
+                                🎯 ${user.leads_count || 0} Leads
+                            </span>
+                        </div>
                     </td>
 
-                    <td style="padding: 1rem; color: #736E68; font-size: 0.8rem;">
+                    <!-- 6. Joined Date -->
+                    <td style="padding: 1.15rem 1.25rem; color: #736E68; font-size: 0.86rem; font-weight: 600;">
                         ${joinedDate}
                     </td>
 
-                    <td style="padding: 1rem 1.25rem; text-align: right;">
-                        <div style="display: flex; justify-content: flex-end; gap: 0.45rem; align-items: center;">
+                    <!-- 7. Actions (Full-width visible, no horizontal scroll needed) -->
+                    <td style="padding: 1.15rem 1.5rem; text-align: right; white-space: nowrap;">
+                        <div style="display: flex; justify-content: flex-end; gap: 0.5rem; align-items: center;">
                             <!-- Configure Quota / Limit -->
                             <button 
                                 onclick="adminView.openUserQuotaModal(${user.id}, '${(user.name || user.email).replace(/'/g, "\\'")}', '${user.email}', ${isSuper})"
                                 title="Configure Rate Limits & Quotas"
                                 class="btn btn-secondary"
-                                style="padding: 0.35rem 0.65rem; font-size: 0.76rem; font-weight: 700; display: flex; align-items: center; gap: 0.25rem; color: #B45309; border-color: #FCD34D; background: #FFFBEB;"
+                                style="padding: 0.5rem 0.85rem; font-size: 0.84rem; font-weight: 700; display: flex; align-items: center; gap: 0.35rem; color: #B45309; border-color: #FCD34D; background: #FFFBEB; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);"
                             >
                                 <span>⚡</span> Limit
                             </button>
@@ -365,7 +369,7 @@ const adminView = {
                                 onclick="adminView.impersonateUser(${user.id}, '${(user.name || user.email).replace(/'/g, "\\'")}')"
                                 title="Inspect this creator's automations & workspace"
                                 class="btn btn-secondary"
-                                style="padding: 0.35rem 0.65rem; font-size: 0.76rem; font-weight: 700; display: flex; align-items: center; gap: 0.25rem;"
+                                style="padding: 0.5rem 0.85rem; font-size: 0.84rem; font-weight: 700; display: flex; align-items: center; gap: 0.35rem; border-radius: 8px;"
                             >
                                 <span>👁️</span> View
                             </button>
@@ -376,7 +380,7 @@ const adminView = {
                                     onclick="adminView.toggleStatus(${user.id}, '${isActive ? 'suspended' : 'active'}')"
                                     title="${isActive ? 'Suspend User Access' : 'Activate User Access'}"
                                     class="btn btn-secondary"
-                                    style="padding: 0.35rem 0.65rem; font-size: 0.76rem; font-weight: 700; color: ${isActive ? '#DC2626' : '#2E7D32'};"
+                                    style="padding: 0.5rem 0.85rem; font-size: 0.84rem; font-weight: 700; color: ${isActive ? '#DC2626' : '#2E7D32'}; border-radius: 8px;"
                                 >
                                     ${isActive ? 'Pause' : 'Activate'}
                                 </button>
@@ -388,7 +392,7 @@ const adminView = {
                                     onclick="adminView.deleteUser(${user.id}, '${(user.name || user.email).replace(/'/g, "\\'")}')"
                                     title="Delete User Workspace"
                                     class="btn btn-secondary"
-                                    style="padding: 0.35rem 0.55rem; font-size: 0.76rem; font-weight: 700; color: #DC2626;"
+                                    style="padding: 0.5rem 0.75rem; font-size: 0.84rem; font-weight: 700; color: #DC2626; border-radius: 8px;"
                                 >
                                     🗑️
                                 </button>
@@ -490,35 +494,35 @@ const adminView = {
                     </div>
 
                     <!-- Presets Selection Bar -->
-                    <div style="margin-bottom: 1.25rem;">
-                        <div style="font-size: 0.74rem; font-weight: 700; color: #736E68; text-transform: uppercase; margin-bottom: 0.4rem; letter-spacing: 0.03em;">Quick Presets</div>
-                        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-                            <button type="button" onclick="adminView.applyQuotaPreset('unlimited')" class="btn btn-secondary" style="font-size: 0.74rem; padding: 0.3rem 0.65rem; font-weight: 700; border-color: #BFDBFE; color: #1E40AF; background: #EFF6FF;">⚡ Unlimited</button>
-                            <button type="button" onclick="adminView.applyQuotaPreset('free')" class="btn btn-secondary" style="font-size: 0.74rem; padding: 0.3rem 0.65rem; font-weight: 700;">Free (60/hr)</button>
-                            <button type="button" onclick="adminView.applyQuotaPreset('pro')" class="btn btn-secondary" style="font-size: 0.74rem; padding: 0.3rem 0.65rem; font-weight: 700;">Pro (300/hr)</button>
-                            <button type="button" onclick="adminView.applyQuotaPreset('agency')" class="btn btn-secondary" style="font-size: 0.74rem; padding: 0.3rem 0.65rem; font-weight: 700;">Agency (1000/hr)</button>
+                    <div style="margin-bottom: 1.35rem;">
+                        <div style="font-size: 0.78rem; font-weight: 800; color: #736E68; text-transform: uppercase; margin-bottom: 0.5rem; letter-spacing: 0.04em;">Quick Presets</div>
+                        <div style="display: flex; gap: 0.6rem; flex-wrap: wrap;">
+                            <button type="button" onclick="adminView.applyQuotaPreset('unlimited')" class="btn btn-secondary" style="font-size: 0.82rem; padding: 0.45rem 0.85rem; font-weight: 700; border-color: #BFDBFE; color: #1E40AF; background: #EFF6FF; border-radius: 8px;">⚡ Unlimited</button>
+                            <button type="button" onclick="adminView.applyQuotaPreset('free')" class="btn btn-secondary" style="font-size: 0.82rem; padding: 0.45rem 0.85rem; font-weight: 700; border-radius: 8px;">Free (60/hr)</button>
+                            <button type="button" onclick="adminView.applyQuotaPreset('pro')" class="btn btn-secondary" style="font-size: 0.82rem; padding: 0.45rem 0.85rem; font-weight: 700; border-radius: 8px;">Pro (300/hr)</button>
+                            <button type="button" onclick="adminView.applyQuotaPreset('agency')" class="btn btn-secondary" style="font-size: 0.82rem; padding: 0.45rem 0.85rem; font-weight: 700; border-radius: 8px;">Agency (1000/hr)</button>
                         </div>
                     </div>
 
                     <!-- Custom Limits Form Fields -->
                     <div id="modal-quota-custom-fields" style="${isUnlimited ? 'opacity: 0.5; pointer-events: none;' : ''}">
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem; margin-bottom: 1rem;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.15rem;">
                             <div class="form-group" style="margin-bottom: 0;">
-                                <label style="font-size: 0.78rem; font-weight: 700; color: #2C2A29; margin-bottom: 0.3rem; display: block;">Hourly DM Limit</label>
-                                <input type="number" id="modal-quota-hourly" class="input" value="${quota.hourly_limit !== -1 ? quota.hourly_limit : 60}" min="1" max="50000" style="padding: 0.5rem 0.75rem; font-size: 0.84rem; width: 100%; box-sizing: border-box;">
-                                <span style="font-size: 0.7rem; color: #736E68; display: block; margin-top: 0.2rem;">Max DMs per rolling 60 minutes</span>
+                                <label style="font-size: 0.84rem; font-weight: 800; color: #2C2A29; margin-bottom: 0.35rem; display: block;">Hourly DM Limit</label>
+                                <input type="number" id="modal-quota-hourly" class="input" value="${quota.hourly_limit !== -1 ? quota.hourly_limit : 60}" min="1" max="50000" style="padding: 0.65rem 0.85rem; font-size: 0.9rem; font-weight: 600; width: 100%; box-sizing: border-box; border-radius: 8px;">
+                                <span style="font-size: 0.74rem; color: #736E68; display: block; margin-top: 0.25rem;">Max DMs per rolling 60 minutes</span>
                             </div>
                             <div class="form-group" style="margin-bottom: 0;">
-                                <label style="font-size: 0.78rem; font-weight: 700; color: #2C2A29; margin-bottom: 0.3rem; display: block;">Monthly DM Limit</label>
-                                <input type="number" id="modal-quota-monthly" class="input" value="${quota.monthly_limit !== -1 ? quota.monthly_limit : 1000}" min="1" max="500000" style="padding: 0.5rem 0.75rem; font-size: 0.84rem; width: 100%; box-sizing: border-box;">
-                                <span style="font-size: 0.7rem; color: #736E68; display: block; margin-top: 0.2rem;">Max DMs per rolling 30 days</span>
+                                <label style="font-size: 0.84rem; font-weight: 800; color: #2C2A29; margin-bottom: 0.35rem; display: block;">Monthly DM Limit</label>
+                                <input type="number" id="modal-quota-monthly" class="input" value="${quota.monthly_limit !== -1 ? quota.monthly_limit : 1000}" min="1" max="500000" style="padding: 0.65rem 0.85rem; font-size: 0.9rem; font-weight: 600; width: 100%; box-sizing: border-box; border-radius: 8px;">
+                                <span style="font-size: 0.74rem; color: #736E68; display: block; margin-top: 0.25rem;">Max DMs per rolling 30 days</span>
                             </div>
                         </div>
 
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem; margin-bottom: 1.25rem;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.35rem;">
                             <div class="form-group" style="margin-bottom: 0;">
-                                <label style="font-size: 0.78rem; font-weight: 700; color: #2C2A29; margin-bottom: 0.3rem; display: block;">Plan Tier Badge</label>
-                                <select id="modal-quota-plan" class="input" style="padding: 0.5rem 0.75rem; font-size: 0.84rem; width: 100%; box-sizing: border-box;">
+                                <label style="font-size: 0.84rem; font-weight: 800; color: #2C2A29; margin-bottom: 0.35rem; display: block;">Plan Tier Badge</label>
+                                <select id="modal-quota-plan" class="input" style="padding: 0.65rem 0.85rem; font-size: 0.9rem; font-weight: 600; width: 100%; box-sizing: border-box; border-radius: 8px;">
                                     <option value="free" ${quota.plan_tier === 'free' ? 'selected' : ''}>Free</option>
                                     <option value="pro" ${quota.plan_tier === 'pro' ? 'selected' : ''}>Pro</option>
                                     <option value="agency" ${quota.plan_tier === 'agency' ? 'selected' : ''}>Agency</option>
@@ -527,29 +531,29 @@ const adminView = {
                                 </select>
                             </div>
                             <div class="form-group" style="margin-bottom: 0;">
-                                <label style="font-size: 0.78rem; font-weight: 700; color: #2C2A29; margin-bottom: 0.3rem; display: block;">Dispatch Pacing Delay (s)</label>
-                                <input type="number" id="modal-quota-delay" class="input" value="${quota.custom_delay_seconds || 1.5}" min="0.1" max="10" step="0.1" style="padding: 0.5rem 0.75rem; font-size: 0.84rem; width: 100%; box-sizing: border-box;">
-                                <span style="font-size: 0.7rem; color: #736E68; display: block; margin-top: 0.2rem;">Seconds between consecutive DMs</span>
+                                <label style="font-size: 0.84rem; font-weight: 800; color: #2C2A29; margin-bottom: 0.35rem; display: block;">Dispatch Pacing Delay (s)</label>
+                                <input type="number" id="modal-quota-delay" class="input" value="${quota.custom_delay_seconds || 1.5}" min="0.1" max="10" step="0.1" style="padding: 0.65rem 0.85rem; font-size: 0.9rem; font-weight: 600; width: 100%; box-sizing: border-box; border-radius: 8px;">
+                                <span style="font-size: 0.74rem; color: #736E68; display: block; margin-top: 0.25rem;">Seconds between consecutive DMs</span>
                             </div>
                         </div>
                     </div>
 
                     <!-- Usage Stats -->
-                    <div style="background: #FAF8F5; border: 1px solid #E6E1D8; border-radius: 8px; padding: 0.75rem; margin-bottom: 1.25rem; font-size: 0.76rem; color: #736E68;">
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.25rem;">
+                    <div style="background: #FAF8F5; border: 1.5px solid #E6E1D8; border-radius: 10px; padding: 0.9rem 1.1rem; margin-bottom: 1.35rem; font-size: 0.82rem; color: #736E68;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.35rem;">
                             <span>Current Hour Usage:</span>
-                            <strong style="color: #2C2A29;">${quota.dms_sent_current_hour || 0} DMs sent</strong>
+                            <strong style="color: #2C2A29; font-size: 0.88rem;">${quota.dms_sent_current_hour || 0} DMs sent</strong>
                         </div>
                         <div style="display: flex; justify-content: space-between;">
                             <span>Current 30-Day Window:</span>
-                            <strong style="color: #2C2A29;">${quota.dms_sent_current_month || 0} DMs sent</strong>
+                            <strong style="color: #2C2A29; font-size: 0.88rem;">${quota.dms_sent_current_month || 0} DMs sent</strong>
                         </div>
                     </div>
 
                     <!-- Footer Controls -->
-                    <div style="display: flex; justify-content: flex-end; gap: 0.75rem;">
-                        <button type="button" class="btn btn-secondary" onclick="App.closeModal()">Cancel</button>
-                        <button type="button" class="btn btn-primary" id="modal-quota-save-btn" onclick="adminView.saveUserQuota(${userId})">
+                    <div style="display: flex; justify-content: flex-end; gap: 0.85rem;">
+                        <button type="button" class="btn btn-secondary" onclick="App.closeModal()" style="padding: 0.65rem 1.25rem; font-size: 0.9rem; font-weight: 700; border-radius: 10px;">Cancel</button>
+                        <button type="button" class="btn btn-primary" id="modal-quota-save-btn" onclick="adminView.saveUserQuota(${userId})" style="padding: 0.65rem 1.35rem; font-size: 0.9rem; font-weight: 700; border-radius: 10px;">
                             Save Rate Limits
                         </button>
                     </div>
@@ -568,8 +572,8 @@ const adminView = {
         try {
             App.openModal(`Super Admin Personal Limit`, `
                 <div style="text-align: center; padding: 2rem;">
-                    <span class="spinner" style="width: 24px; height: 24px; display: inline-block;"></span>
-                    <div style="margin-top: 0.5rem; color: #736E68;">Loading Super Admin settings...</div>
+                    <span class="spinner" style="width: 28px; height: 28px; display: inline-block;"></span>
+                    <div style="margin-top: 0.75rem; color: #736E68; font-size: 0.95rem;">Loading Super Admin settings...</div>
                 </div>
             `);
 
@@ -588,22 +592,22 @@ const adminView = {
 
             const html = `
                 <div style="padding: 0.25rem 0;">
-                    <div style="background: #FEF3C7; border: 1.5px solid #FCD34D; border-radius: 10px; padding: 0.85rem 1rem; margin-bottom: 1.25rem;">
-                        <div style="font-weight: 800; color: #92400E; font-size: 0.88rem; display: flex; align-items: center; gap: 0.35rem;">
+                    <div style="background: #FEF3C7; border: 1.5px solid #FCD34D; border-radius: 12px; padding: 1rem 1.25rem; margin-bottom: 1.35rem;">
+                        <div style="font-weight: 800; color: #92400E; font-size: 0.95rem; display: flex; align-items: center; gap: 0.45rem;">
                             <span>👑 Super Admin Rate Limit & Dispatch Controls</span>
                         </div>
-                        <div style="font-size: 0.76rem; color: #B45309; margin-top: 0.2rem; line-height: 1.3;">
+                        <div style="font-size: 0.84rem; color: #B45309; margin-top: 0.3rem; line-height: 1.4;">
                             You control your own rate limits. Unlimited is recommended for high-volume automated campaigns and live reel launches.
                         </div>
                     </div>
 
                     <!-- Unlimited Toggle -->
-                    <div style="background: #EFF6FF; border: 1.5px solid #BFDBFE; border-radius: 10px; padding: 0.85rem 1rem; margin-bottom: 1.25rem;">
-                        <label style="display: flex; align-items: flex-start; gap: 0.65rem; cursor: pointer;">
-                            <input type="checkbox" id="modal-quota-unlimited" style="width: 18px; height: 18px; margin-top: 2px; accent-color: #D97757; cursor: pointer;" onchange="adminView.handleQuotaUnlimitedToggle(this.checked)" ${isUnlimited ? 'checked' : ''}>
+                    <div style="background: #EFF6FF; border: 1.5px solid #BFDBFE; border-radius: 12px; padding: 1rem 1.25rem; margin-bottom: 1.35rem;">
+                        <label style="display: flex; align-items: flex-start; gap: 0.75rem; cursor: pointer;">
+                            <input type="checkbox" id="modal-quota-unlimited" style="width: 20px; height: 20px; margin-top: 2px; accent-color: #D97757; cursor: pointer;" onchange="adminView.handleQuotaUnlimitedToggle(this.checked)" ${isUnlimited ? 'checked' : ''}>
                             <div>
-                                <div style="font-weight: 800; color: #1E40AF; font-size: 0.88rem;">⚡ Unlimited DMs (No Rate Limits)</div>
-                                <div style="font-size: 0.76rem; color: #3B82F6; margin-top: 0.2rem;">
+                                <div style="font-weight: 800; color: #1E40AF; font-size: 0.92rem;">⚡ Unlimited DMs (No Rate Limits)</div>
+                                <div style="font-size: 0.82rem; color: #3B82F6; margin-top: 0.25rem; line-height: 1.35;">
                                     Bypasses all hourly and monthly throttles. Dispatches as fast as safely configured.
                                 </div>
                             </div>
@@ -611,48 +615,48 @@ const adminView = {
                     </div>
 
                     <!-- Presets Selection Bar -->
-                    <div style="margin-bottom: 1.25rem;">
-                        <div style="font-size: 0.74rem; font-weight: 700; color: #736E68; text-transform: uppercase; margin-bottom: 0.4rem;">Admin Presets</div>
-                        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-                            <button type="button" onclick="adminView.applyQuotaPreset('unlimited')" class="btn btn-secondary" style="font-size: 0.74rem; padding: 0.3rem 0.65rem; font-weight: 700; border-color: #BFDBFE; color: #1E40AF; background: #EFF6FF;">⚡ Unlimited (Recommended)</button>
-                            <button type="button" onclick="adminView.applyQuotaPreset('super_high')" class="btn btn-secondary" style="font-size: 0.74rem; padding: 0.3rem 0.65rem; font-weight: 700;">Turbo (5000/hr)</button>
-                            <button type="button" onclick="adminView.applyQuotaPreset('safe')" class="btn btn-secondary" style="font-size: 0.74rem; padding: 0.3rem 0.65rem; font-weight: 700;">Safe Cap (500/hr)</button>
+                    <div style="margin-bottom: 1.35rem;">
+                        <div style="font-size: 0.78rem; font-weight: 800; color: #736E68; text-transform: uppercase; margin-bottom: 0.5rem; letter-spacing: 0.04em;">Admin Presets</div>
+                        <div style="display: flex; gap: 0.6rem; flex-wrap: wrap;">
+                            <button type="button" onclick="adminView.applyQuotaPreset('unlimited')" class="btn btn-secondary" style="font-size: 0.82rem; padding: 0.45rem 0.85rem; font-weight: 700; border-color: #BFDBFE; color: #1E40AF; background: #EFF6FF; border-radius: 8px;">⚡ Unlimited (Recommended)</button>
+                            <button type="button" onclick="adminView.applyQuotaPreset('super_high')" class="btn btn-secondary" style="font-size: 0.82rem; padding: 0.45rem 0.85rem; font-weight: 700; border-radius: 8px;">Turbo (5000/hr)</button>
+                            <button type="button" onclick="adminView.applyQuotaPreset('safe')" class="btn btn-secondary" style="font-size: 0.82rem; padding: 0.45rem 0.85rem; font-weight: 700; border-radius: 8px;">Safe Cap (500/hr)</button>
                         </div>
                     </div>
 
                     <!-- Custom Form Fields -->
                     <div id="modal-quota-custom-fields" style="${isUnlimited ? 'opacity: 0.5; pointer-events: none;' : ''}">
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem; margin-bottom: 1rem;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.15rem;">
                             <div class="form-group" style="margin-bottom: 0;">
-                                <label style="font-size: 0.78rem; font-weight: 700; color: #2C2A29; margin-bottom: 0.3rem; display: block;">Hourly DM Limit</label>
-                                <input type="number" id="modal-quota-hourly" class="input" value="${quota.hourly_limit !== -1 ? quota.hourly_limit : 5000}" min="1" max="100000" style="padding: 0.5rem 0.75rem; font-size: 0.84rem; width: 100%; box-sizing: border-box;">
+                                <label style="font-size: 0.84rem; font-weight: 800; color: #2C2A29; margin-bottom: 0.35rem; display: block;">Hourly DM Limit</label>
+                                <input type="number" id="modal-quota-hourly" class="input" value="${quota.hourly_limit !== -1 ? quota.hourly_limit : 5000}" min="1" max="100000" style="padding: 0.65rem 0.85rem; font-size: 0.9rem; font-weight: 600; width: 100%; box-sizing: border-box; border-radius: 8px;">
                             </div>
                             <div class="form-group" style="margin-bottom: 0;">
-                                <label style="font-size: 0.78rem; font-weight: 700; color: #2C2A29; margin-bottom: 0.3rem; display: block;">Monthly DM Limit</label>
-                                <input type="number" id="modal-quota-monthly" class="input" value="${quota.monthly_limit !== -1 ? quota.monthly_limit : 100000}" min="1" max="1000000" style="padding: 0.5rem 0.75rem; font-size: 0.84rem; width: 100%; box-sizing: border-box;">
+                                <label style="font-size: 0.84rem; font-weight: 800; color: #2C2A29; margin-bottom: 0.35rem; display: block;">Monthly DM Limit</label>
+                                <input type="number" id="modal-quota-monthly" class="input" value="${quota.monthly_limit !== -1 ? quota.monthly_limit : 100000}" min="1" max="1000000" style="padding: 0.65rem 0.85rem; font-size: 0.9rem; font-weight: 600; width: 100%; box-sizing: border-box; border-radius: 8px;">
                             </div>
                         </div>
                     </div>
 
                     <!-- Dispatch Delay Pacing -->
-                    <div class="form-group" style="margin-bottom: 1.25rem;">
-                        <label style="font-size: 0.78rem; font-weight: 700; color: #2C2A29; margin-bottom: 0.3rem; display: block;">Super Admin Dispatch Pacing Delay (s)</label>
-                        <input type="number" id="modal-quota-delay" class="input" value="${quota.custom_delay_seconds || 0.5}" min="0.1" max="5" step="0.1" style="padding: 0.5rem 0.75rem; font-size: 0.84rem; width: 100%; box-sizing: border-box;">
-                        <span style="font-size: 0.7rem; color: #736E68; display: block; margin-top: 0.2rem;">Default is 0.5s for Super Admin fast burst dispatch.</span>
+                    <div class="form-group" style="margin-bottom: 1.35rem;">
+                        <label style="font-size: 0.84rem; font-weight: 800; color: #2C2A29; margin-bottom: 0.35rem; display: block;">Super Admin Dispatch Pacing Delay (s)</label>
+                        <input type="number" id="modal-quota-delay" class="input" value="${quota.custom_delay_seconds || 0.5}" min="0.1" max="5" step="0.1" style="padding: 0.65rem 0.85rem; font-size: 0.9rem; font-weight: 600; width: 100%; box-sizing: border-box; border-radius: 8px;">
+                        <span style="font-size: 0.74rem; color: #736E68; display: block; margin-top: 0.25rem;">Default is 0.5s for Super Admin fast burst dispatch.</span>
                     </div>
 
                     <!-- Usage Telemetry -->
-                    <div style="background: #FAF8F5; border: 1px solid #E6E1D8; border-radius: 8px; padding: 0.75rem; margin-bottom: 1.25rem; font-size: 0.76rem; color: #736E68;">
+                    <div style="background: #FAF8F5; border: 1.5px solid #E6E1D8; border-radius: 10px; padding: 0.9rem 1.1rem; margin-bottom: 1.35rem; font-size: 0.82rem; color: #736E68;">
                         <div style="display: flex; justify-content: space-between;">
                             <span>Sent in Current Hour:</span>
-                            <strong style="color: #2C2A29;">${quota.dms_sent_current_hour || 0} DMs</strong>
+                            <strong style="color: #2C2A29; font-size: 0.88rem;">${quota.dms_sent_current_hour || 0} DMs</strong>
                         </div>
                     </div>
 
                     <!-- Footer Controls -->
-                    <div style="display: flex; justify-content: flex-end; gap: 0.75rem;">
-                        <button type="button" class="btn btn-secondary" onclick="App.closeModal()">Cancel</button>
-                        <button type="button" class="btn btn-primary" onclick="adminView.saveSuperAdminQuota()">
+                    <div style="display: flex; justify-content: flex-end; gap: 0.85rem;">
+                        <button type="button" class="btn btn-secondary" onclick="App.closeModal()" style="padding: 0.65rem 1.25rem; font-size: 0.9rem; font-weight: 700; border-radius: 10px;">Cancel</button>
+                        <button type="button" class="btn btn-primary" onclick="adminView.saveSuperAdminQuota()" style="padding: 0.65rem 1.35rem; font-size: 0.9rem; font-weight: 700; border-radius: 10px;">
                             Save Super Admin Limit
                         </button>
                     </div>

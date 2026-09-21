@@ -136,9 +136,7 @@ router.get('/events/stats', auth, (req, res) => {
         const dmsSent = db.prepare(`SELECT COUNT(*) as count FROM events WHERE dm_status IN ('sent', 'delivered') ${userFilter ? userFilter.replace('WHERE', 'AND') : ''}`).get(...userParams).count;
         const dmsDelivered = db.prepare(`SELECT COUNT(*) as count FROM events WHERE dm_status = 'delivered' ${userFilter ? userFilter.replace('WHERE', 'AND') : ''}`).get(...userParams).count;
         const dmsFailed = db.prepare(`SELECT COUNT(*) as count FROM events WHERE dm_status = 'failed' ${userFilter ? userFilter.replace('WHERE', 'AND') : ''}`).get(...userParams).count;
-        const totalClicks = db.prepare(`SELECT COUNT(*) as count FROM clicks c JOIN events e ON c.event_id = e.id ${userFilter ? userFilter.replace('WHERE', 'WHERE (e.user_id = ? OR e.user_id IS NULL)') : ''}`).get(...userParams).count;
-        
-        const todayStr = new Date().toISOString().split('T')[0];
+        const totalClicks = db.prepare(`SELECT COUNT(*) as count FROM clicks c JOIN events e ON c.event_id = e.id ${(!isSuperAdmin && userId) ? 'WHERE (e.user_id = ? OR e.user_id IS NULL)' : ''}`).get(...userParams).count;
         const todayEvents = db.prepare(`SELECT COUNT(*) as count FROM events WHERE created_at >= ? ${userFilter ? userFilter.replace('WHERE', 'AND') : ''}`).get(todayStr, ...userParams).count;
         
         const weekAgo = new Date();
