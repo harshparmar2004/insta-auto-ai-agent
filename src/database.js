@@ -701,7 +701,10 @@ function getAllUsers(search = '') {
     const s = `%${search.trim()}%`;
     params.push(s, s, s);
   }
-  query += ` ORDER BY u.id DESC`;
+  query += ` ORDER BY 
+    CASE WHEN u.role = 'super_admin' THEN 0 ELSE 1 END ASC,
+    u.created_at ASC,
+    u.id ASC`;
   return db.prepare(query).all(...params);
 }
 

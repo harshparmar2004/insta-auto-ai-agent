@@ -90,20 +90,23 @@ const adminView = {
                             <div style="font-size: 0.8rem; color: #736E68;">Search, inspect, and manage tenant workspaces, privileges, and rate limits.</div>
                         </div>
 
-                        <!-- Filter & Search Controls -->
-                        <div style="display: flex; gap: 0.65rem; align-items: center; flex-wrap: wrap;">
-                            <input 
-                                type="text" 
-                                id="admin-search-input" 
-                                placeholder="Search by name, email, or @handle..." 
-                                value="${this.searchQuery}"
-                                oninput="adminView.handleSearch(this.value)"
-                                style="padding: 0.45rem 0.85rem; font-size: 0.82rem; border-radius: 8px; border: 1.5px solid #E6E1D8; background: #FAF8F5; outline: none; min-width: 250px; transition: border-color 0.15s ease;"
-                            />
+                        <!-- Filter & Search Controls (Longer Search Bar) -->
+                        <div style="display: flex; gap: 0.75rem; align-items: center; flex: 1; max-width: 560px; justify-content: flex-end;">
+                            <div style="position: relative; flex: 1; min-width: 280px;">
+                                <span style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); font-size: 0.82rem; color: #A09890; pointer-events: none;">🔍</span>
+                                <input 
+                                    type="text" 
+                                    id="admin-search-input" 
+                                    placeholder="Search by name, email, or @handle..." 
+                                    value="${this.searchQuery}"
+                                    oninput="adminView.handleSearch(this.value)"
+                                    style="width: 100%; box-sizing: border-box; padding: 0.48rem 0.85rem 0.48rem 2rem; font-size: 0.82rem; border-radius: 8px; border: 1.5px solid #E6E1D8; background: #FAF8F5; outline: none; transition: border-color 0.15s ease;"
+                                />
+                            </div>
                             <select 
                                 id="admin-status-filter"
                                 onchange="adminView.handleStatusFilter(this.value)"
-                                style="padding: 0.45rem 0.85rem; font-size: 0.82rem; border-radius: 8px; border: 1.5px solid #E6E1D8; background: #FAF8F5; outline: none; cursor: pointer; font-weight: 600;"
+                                style="padding: 0.48rem 0.95rem; font-size: 0.82rem; border-radius: 8px; border: 1.5px solid #E6E1D8; background: #FAF8F5; outline: none; cursor: pointer; font-weight: 600; flex-shrink: 0;"
                             >
                                 <option value="all" ${this.statusFilter === 'all' ? 'selected' : ''}>All Statuses</option>
                                 <option value="active" ${this.statusFilter === 'active' ? 'selected' : ''}>Active Only</option>
@@ -117,18 +120,19 @@ const adminView = {
                         <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.84rem;">
                             <thead>
                                 <tr style="background: #FAF8F5; border-bottom: 1.5px solid #E6E1D8; color: #736E68; font-size: 0.72rem; text-transform: uppercase; font-weight: 800; letter-spacing: 0.04em;">
-                                    <th style="padding: 0.75rem 1rem; width: 22%;">Creator / User</th>
-                                    <th style="padding: 0.75rem 0.85rem; width: 17%;">Instagram Account</th>
+                                    <th style="padding: 0.75rem 0.65rem; width: 4%; min-width: 44px; text-align: center;">#</th>
+                                    <th style="padding: 0.75rem 0.95rem; width: 21%;">Creator / User</th>
+                                    <th style="padding: 0.75rem 0.85rem; width: 16%;">Instagram Account</th>
                                     <th style="padding: 0.75rem 0.85rem; width: 12%;">Role & Status</th>
-                                    <th style="padding: 0.75rem 0.85rem; width: 17%;">Rate Limit / Tier</th>
-                                    <th style="padding: 0.75rem 0.85rem; width: 14%;">Automations & Leads</th>
+                                    <th style="padding: 0.75rem 0.85rem; width: 16%;">Rate Limit / Tier</th>
+                                    <th style="padding: 0.75rem 0.85rem; width: 13%;">Automations & Leads</th>
                                     <th style="padding: 0.75rem 0.85rem; width: 8%;">Joined</th>
                                     <th style="padding: 0.75rem 1rem; width: 10%; text-align: right; white-space: nowrap;">Actions</th>
                                 </tr>
                             </thead>
                             <tbody id="admin-users-tbody">
                                 <tr>
-                                    <td colspan="7" style="padding: 2rem; text-align: center; color: #736E68;">
+                                    <td colspan="8" style="padding: 2rem; text-align: center; color: #736E68;">
                                         <span class="spinner" style="width: 24px; height: 24px; display: inline-block;"></span>
                                         <div style="margin-top: 0.5rem; font-size: 0.85rem; font-weight: 600;">Loading user directory...</div>
                                     </td>
@@ -247,10 +251,22 @@ const adminView = {
             filtered = filtered.filter(u => u.status === this.statusFilter);
         }
 
+        // Sort: Super Admin ALWAYS #1 on top, then subsequent users ranked chronologically by join date (created_at ASC)
+        filtered.sort((a, b) => {
+            const aIsSuper = a.role === 'super_admin';
+            const bIsSuper = b.role === 'super_admin';
+            if (aIsSuper && !bIsSuper) return -1;
+            if (!aIsSuper && bIsSuper) return 1;
+            const timeA = a.created_at ? new Date(a.created_at).getTime() : 0;
+            const timeB = b.created_at ? new Date(b.created_at).getTime() : 0;
+            if (timeA !== timeB) return timeA - timeB;
+            return (a.id || 0) - (b.id || 0);
+        });
+
         if (filtered.length === 0) {
             tbody.innerHTML = `
                 <tr>
-                    <td colspan="7" style="padding: 3rem; text-align: center; color: #736E68;">
+                    <td colspan="8" style="padding: 3rem; text-align: center; color: #736E68;">
                         <div style="font-size: 1.5rem; margin-bottom: 0.4rem;">🔍</div>
                         <div style="font-weight: 700; font-size: 1.05rem; color: #2C2A29;">No creators found</div>
                         <div style="font-size: 0.86rem; color: #A09890; margin-top: 0.25rem;">Try adjusting your search query or filters.</div>
@@ -260,7 +276,7 @@ const adminView = {
             return;
         }
 
-        tbody.innerHTML = filtered.map(user => {
+        tbody.innerHTML = filtered.map((user, index) => {
             const isSuper = user.role === 'super_admin';
             const isActive = user.status === 'active';
             const hasIg = !!user.ig_username;
@@ -272,11 +288,25 @@ const adminView = {
             const monthlyLimit = user.monthly_limit !== undefined && user.monthly_limit !== null ? user.monthly_limit : (isSuper ? '∞' : 1000);
             const planTier = user.plan_tier || (isSuper ? 'super_admin' : 'free');
             const sentHour = user.dms_sent_current_hour || 0;
+            const serialNumber = index + 1;
 
             return `
                 <tr style="border-bottom: 1.5px solid #F5F1EA; transition: background 0.15s ease;" onmouseover="this.style.background='#FAF8F5'" onmouseout="this.style.background='transparent'">
+                    <!-- 0. Serial Number (Super Admin #1, then sequential on join basis) -->
+                    <td style="padding: 0.7rem 0.65rem; text-align: center;">
+                        ${isSuper ? `
+                            <span style="display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 6px; background: #FEF3C7; color: #B45309; border: 1px solid #FCD34D; font-weight: 800; font-size: 0.76rem;" title="Super Admin (Rank #1)">
+                                1
+                            </span>
+                        ` : `
+                            <span style="display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 6px; background: #F5F1EA; color: #736E68; font-weight: 700; font-size: 0.76rem;">
+                                ${serialNumber}
+                            </span>
+                        `}
+                    </td>
+
                     <!-- 1. Creator / User -->
-                    <td style="padding: 0.7rem 1rem;">
+                    <td style="padding: 0.7rem 0.95rem;">
                         <div style="display: flex; align-items: center; gap: 0.65rem;">
                             <div style="width: 32px; height: 32px; border-radius: 50%; background: #FAF0EC; color: #D97757; font-weight: 700; font-size: 0.76rem; display: flex; align-items: center; justify-content: center; border: 1.5px solid #E6E1D8; flex-shrink: 0; box-shadow: 0 1px 2px rgba(0,0,0,0.03);">
                                 ${initials}
