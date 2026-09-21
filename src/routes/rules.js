@@ -564,6 +564,7 @@ router.post('/rules/:id/backfill', auth, async (req, res) => {
                     messageText: messageToSend,
                     publicReply: rule.public_reply || null,
                     eventId: eventId,
+                    userId: req.user ? req.user.id : (rule.user_id || null),
                     processAt
                 });
 

@@ -163,6 +163,21 @@ function getDb() {
       status TEXT DEFAULT 'active',
       created_at TEXT
     );
+
+    CREATE TABLE IF NOT EXISTS user_quotas (
+      user_id INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+      plan_tier TEXT DEFAULT 'free',
+      is_unlimited INTEGER DEFAULT 0,
+      hourly_limit INTEGER DEFAULT 60,
+      monthly_limit INTEGER DEFAULT 1000,
+      dms_sent_current_hour INTEGER DEFAULT 0,
+      dms_sent_current_month INTEGER DEFAULT 0,
+      hour_window_start TEXT,
+      month_window_start TEXT,
+      custom_delay_seconds REAL DEFAULT 1.5,
+      updated_by_admin INTEGER DEFAULT 0,
+      updated_at TEXT
+    );
   `);
 
   // Safe migrations
@@ -666,11 +681,19 @@ function getAllUsers(search = '') {
     SELECT 
       u.id, u.name, u.email, u.role, u.status, u.created_at, u.updated_at,
       a.ig_username, a.ig_user_id, a.token_expires_at, a.is_active as ig_active,
+      COALESCE(q.plan_tier, CASE WHEN u.role = 'super_admin' THEN 'super_admin' ELSE 'free' END) as plan_tier,
+      COALESCE(q.is_unlimited, CASE WHEN u.role = 'super_admin' THEN 1 ELSE 0 END) as is_unlimited,
+      COALESCE(q.hourly_limit, CASE WHEN u.role = 'super_admin' THEN -1 ELSE 60 END) as hourly_limit,
+      COALESCE(q.monthly_limit, CASE WHEN u.role = 'super_admin' THEN -1 ELSE 1000 END) as monthly_limit,
+      COALESCE(q.dms_sent_current_hour, 0) as dms_sent_current_hour,
+      COALESCE(q.dms_sent_current_month, 0) as dms_sent_current_month,
+      COALESCE(q.custom_delay_seconds, CASE WHEN u.role = 'super_admin' THEN 0.5 ELSE 1.5 END) as custom_delay_seconds,
       (SELECT COUNT(*) FROM rules WHERE user_id = u.id) as rules_count,
       (SELECT COUNT(*) FROM events WHERE user_id = u.id) as leads_count,
       (SELECT COUNT(*) FROM media WHERE user_id = u.id) as media_count
     FROM users u
     LEFT JOIN instagram_accounts a ON a.user_id = u.id AND a.is_active = 1
+    LEFT JOIN user_quotas q ON q.user_id = u.id
   `;
   const params = [];
   if (search && search.trim()) {
@@ -752,6 +775,171 @@ function getAgentCampaigns() {
   `).all();
 }
 
+function getUserQuota(userId) {
+  const database = getDb();
+  if (!userId) {
+    return {
+      user_id: 0,
+      plan_tier: 'super_admin',
+      is_unlimited: 1,
+      hourly_limit: -1,
+      monthly_limit: -1,
+      dms_sent_current_hour: 0,
+      dms_sent_current_month: 0,
+      custom_delay_seconds: 0.5
+    };
+  }
+
+  let quota = database.prepare('SELECT * FROM user_quotas WHERE user_id = ?').get(userId);
+  if (!quota) {
+    const user = database.prepare('SELECT id, role FROM users WHERE id = ?').get(userId);
+    const isSuper = user && user.role === 'super_admin';
+    const now = new Date().toISOString();
+
+    const planTier = isSuper ? 'super_admin' : 'free';
+    const isUnlimited = isSuper ? 1 : 0;
+    const hourlyLimit = isSuper ? -1 : 60;
+    const monthlyLimit = isSuper ? -1 : 1000;
+    const delaySec = isSuper ? 0.5 : 1.5;
+
+    database.prepare(`
+      INSERT INTO user_quotas (
+        user_id, plan_tier, is_unlimited, hourly_limit, monthly_limit,
+        dms_sent_current_hour, dms_sent_current_month,
+        hour_window_start, month_window_start,
+        custom_delay_seconds, updated_by_admin, updated_at
+      ) VALUES (?, ?, ?, ?, ?, 0, 0, ?, ?, ?, ?, ?)
+    `).run(userId, planTier, isUnlimited, hourlyLimit, monthlyLimit, now, now, delaySec, isSuper ? 1 : 0, now);
+
+    quota = database.prepare('SELECT * FROM user_quotas WHERE user_id = ?').get(userId);
+  }
+  return quota;
+}
+
+function updateUserQuota(userId, { plan_tier, is_unlimited, hourly_limit, monthly_limit, custom_delay_seconds, updated_by_admin = 1 }) {
+  const database = getDb();
+  const existing = getUserQuota(userId);
+  const now = new Date().toISOString();
+
+  const planTier = plan_tier !== undefined ? plan_tier : existing.plan_tier;
+  const isUnlimited = is_unlimited !== undefined ? (is_unlimited ? 1 : 0) : existing.is_unlimited;
+  const hourlyLimit = hourly_limit !== undefined ? Number(hourly_limit) : existing.hourly_limit;
+  const monthlyLimit = monthly_limit !== undefined ? Number(monthly_limit) : existing.monthly_limit;
+  const delaySec = custom_delay_seconds !== undefined ? Number(custom_delay_seconds) : existing.custom_delay_seconds;
+
+  database.prepare(`
+    UPDATE user_quotas
+    SET plan_tier = ?,
+        is_unlimited = ?,
+        hourly_limit = ?,
+        monthly_limit = ?,
+        custom_delay_seconds = ?,
+        updated_by_admin = ?,
+        updated_at = ?
+    WHERE user_id = ?
+  `).run(planTier, isUnlimited, hourlyLimit, monthlyLimit, delaySec, updated_by_admin ? 1 : 0, now, userId);
+
+  return getUserQuota(userId);
+}
+
+function checkAndIncrementUserQuota(userId) {
+  if (!userId) {
+    return { allowed: true, is_unlimited: true, delay_seconds: 0.5 };
+  }
+
+  const database = getDb();
+  let quota = getUserQuota(userId);
+  const now = new Date();
+  const nowIso = now.toISOString();
+
+  // 1. Super Admin or explicitly flagged unlimited users have zero restrictions
+  if (quota.is_unlimited === 1 || quota.plan_tier === 'super_admin' || (quota.hourly_limit === -1 && quota.monthly_limit === -1)) {
+    database.prepare(`
+      UPDATE user_quotas 
+      SET dms_sent_current_hour = dms_sent_current_hour + 1,
+          dms_sent_current_month = dms_sent_current_month + 1,
+          updated_at = ?
+      WHERE user_id = ?
+    `).run(nowIso, userId);
+
+    return { 
+      allowed: true, 
+      is_unlimited: true, 
+      delay_seconds: quota.custom_delay_seconds || 0.5 
+    };
+  }
+
+  // 2. Window rollover checks
+  let hourlyUsage = quota.dms_sent_current_hour || 0;
+  let monthlyUsage = quota.dms_sent_current_month || 0;
+  let hourStart = quota.hour_window_start ? new Date(quota.hour_window_start) : now;
+  let monthStart = quota.month_window_start ? new Date(quota.month_window_start) : now;
+
+  // If >= 1 hour elapsed, reset hourly bucket
+  if ((now.getTime() - hourStart.getTime()) >= 3600000) {
+    hourlyUsage = 0;
+    hourStart = now;
+    database.prepare(`
+      UPDATE user_quotas 
+      SET dms_sent_current_hour = 0, hour_window_start = ?
+      WHERE user_id = ?
+    `).run(nowIso, userId);
+  }
+
+  // If >= 30 days elapsed or calendar month rolled, reset monthly bucket
+  const daysElapsed = (now.getTime() - monthStart.getTime()) / (1000 * 60 * 60 * 24);
+  if (daysElapsed >= 30 || now.getMonth() !== monthStart.getMonth()) {
+    monthlyUsage = 0;
+    monthStart = now;
+    database.prepare(`
+      UPDATE user_quotas 
+      SET dms_sent_current_month = 0, month_window_start = ?
+      WHERE user_id = ?
+    `).run(nowIso, userId);
+  }
+
+  // 3. Hourly Cap Enforcement
+  if (quota.hourly_limit > 0 && hourlyUsage >= quota.hourly_limit) {
+    return {
+      allowed: false,
+      reason: 'hourly_limit_exceeded',
+      message: `Hourly rate limit reached (${quota.hourly_limit} DMs/hour). Reset in ${Math.max(1, Math.round(60 - (now - hourStart) / 60000))} minutes.`,
+      current: hourlyUsage,
+      limit: quota.hourly_limit
+    };
+  }
+
+  // 4. Monthly Cap Enforcement
+  if (quota.monthly_limit > 0 && monthlyUsage >= quota.monthly_limit) {
+    return {
+      allowed: false,
+      reason: 'monthly_limit_exceeded',
+      message: `Monthly quota reached (${quota.monthly_limit} DMs/month). Please contact Super Admin to upgrade.`,
+      current: monthlyUsage,
+      limit: quota.monthly_limit
+    };
+  }
+
+  // 5. Allowed - increment usage
+  database.prepare(`
+    UPDATE user_quotas 
+    SET dms_sent_current_hour = dms_sent_current_hour + 1,
+        dms_sent_current_month = dms_sent_current_month + 1,
+        updated_at = ?
+    WHERE user_id = ?
+  `).run(nowIso, userId);
+
+  return {
+    allowed: true,
+    is_unlimited: false,
+    delay_seconds: quota.custom_delay_seconds || 1.5,
+    hourly_used: hourlyUsage + 1,
+    hourly_limit: quota.hourly_limit,
+    monthly_used: monthlyUsage + 1,
+    monthly_limit: quota.monthly_limit
+  };
+}
+
 module.exports = {
   getDb,
   getConfig,
@@ -776,5 +964,8 @@ module.exports = {
   deleteUser,
   getAdminMetrics,
   saveAgentCampaign,
-  getAgentCampaigns
+  getAgentCampaigns,
+  getUserQuota,
+  updateUserQuota,
+  checkAndIncrementUserQuota
 };

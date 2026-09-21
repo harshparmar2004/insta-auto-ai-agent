@@ -333,6 +333,7 @@ async function processCommentEvent(payload) {
                     messageText: messageToSend,
                     publicReply: rule.public_reply || null,
                     eventId: eventId,
+                    userId: targetUserId,
                     accessToken: activeToken,
                     processAt
                 });
@@ -382,6 +383,7 @@ async function processMessageEvent(payload) {
                             type: 'direct_message',
                             recipientId: senderId,
                             messageText: messageToSend,
+                            userId: targetUserId,
                             accessToken: activeToken,
                             processAt: Date.now()
                         });
@@ -456,6 +458,7 @@ async function processMessageEvent(payload) {
                         recipientId: senderId,
                         messagePayload: step2Payload,
                         messageText: step2Text,
+                        userId: targetUserId,
                         accessToken: activeToken,
                         processAt: Date.now()
                     });
@@ -519,6 +522,7 @@ async function processMessageEvent(payload) {
                             recipientId: senderId,
                             messagePayload: repromptPayload,
                             messageText: notFollowingText,
+                            userId: targetUserId,
                             accessToken: activeToken,
                             processAt: Date.now()
                         });
@@ -600,6 +604,7 @@ async function processMessageEvent(payload) {
                         messagePayload: step3Payload || messageToSend,
                         messageText: messageToSend,
                         eventId: eventResult.lastInsertRowid,
+                        userId: targetUserId,
                         accessToken: activeToken,
                         processAt: Date.now()
                     });
