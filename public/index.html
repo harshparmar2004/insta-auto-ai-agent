@@ -43,314 +43,275 @@
     <div id="toast-container" class="toast-container"></div>
     
     <!-- ==========================================================================
-         EMERGENT-STYLE SAAS LANDING PAGE & AUTH EXPERIENCE (InstaAuto AI Agent)
+         EMERGENT-STYLE PIXEL-PERFECT SAAS LANDING & AUTH EXPERIENCE (InstaAuto AI Agent)
          ========================================================================== -->
     <div id="login-screen" class="login-screen active">
-        <!-- FIXED STICKY NAVIGATION HEADER -->
-        <header class="landing-header">
-            <div class="landing-nav-container">
-                <!-- Brand Logo & Live Status -->
-                <a href="#hero" class="landing-logo">
-                    <img src="favicon.png?v=5" alt="InstaAuto Logo" class="landing-logo-img" />
-                    <div class="landing-logo-text-col">
-                        <span class="landing-logo-title">InstaAuto</span>
-                        <span class="landing-logo-tag">AI Agent</span>
-                    </div>
-                    <div class="landing-status-pill">
-                        <span class="status-dot"></span>
-                        <span>Meta API v21.0</span>
+        <!-- Full-Page Ambient Background Picture -->
+        <picture class="auth-bg-picture">
+            <source media="(max-width: 767px)" srcset="https://assets.emergent.sh/assets/landing-page/landing-page-mobile.png"/>
+            <source media="(prefers-color-scheme: dark)" srcset="https://assets.emergent.sh/assets/landing-page/landing-bg.png"/>
+            <img src="https://assets.emergent.sh/assets/landing-page/landing-bg-light.png" alt="Background pattern" class="auth-bg-img" loading="eager"/>
+        </picture>
+
+        <!-- STICKY TOP NAVIGATION HEADER -->
+        <header class="emergent-header">
+            <div class="emergent-header-inner">
+                <!-- Brand Logo & Live Badge -->
+                <a href="#hero" class="emergent-brand-group">
+                    <img src="favicon.png?v=5" alt="InstaAuto" class="emergent-brand-logo" />
+                    <div class="emergent-brand-title-wrap">
+                        <span class="emergent-brand-name">InstaAuto</span>
+                        <span class="emergent-brand-badge">Meta API v21.0</span>
                     </div>
                 </a>
 
-                <!-- Centered Navigation Group -->
-                <nav class="landing-nav-menu">
-                    <a href="#features" class="nav-link">Features</a>
-                    <a href="#how-it-works" class="nav-link">How It Works</a>
-                    <a href="#pricing" class="nav-link">Pricing</a>
-                    <a href="#faqs" class="nav-link">FAQs</a>
-                    <a href="#solutions" class="nav-link">Solutions</a>
+                <!-- Centered Navigation Links -->
+                <nav class="emergent-nav-links">
+                    <a href="#features" class="emergent-nav-item">Features</a>
+                    <a href="#how-it-works" class="emergent-nav-item">How It Works</a>
+                    <a href="#pricing" class="emergent-nav-item">Pricing</a>
+                    <a href="#faqs" class="emergent-nav-item">FAQs</a>
+                    <a href="#solutions" class="emergent-nav-item">Solutions</a>
                 </nav>
 
                 <!-- Header Actions -->
-                <div class="landing-header-actions">
-                    <button type="button" onclick="scrollToAuth('login')" class="btn-header-ghost">Sign In</button>
-                    <button type="button" onclick="scrollToAuth('register')" class="btn-header-cta">
+                <div class="emergent-header-actions">
+                    <button type="button" onclick="scrollToAuth('login')" class="emergent-btn-ghost">Sign In</button>
+                    <button type="button" onclick="scrollToAuth('register')" class="emergent-btn-cta">
                         <span>Get Started Free</span>
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                        <svg class="emergent-arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                     </button>
                 </div>
             </div>
         </header>
 
-        <!-- HERO SECTION (Split Architecture) -->
-        <section id="hero" class="landing-hero-section">
-            <!-- Ambient Background Gradients -->
-            <div class="hero-ambient-glow">
-                <div class="glow-orb orb-1"></div>
-                <div class="glow-orb orb-2"></div>
-                <div class="glow-orb orb-3"></div>
-            </div>
-
-            <div class="hero-split-grid">
-                <!-- LEFT COLUMN: Prompt, Headline & Provider Auth -->
-                <div class="hero-left-col">
-                    <!-- Eyebrow Pill -->
-                    <div class="hero-badge-pill">
-                        <span>⚡</span>
-                        <span>Next-Gen Instagram Automation SaaS</span>
-                    </div>
-
-                    <!-- Master Headline -->
-                    <h1 class="hero-main-title">
-                        Describe your automation <br/>
-                        <span class="hero-gradient-text">Build Instagram Growth & DMs with AI</span>
-                    </h1>
-
-                    <p class="hero-description">
-                        Turn Reel comments into verified followers, email leads, and automatic digital sales in 0.4 seconds. Powered by our 24/7 autonomous Meta Graph AI Agent.
-                    </p>
-
-                    <!-- Authentication Card Box -->
-                    <div id="auth-box" class="hero-auth-card">
-                        <!-- Mode Switcher Tabs -->
-                        <div class="auth-mode-tabs">
-                            <button type="button" id="tab-btn-login" onclick="switchAuthTab('login')" class="tab-btn active">
-                                Sign In
-                            </button>
-                            <button type="button" id="tab-btn-register" onclick="switchAuthTab('register')" class="tab-btn">
-                                Create Free Account
-                            </button>
+        <!-- HERO SECTION: FULL-VIEWPORT SPLIT EXPERIENCE -->
+        <section id="hero" class="emergent-hero-section">
+            <div class="emergent-hero-split">
+                <!-- LEFT COLUMN: Master Headline & Authentication -->
+                <div class="emergent-left-col">
+                    <div class="emergent-auth-container">
+                        <!-- Hero Logo -->
+                        <div class="emergent-hero-logo-box">
+                            <img src="favicon.png?v=5" alt="InstaAuto Hero Logo" class="emergent-hero-logo" />
                         </div>
 
-                        <!-- Provider Buttons (Instagram / Meta, Google, Apple) -->
-                        <div class="provider-auth-list">
-                            <!-- Instagram / Meta -->
-                            <button type="button" onclick="continueWithMeta()" class="provider-btn provider-meta" title="Connect Instagram via Meta Graph API">
-                                <div class="provider-btn-content">
-                                    <svg class="provider-icon" viewBox="0 0 24 24" fill="currentColor">
-                                        <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
-                                    </svg>
+                        <!-- Master Headline -->
+                        <div class="emergent-headline-box">
+                            <h1 class="emergent-main-headline">
+                                Describe your automation <br/>
+                                <span class="emergent-gradient-text">Build Instagram Growth & DMs with AI</span>
+                            </h1>
+                            <p class="emergent-hero-subtext">
+                                Turn Reel comments into followers, qualified leads, and digital sales in 0.4 seconds. Powered by autonomous Meta Graph AI.
+                            </p>
+                        </div>
+
+                        <!-- Provider Buttons (Instagram / Google / Apple) -->
+                        <div class="emergent-provider-list">
+                            <!-- Instagram (Meta) Button -->
+                            <button type="button" onclick="continueWithMeta()" class="emergent-provider-btn btn-instagram" title="Connect with Instagram">
+                                <div class="btn-inner">
+                                    <svg class="provider-svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
                                     <span>Continue with Instagram (Meta)</span>
                                 </div>
                             </button>
 
-                            <!-- Google -->
-                            <button type="button" onclick="continueWithGoogle()" class="provider-btn provider-google">
-                                <div class="provider-btn-content">
-                                    <svg class="provider-icon" viewBox="0 0 24 24">
-                                        <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"/>
-                                        <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.34 24 12 24z"/>
-                                        <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 10.03 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/>
-                                        <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.34 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
-                                    </svg>
+                            <!-- Google Button -->
+                            <button type="button" onclick="continueWithGoogle()" class="emergent-provider-btn btn-google">
+                                <div class="btn-inner">
+                                    <img src="https://assets.emergent.sh/assets/Google.svg" alt="Google" class="provider-img" />
                                     <span>Continue with Google</span>
                                 </div>
                             </button>
 
-                            <!-- Apple -->
-                            <button type="button" onclick="continueWithApple()" class="provider-btn provider-apple">
-                                <div class="provider-btn-content">
-                                    <svg class="provider-icon" viewBox="0 0 24 24" fill="currentColor">
-                                        <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.38c.62-.75 1.04-1.8 1.01-2.85-.92.04-2.06.62-2.73 1.4-.57.66-.99 1.74-.92 2.76 1.04.08 2.02-.56 2.64-1.31z"/>
-                                    </svg>
+                            <!-- Apple Button -->
+                            <button type="button" onclick="continueWithApple()" class="emergent-provider-btn btn-apple">
+                                <div class="btn-inner">
+                                    <svg class="provider-svg" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.38c.62-.75 1.04-1.8 1.01-2.85-.92.04-2.06.62-2.73 1.4-.57.66-.99 1.74-.92 2.76 1.04.08 2.02-.56 2.64-1.31z"/></svg>
                                     <span>Continue with Apple</span>
                                 </div>
                             </button>
                         </div>
 
-                        <!-- Divider: OR CONTINUE WITH EMAIL -->
-                        <div class="auth-divider">
+                        <!-- Dashed Divider -->
+                        <div class="emergent-divider">
                             <span class="divider-line"></span>
-                            <span class="divider-text">OR CONTINUE WITH EMAIL</span>
+                            <span class="divider-label">OR CONTINUE WITH EMAIL</span>
                             <span class="divider-line"></span>
                         </div>
 
+                        <!-- Tab Switcher: Sign In / Create Account -->
+                        <div class="emergent-tab-pill">
+                            <button type="button" id="tab-btn-login" onclick="switchAuthTab('login')" class="tab-item active">Sign In</button>
+                            <button type="button" id="tab-btn-register" onclick="switchAuthTab('register')" class="tab-item">Create Account</button>
+                        </div>
+
                         <!-- SIGN IN FORM -->
-                        <form id="login-form" class="auth-form">
-                            <div class="form-field">
-                                <label for="login-email">Email Address</label>
-                                <div class="input-wrapper">
-                                    <input type="email" id="login-email" class="clean-input" placeholder="creator@domain.com or admin email" required />
-                                </div>
+                        <form id="login-form" class="emergent-form">
+                            <div class="form-group">
+                                <input type="email" id="login-email" class="emergent-input" placeholder="Enter your email" required />
                             </div>
-
-                            <div class="form-field">
-                                <label for="password">Password</label>
-                                <div class="input-wrapper password-wrapper">
-                                    <input type="password" id="password" class="clean-input" placeholder="Enter your password" required />
-                                    <button type="button" id="btn-toggle-login-pwd" onclick="toggleLoginPassword('password', 'btn-toggle-login-pwd')" class="pwd-toggle-btn" title="Toggle visibility">👁️</button>
-                                </div>
-                                <div class="field-aux-row">
-                                    <span class="demo-admin-badge">Admin Demo: <code>Harsh@2004</code></span>
-                                    <button type="button" onclick="autofillSuperAdmin()" class="autofill-btn">
-                                        <span>👑</span> Autofill Super Admin
-                                    </button>
-                                </div>
+                            <div class="form-group relative-input">
+                                <input type="password" id="password" class="emergent-input pr-12" placeholder="Enter your password" required />
+                                <button type="button" onclick="toggleLoginPassword('password', this)" class="pwd-visibility-btn" title="Toggle visibility">👁️</button>
                             </div>
-
-                            <button type="submit" class="submit-auth-btn">
+                            <div class="admin-helper-row">
+                                <span class="admin-hint">Demo Admin: <code>Harsh@2004</code></span>
+                                <button type="button" onclick="autofillSuperAdmin()" class="btn-autofill">👑 Autofill Super Admin</button>
+                            </div>
+                            <button type="submit" class="emergent-submit-btn">
                                 <span>Sign In to Dashboard →</span>
                             </button>
                         </form>
 
                         <!-- REGISTER FORM -->
-                        <form id="register-form" class="auth-form" style="display: none;">
-                            <div class="form-field">
-                                <label for="reg-name">Full Name</label>
-                                <div class="input-wrapper">
-                                    <input type="text" id="reg-name" class="clean-input" placeholder="e.g. Alex Rivera" required />
-                                </div>
+                        <form id="register-form" class="emergent-form" style="display: none;">
+                            <div class="form-group">
+                                <input type="text" id="reg-name" class="emergent-input" placeholder="Full name" required />
                             </div>
-
-                            <div class="form-field">
-                                <label for="reg-email">Work / Creator Email</label>
-                                <div class="input-wrapper">
-                                    <input type="email" id="reg-email" class="clean-input" placeholder="e.g. alex@creatorstudio.com" required />
-                                </div>
+                            <div class="form-group">
+                                <input type="email" id="reg-email" class="emergent-input" placeholder="Work email address" required />
                             </div>
-
-                            <div class="form-field">
-                                <label for="reg-password">Password (min 6 characters)</label>
-                                <div class="input-wrapper password-wrapper">
-                                    <input type="password" id="reg-password" class="clean-input" placeholder="Create secure password" minlength="6" required />
-                                    <button type="button" id="btn-toggle-reg-pwd" onclick="toggleLoginPassword('reg-password', 'btn-toggle-reg-pwd')" class="pwd-toggle-btn" title="Toggle visibility">👁️</button>
-                                </div>
+                            <div class="form-group relative-input">
+                                <input type="password" id="reg-password" class="emergent-input pr-12" placeholder="Create password (min 6 chars)" minlength="6" required />
+                                <button type="button" onclick="toggleLoginPassword('reg-password', this)" class="pwd-visibility-btn" title="Toggle visibility">👁️</button>
                             </div>
-
-                            <button type="submit" class="submit-auth-btn">
+                            <button type="submit" class="emergent-submit-btn">
                                 <span>Launch AI Agent Free →</span>
                             </button>
                         </form>
 
-                        <p class="auth-terms-notice">
+                        <!-- Legal Notice -->
+                        <p class="emergent-legal-note">
                             By continuing, you agree to our <a href="#faqs">Terms of Service</a> and <a href="#faqs">Privacy Policy</a>.
                         </p>
                     </div>
                 </div>
 
-                <!-- RIGHT COLUMN: Emergent 3D Perspective Showcase -->
-                <div class="hero-right-col">
-                    <div class="perspective-partner-badge">
-                        <span class="partner-star">★</span>
-                        <span>Meta Graph API Verified Partner Protocol</span>
-                    </div>
-
-                    <div class="showcase-3d-wrapper">
-                        <!-- Left Perspective Card: Multi-Tenant Queue Telemetry -->
-                        <div class="perspective-card card-flank-left">
-                            <div class="flank-header">
-                                <span>⚡ Queue Engine</span>
-                                <span class="badge-green">ACTIVE</span>
+                <!-- RIGHT COLUMN: 3D Perspective Glass Showcase -->
+                <div class="emergent-right-col">
+                    <div class="emergent-showcase-panel">
+                        <!-- Top Partner Badges (Emergent YC + Meta Tech Partner) -->
+                        <div class="showcase-top-badges">
+                            <div class="badge-meta-partner">
+                                <span class="star-icon">★</span>
+                                <span>Meta Graph API Partner</span>
                             </div>
-                            <div class="flank-stat-item">
-                                <span class="flank-label">Sliding Window</span>
-                                <span class="flank-val">100% Safe</span>
-                            </div>
-                            <div class="flank-stat-item">
-                                <span class="flank-label">Active Jobs</span>
-                                <span class="flank-val">1,248 / hr</span>
-                            </div>
-                            <div class="flank-stat-item">
-                                <span class="flank-label">Anti-Spam Pacing</span>
-                                <span class="flank-val">0.5s - 1.5s</span>
+                            <div class="badge-yc">
+                                <span class="yc-square">Y</span>
+                                <span class="yc-text">Combinator S24</span>
                             </div>
                         </div>
 
-                        <!-- Main Centerpiece Live Automation Card -->
-                        <div class="showcase-center-card">
-                            <div class="center-card-header">
-                                <div class="creator-profile-badge">
-                                    <div class="avatar-circle">IA</div>
-                                    <div>
-                                        <div class="creator-username">@harshparmar007__</div>
-                                        <div class="creator-reel-title">Live Reel • "Comment 'GROWTH' for AI blueprint"</div>
-                                    </div>
+                        <!-- Center 3D Stage -->
+                        <div class="showcase-stage-3d">
+                            <!-- Left Flank: Queue & Rate Limits -->
+                            <div class="flank-card flank-left">
+                                <div class="flank-card-header">
+                                    <span>⚡ Queue Engine</span>
+                                    <span class="status-active-pill">ACTIVE</span>
                                 </div>
-                                <div class="live-pill">
-                                    <span class="pulse-dot"></span>
-                                    <span>Auto-Pilot: ON</span>
+                                <div class="flank-metric-list">
+                                    <div class="flank-metric-row">
+                                        <span>Sliding Window</span>
+                                        <span class="val-safe">100% Safe</span>
+                                    </div>
+                                    <div class="flank-metric-row">
+                                        <span>Active Jobs</span>
+                                        <span>1,248 / hr</span>
+                                    </div>
+                                    <div class="flank-metric-row">
+                                        <span>Anti-Spam Pacing</span>
+                                        <span class="val-safe">0.5s - 1.5s</span>
+                                    </div>
                                 </div>
                             </div>
 
-                            <!-- Follower Trigger -->
-                            <div class="sim-step-comment">
-                                <div class="comment-icon">💬</div>
-                                <div class="comment-body">
-                                    <div class="comment-author-row">
+                            <!-- Main Center Showcase Card -->
+                            <div class="main-showcase-card">
+                                <div class="card-creator-header">
+                                    <div class="creator-avatar-wrap">
+                                        <div class="creator-avatar">IA</div>
+                                        <div>
+                                            <div class="creator-name">@harshparmar007__</div>
+                                            <div class="creator-reel-sub">Live Reel • "Comment 'GROWTH'"</div>
+                                        </div>
+                                    </div>
+                                    <div class="autopilot-pill">
+                                        <span class="autopilot-dot"></span>
+                                        <span>Auto-Pilot: ON</span>
+                                    </div>
+                                </div>
+
+                                <!-- Follower Comment Trigger -->
+                                <div class="trigger-comment-bubble">
+                                    <div class="comment-user-row">
                                         <strong>@sarah_creator</strong>
-                                        <span class="trigger-matched-pill">⚡ Keyword: "GROWTH"</span>
+                                        <span class="keyword-match-pill">⚡ Keyword: "GROWTH"</span>
                                     </div>
-                                    <p class="comment-text">"GROWTH! Sent me this blueprint please, dying to scale my page 🔥"</p>
+                                    <p class="comment-message">"GROWTH! Sent me this blueprint please, dying to scale my page 🔥"</p>
+                                </div>
+
+                                <!-- Agent Verification Pipeline -->
+                                <div class="agent-pipeline-box">
+                                    <div class="pipeline-row"><span class="check-green">✓</span> Follower Verified (@sarah_creator follows you)</div>
+                                    <div class="pipeline-row"><span class="check-green">✓</span> Rate Limit Safe: 12 / 500 DMs consumed</div>
+                                    <div class="pipeline-row"><span class="check-green">✓</span> AI Dynamic Reply Armed: 0.4s dispatch delay</div>
+                                </div>
+
+                                <!-- Delivered DM Bubble -->
+                                <div class="delivered-dm-card">
+                                    <div class="dm-status-row">
+                                        <span>🚀 Sent via InstaAuto AI Agent</span>
+                                        <span class="dm-delivered-label">DELIVERED (0.4s)</span>
+                                    </div>
+                                    <p class="dm-text-preview">"Hey Sarah! Here is your exclusive <strong>Creator Growth Blueprint & VIP Invite</strong> 🎁"</p>
+                                    <div class="dm-button-row">
+                                        <span class="dm-download-btn">Download Blueprint ↗</span>
+                                        <span class="dm-open-rate">98.8% Open Rate</span>
+                                    </div>
+                                </div>
+
+                                <!-- Real-Time Metrics -->
+                                <div class="card-metrics-grid">
+                                    <div class="metric-item">
+                                        <span class="metric-big">99.8%</span>
+                                        <span class="metric-sub">Inbox Delivery</span>
+                                    </div>
+                                    <div class="metric-divider"></div>
+                                    <div class="metric-item">
+                                        <span class="metric-big">0.4s</span>
+                                        <span class="metric-sub">Dispatch Speed</span>
+                                    </div>
+                                    <div class="metric-divider"></div>
+                                    <div class="metric-item">
+                                        <span class="metric-big">0 Flags</span>
+                                        <span class="metric-sub">Meta Compliant</span>
+                                    </div>
                                 </div>
                             </div>
 
-                            <!-- Pipeline Verification -->
-                            <div class="sim-agent-pipeline">
-                                <div class="pipeline-item">
-                                    <span class="chk-icon">✓</span>
-                                    <span>Follower Verified (@sarah_creator follows you)</span>
+                            <!-- Right Flank: Live Telemetry -->
+                            <div class="flank-card flank-right">
+                                <div class="flank-card-header">
+                                    <span>📈 Telemetry</span>
+                                    <span class="status-realtime-pill">REAL-TIME</span>
                                 </div>
-                                <div class="pipeline-item">
-                                    <span class="chk-icon">✓</span>
-                                    <span>Rate Limit Safe: 12 / 500 DMs consumed</span>
+                                <div class="flank-metric-list">
+                                    <div class="flank-metric-row">
+                                        <span>New Followers</span>
+                                        <span class="val-safe">+1,420</span>
+                                    </div>
+                                    <div class="flank-metric-row">
+                                        <span>Link Clicks</span>
+                                        <span>3,890 (68%)</span>
+                                    </div>
+                                    <div class="flank-metric-row">
+                                        <span>Revenue Generated</span>
+                                        <span class="val-safe" style="color: #4ade80;">$14,250</span>
+                                    </div>
                                 </div>
-                                <div class="pipeline-item">
-                                    <span class="chk-icon">✓</span>
-                                    <span>AI Dynamic Reply Armed: 0.4s dispatch delay</span>
-                                </div>
-                            </div>
-
-                            <!-- Delivered DM -->
-                            <div class="sim-step-dm">
-                                <div class="dm-header">
-                                    <span>🚀 Sent via InstaAuto AI Agent</span>
-                                    <span class="dm-delivered-tag">DELIVERED (0.4s)</span>
-                                </div>
-                                <p class="dm-content">
-                                    "Hey Sarah! Here is your exclusive <strong>Creator Growth Blueprint & VIP Invite</strong> 🎁"
-                                </p>
-                                <div class="dm-actions">
-                                    <a href="javascript:void(0)" class="dm-cta-btn">Download Blueprint ↗</a>
-                                    <span class="dm-ctr-badge">98.8% Open Rate</span>
-                                </div>
-                            </div>
-
-                            <!-- Metrics Strip -->
-                            <div class="center-metrics-strip">
-                                <div class="metric-block">
-                                    <span class="metric-num">99.8%</span>
-                                    <span class="metric-desc">Inbox Delivery</span>
-                                </div>
-                                <div class="metric-divider"></div>
-                                <div class="metric-block">
-                                    <span class="metric-num">0.4s</span>
-                                    <span class="metric-desc">Dispatch Speed</span>
-                                </div>
-                                <div class="metric-divider"></div>
-                                <div class="metric-block">
-                                    <span class="metric-num">0 Flags</span>
-                                    <span class="metric-desc">Meta Compliant</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Right Perspective Card: Live Telemetry -->
-                        <div class="perspective-card card-flank-right">
-                            <div class="flank-header">
-                                <span>📈 Live Telemetry</span>
-                                <span class="badge-purple">REAL-TIME</span>
-                            </div>
-                            <div class="flank-stat-item">
-                                <span class="flank-label">New Followers</span>
-                                <span class="flank-val">+1,420</span>
-                            </div>
-                            <div class="flank-stat-item">
-                                <span class="flank-label">Link Clicks</span>
-                                <span class="flank-val">3,890 (68%)</span>
-                            </div>
-                            <div class="flank-stat-item">
-                                <span class="flank-label">Revenue Generated</span>
-                                <span class="flank-val" style="color: #16A34A;">$14,250</span>
                             </div>
                         </div>
                     </div>
@@ -359,109 +320,92 @@
         </section>
 
         <!-- SOCIAL PROOF STRIP -->
-        <section class="landing-social-proof">
-            <div class="proof-container">
-                <p class="proof-eyebrow">TRUSTED BY OVER 10,000+ TOP CREATORS, AGENCIES, AND BRANDS</p>
-                <div class="creator-logo-grid">
-                    <span class="creator-tag">@luxurycreators</span>
-                    <span class="creator-tag">@scaleagency</span>
-                    <span class="creator-tag">@growthhackers</span>
-                    <span class="creator-tag">@fitcoach.pro</span>
-                    <span class="creator-tag">@ecomboost</span>
-                    <span class="creator-tag">@socialelite</span>
+        <section class="emergent-proof-section">
+            <div class="proof-wrapper">
+                <p class="proof-eyebrow">TRUSTED BY OVER 10,000+ TOP CREATORS, AGENCIES, AND DIGITAL FOUNDERS</p>
+                <div class="proof-badges-grid">
+                    <span class="proof-chip">@luxurycreators</span>
+                    <span class="proof-chip">@scaleagency</span>
+                    <span class="proof-chip">@growthhackers</span>
+                    <span class="proof-chip">@fitcoach.pro</span>
+                    <span class="proof-chip">@ecomboost</span>
+                    <span class="proof-chip">@socialelite</span>
                 </div>
             </div>
         </section>
 
         <!-- FEATURES BENTO GRID SECTION -->
-        <section id="features" class="landing-section">
-            <div class="section-header-block">
-                <span class="section-eyebrow">POWERFUL AUTONOMOUS ENGINE</span>
-                <h2 class="section-title">Built for Explosive Instagram Growth</h2>
-                <p class="section-subtitle">
-                    Say goodbye to clunky manual DMs and shadowban worries. InstaAuto handles everything while you focus on creating content.
-                </p>
+        <section id="features" class="emergent-content-section">
+            <div class="section-heading-box">
+                <span class="section-tag-pill">POWERFUL AUTONOMOUS ENGINE</span>
+                <h2 class="section-headline">Built for Explosive Instagram Growth</h2>
+                <p class="section-subtext">Say goodbye to clunky visual flowcharts and shadowban fears. InstaAuto runs 24/7 in the cloud.</p>
             </div>
 
-            <div class="features-bento-grid">
-                <!-- Feature 1: Autonomous Reel Watcher -->
-                <div class="bento-card bento-span-2">
-                    <div class="bento-badge">24/7 AUTO-PILOT</div>
-                    <h3 class="bento-title">Autonomous Reel Watcher</h3>
-                    <p class="bento-desc">
-                        Never manually configure a trigger again. InstaAuto continuously monitors your Instagram account, identifies newly published Reels within minutes, and auto-arms intelligent keyword funnels instantly.
-                    </p>
-                    <div class="bento-visual visual-reel-watcher">
-                        <div class="watcher-chip"><span>⚡ Live Watcher</span><span class="chip-dot"></span><span>Checking @harshparmar007__</span></div>
-                        <div class="watcher-stat">100% Cloud-Native • Zero Local Laptop Required</div>
+            <div class="bento-container">
+                <!-- Bento Card 1 -->
+                <div class="bento-box bento-span-2">
+                    <span class="bento-badge-label">24/7 AUTO-PILOT</span>
+                    <h3 class="bento-heading">Autonomous Reel Watcher</h3>
+                    <p class="bento-copy">Never manually configure a trigger again. InstaAuto continuously monitors your Instagram account, identifies newly published Reels within minutes, and auto-arms intelligent keyword funnels instantly.</p>
+                    <div class="bento-visual-chip">
+                        <span>⚡ Live Watcher</span> • <span style="color: #4ade80;">Checking @harshparmar007__</span> • <span>Zero Local Laptop Required</span>
                     </div>
                 </div>
 
-                <!-- Feature 2: Smart Follow-to-Unlock Gate -->
-                <div class="bento-card">
-                    <div class="bento-badge">FOLLOWER MULTIPLIER</div>
-                    <h3 class="bento-title">Follow-to-Unlock Verification</h3>
-                    <p class="bento-desc">
-                        Convert viral viewers into permanent subscribers. The AI agent verifies if the user follows you before dispatching the high-value link.
-                    </p>
-                    <div class="bento-pill-group">
+                <!-- Bento Card 2 -->
+                <div class="bento-box">
+                    <span class="bento-badge-label">FOLLOWER MULTIPLIER</span>
+                    <h3 class="bento-heading">Follow-to-Unlock Gate</h3>
+                    <p class="bento-copy">Convert viral viewers into permanent subscribers. The AI agent verifies if the user follows you before dispatching the high-value link.</p>
+                    <div class="bento-tags-row">
                         <span class="feature-tag">✔ 3.8x Follower Growth</span>
                         <span class="feature-tag">✔ Instant Graph Check</span>
                     </div>
                 </div>
 
-                <!-- Feature 3: Instant 0.4s Comment-to-DM -->
-                <div class="bento-card">
-                    <div class="bento-badge">BLAZING SPEED</div>
-                    <h3 class="bento-title">Instant Comment-to-DM</h3>
-                    <p class="bento-desc">
-                        Delivers lead magnets, checkout links, and calendar bookings straight to their direct messages in fractions of a second.
-                    </p>
-                    <div class="bento-pill-group">
-                        <span class="feature-tag">✔ 0.4s Humanized Pacing</span>
-                        <span class="feature-tag">✔ Custom Emojis & Words</span>
+                <!-- Bento Card 3 -->
+                <div class="bento-box">
+                    <span class="bento-badge-label">BLAZING SPEED</span>
+                    <h3 class="bento-heading">Instant 0.4s Comment-to-DM</h3>
+                    <p class="bento-copy">Delivers lead magnets, checkout links, and calendar bookings straight to their direct messages in fractions of a second.</p>
+                    <div class="bento-tags-row">
+                        <span class="feature-tag">✔ 0.4s Dispatch Delay</span>
+                        <span class="feature-tag">✔ Custom Emojis & Links</span>
                     </div>
                 </div>
 
-                <!-- Feature 4: ManyChat-Grade Multi-Tenant Queues -->
-                <div class="bento-card bento-span-2">
-                    <div class="bento-badge">ENTERPRISE SAFETY</div>
-                    <h3 class="bento-title">ManyChat-Grade Multi-Tenant Queuing Engine</h3>
-                    <p class="bento-desc">
-                        Equipped with sliding-window rate limiters, burst protection, and humanized jitter delay. Your account is permanently protected from Meta spam flags and action limits.
-                    </p>
-                    <div class="bento-visual visual-safety-meter">
-                        <div class="safety-bar-wrap">
-                            <div class="safety-bar-fill" style="width: 100%;"></div>
-                        </div>
-                        <div class="safety-labels">
-                            <span>Meta Graph API v21.0 Compliant</span>
+                <!-- Bento Card 4 -->
+                <div class="bento-box bento-span-2">
+                    <span class="bento-badge-label">ENTERPRISE SAFETY</span>
+                    <h3 class="bento-heading">ManyChat-Grade Multi-Tenant Queuing Engine</h3>
+                    <p class="bento-copy">Equipped with sliding-window rate limiters, burst protection, and humanized jitter delay. Your account is permanently protected from Meta spam flags and action limits.</p>
+                    <div class="bento-safety-meter">
+                        <div class="meter-bar"><div class="meter-fill" style="width: 100%;"></div></div>
+                        <div class="meter-labels">
+                            <span>Official Meta Graph API v21.0 Endpoints</span>
                             <span style="color: #16A34A; font-weight: 700;">Zero Account Bans</span>
                         </div>
                     </div>
                 </div>
 
-                <!-- Feature 5: Real-Time Lead & Click Analytics -->
-                <div class="bento-card">
-                    <div class="bento-badge">DATA & CRM</div>
-                    <h3 class="bento-title">Real-Time Funnel Analytics</h3>
-                    <p class="bento-desc">
-                        Track link CTR, subscriber conversions, and sync every lead directly to Google Sheets and Webhooks in real-time.
-                    </p>
-                    <div class="bento-pill-group">
+                <!-- Bento Card 5 -->
+                <div class="bento-box">
+                    <span class="bento-badge-label">DATA & CRM</span>
+                    <h3 class="bento-heading">Real-Time Funnel Analytics</h3>
+                    <p class="bento-copy">Track link CTR, subscriber conversions, and sync every lead directly to Google Sheets and Webhooks in real-time.</p>
+                    <div class="bento-tags-row">
                         <span class="feature-tag">✔ Google Sheets Sync</span>
                         <span class="feature-tag">✔ Live Conversion Dash</span>
                     </div>
                 </div>
 
-                <!-- Feature 6: Super Admin Command -->
-                <div class="bento-card">
-                    <div class="bento-badge">MASTER CONTROL</div>
-                    <h3 class="bento-title">Super Admin Quota Power</h3>
-                    <p class="bento-desc">
-                        Platform-wide control center with pinned rank #1 creator directory, selective unlimited quota grants, and live event telemetry.
-                    </p>
-                    <div class="bento-pill-group">
+                <!-- Bento Card 6 -->
+                <div class="bento-box">
+                    <span class="bento-badge-label">MASTER CONTROL</span>
+                    <h3 class="bento-heading">Super Admin Quota Power</h3>
+                    <p class="bento-copy">Platform-wide control center with pinned rank #1 creator directory, selective unlimited quota grants, and live event telemetry.</p>
+                    <div class="bento-tags-row">
                         <span class="feature-tag">✔ Unlimited Super Admin DMs</span>
                         <span class="feature-tag">✔ 0.5s Burst Dispatch</span>
                     </div>
@@ -470,296 +414,270 @@
         </section>
 
         <!-- "HOW IT WORKS" WORKFLOW SECTION -->
-        <section id="how-it-works" class="landing-section-full bg-alt">
-            <div class="landing-section" style="padding-top: 0; padding-bottom: 0;">
-                <div class="section-header-block">
-                    <span class="section-eyebrow">HOW IT WORKS</span>
-                    <h2 class="section-title">From Reel Comment to High-Paying Subscriber</h2>
-                    <p class="section-subtitle">
-                        Four streamlined steps. Zero complicated visual spaghetti. Built for maximum conversions.
-                    </p>
-                </div>
+        <section id="how-it-works" class="emergent-content-section bg-subtle">
+            <div class="section-heading-box">
+                <span class="section-tag-pill">HOW IT WORKS</span>
+                <h2 class="section-headline">From Reel Comment to High-Paying Subscriber</h2>
+                <p class="section-subtext">Four streamlined steps. Zero complicated visual spaghetti. Built for maximum conversions.</p>
+            </div>
 
-                <div class="workflow-steps-grid">
-                    <div class="step-card">
-                        <div class="step-num">01</div>
-                        <h3 class="step-title">Creator Posts Reel</h3>
-                        <p class="step-desc">Publish your Reel with an irresistible call-to-action like <em>"Comment GROWTH for the free masterclass"</em>.</p>
-                    </div>
-                    <div class="step-connector">→</div>
-                    <div class="step-card">
-                        <div class="step-num">02</div>
-                        <h3 class="step-title">Follower Triggers Keyword</h3>
-                        <p class="step-desc">Viewers comment the keyword. The autonomous watcher detects the new comments in real-time.</p>
-                    </div>
-                    <div class="step-connector">→</div>
-                    <div class="step-card">
-                        <div class="step-num">03</div>
-                        <h3 class="step-title">AI Verifies & Formats</h3>
-                        <p class="step-desc">The AI agent checks follow status, logs the analytics event, and personalizes the private direct message.</p>
-                    </div>
-                    <div class="step-connector">→</div>
-                    <div class="step-card">
-                        <div class="step-num">04</div>
-                        <h3 class="step-title">Instant DM Delivery</h3>
-                        <p class="step-desc">Direct message lands in their primary inbox in 0.4 seconds with a tracked link, converting into sales.</p>
-                    </div>
+            <div class="workflow-grid">
+                <div class="workflow-step">
+                    <div class="step-badge">01</div>
+                    <h3 class="step-heading">Creator Posts Reel</h3>
+                    <p class="step-copy">Publish your Reel with an irresistible call-to-action like <em>"Comment GROWTH for the free blueprint"</em>.</p>
+                </div>
+                <div class="step-arrow">→</div>
+                <div class="workflow-step">
+                    <div class="step-badge">02</div>
+                    <h3 class="step-heading">Follower Triggers Keyword</h3>
+                    <p class="step-copy">Viewers comment the keyword. The autonomous watcher detects the new comments in real-time.</p>
+                </div>
+                <div class="step-arrow">→</div>
+                <div class="workflow-step">
+                    <div class="step-badge">03</div>
+                    <h3 class="step-heading">AI Verifies & Formats</h3>
+                    <p class="step-copy">The AI agent checks follow status, logs the analytics event, and personalizes the private direct message.</p>
+                </div>
+                <div class="step-arrow">→</div>
+                <div class="workflow-step">
+                    <div class="step-badge">04</div>
+                    <h3 class="step-heading">Instant DM Delivery</h3>
+                    <p class="step-copy">Direct message lands in their primary inbox in 0.4 seconds with a tracked link, converting into sales.</p>
                 </div>
             </div>
         </section>
 
-        <!-- PRICING MATRIX SECTION (Emergent Clone) -->
-        <section id="pricing" class="landing-section">
-            <div class="section-header-block">
-                <span class="section-eyebrow">TRANSPARENT PRICING</span>
-                <h2 class="section-title">Pick the Pricing Plan That Works for You</h2>
-                <p class="section-subtitle">
-                    Start for free. Scale your audience and automated revenue with zero friction.
-                </p>
+        <!-- PRICING MATRIX SECTION -->
+        <section id="pricing" class="emergent-content-section">
+            <div class="section-heading-box">
+                <span class="section-tag-pill">TRANSPARENT PRICING</span>
+                <h2 class="section-headline">Pick the Pricing Plan That Works for You</h2>
+                <p class="section-subtext">Start for free. Scale your audience and automated revenue with zero friction.</p>
 
                 <!-- Billing Toggle Switch -->
-                <div class="billing-toggle-wrapper">
+                <div class="billing-toggle-wrap">
                     <span id="label-monthly" class="billing-label active">Monthly</span>
-                    <button type="button" id="billing-switch" onclick="toggleBillingCycle()" class="billing-switch-btn" aria-label="Toggle annual billing">
-                        <span class="switch-handle"></span>
+                    <button type="button" id="billing-switch" onclick="toggleBillingCycle()" class="billing-switch-toggle" aria-label="Toggle annual billing">
+                        <span class="switch-ball"></span>
                     </button>
                     <span id="label-annual" class="billing-label">Annual</span>
-                    <span class="save-pill">Save 20%</span>
+                    <span class="save-tag">Save 20%</span>
                 </div>
             </div>
 
-            <div class="pricing-cards-grid">
-                <!-- Card 1: Starter -->
-                <div class="pricing-card">
-                    <div class="pricing-card-header">
-                        <h3 class="plan-name">Starter / Free</h3>
-                        <p class="plan-desc">For emerging creators testing the waters.</p>
-                        <div class="price-row">
-                            <span class="price-val">$0</span>
-                            <span class="price-period">/ month</span>
+            <div class="pricing-grid">
+                <!-- Starter Tier -->
+                <div class="pricing-plan-card">
+                    <div class="plan-header">
+                        <h3 class="plan-tier-name">Starter / Free</h3>
+                        <p class="plan-tier-sub">For emerging creators testing the waters.</p>
+                        <div class="plan-price-row">
+                            <span class="plan-price-amount">$0</span>
+                            <span class="plan-price-cycle">/ month</span>
                         </div>
                     </div>
-                    <ul class="plan-features-list">
-                        <li><span class="chk">✓</span> 60 DMs / hour quota</li>
-                        <li><span class="chk">✓</span> 1 Connected Instagram account</li>
-                        <li><span class="chk">✓</span> Unlimited Keyword Triggers</li>
-                        <li><span class="chk">✓</span> Basic Click Tracking</li>
-                        <li><span class="chk">✓</span> Community Support</li>
+                    <ul class="plan-perks-list">
+                        <li><span class="perk-check">✓</span> 60 DMs / hour quota</li>
+                        <li><span class="perk-check">✓</span> 1 Connected Instagram account</li>
+                        <li><span class="perk-check">✓</span> Unlimited Keyword Triggers</li>
+                        <li><span class="perk-check">✓</span> Basic Click Tracking</li>
+                        <li><span class="perk-check">✓</span> Community Support</li>
                     </ul>
-                    <button type="button" onclick="scrollToAuth('register')" class="plan-cta-btn btn-secondary">Start Free</button>
+                    <button type="button" onclick="scrollToAuth('register')" class="plan-action-btn btn-plan-secondary">Start Free</button>
                 </div>
 
-                <!-- Card 2: Pro Creator (Featured) -->
-                <div class="pricing-card pricing-featured">
-                    <div class="featured-badge">MOST POPULAR</div>
-                    <div class="pricing-card-header">
-                        <h3 class="plan-name">Pro Creator</h3>
-                        <p class="plan-desc">For serious creators and influencers scaling revenue.</p>
-                        <div class="price-row">
-                            <span class="price-val" data-monthly="$29" data-annual="$23">$29</span>
-                            <span class="price-period">/ month</span>
+                <!-- Pro Tier (Featured) -->
+                <div class="pricing-plan-card featured-plan">
+                    <div class="featured-ribbon">MOST POPULAR</div>
+                    <div class="plan-header">
+                        <h3 class="plan-tier-name">Pro Creator</h3>
+                        <p class="plan-tier-sub">For serious creators and influencers scaling revenue.</p>
+                        <div class="plan-price-row">
+                            <span class="plan-price-amount price-val" data-monthly="$29" data-annual="$23">$29</span>
+                            <span class="plan-price-cycle">/ month</span>
                         </div>
                     </div>
-                    <ul class="plan-features-list">
-                        <li><span class="chk">✓</span> <strong>500 DMs / hour</strong> quota</li>
-                        <li><span class="chk">✓</span> 3 Connected Instagram accounts</li>
-                        <li><span class="chk">✓</span> <strong>Autonomous 24/7 Reel Watcher</strong></li>
-                        <li><span class="chk">✓</span> <strong>Follow-to-Unlock Verification</strong></li>
-                        <li><span class="chk">✓</span> Google Sheets & CRM Real-time Sync</li>
-                        <li><span class="chk">✓</span> Priority Queue Dispatch (1.0s delay)</li>
+                    <ul class="plan-perks-list">
+                        <li><span class="perk-check">✓</span> <strong>500 DMs / hour</strong> quota</li>
+                        <li><span class="perk-check">✓</span> 3 Connected Instagram accounts</li>
+                        <li><span class="perk-check">✓</span> <strong>Autonomous 24/7 Reel Watcher</strong></li>
+                        <li><span class="perk-check">✓</span> <strong>Follow-to-Unlock Verification</strong></li>
+                        <li><span class="perk-check">✓</span> Google Sheets & CRM Sync</li>
+                        <li><span class="perk-check">✓</span> Priority Queue Dispatch (1.0s)</li>
                     </ul>
-                    <button type="button" onclick="scrollToAuth('register')" class="plan-cta-btn btn-primary-gradient">Get Started with Pro</button>
+                    <button type="button" onclick="scrollToAuth('register')" class="plan-action-btn btn-plan-primary">Get Started with Pro</button>
                 </div>
 
-                <!-- Card 3: Agency Scale -->
-                <div class="pricing-card">
-                    <div class="pricing-card-header">
-                        <h3 class="plan-name">Agency Scale</h3>
-                        <p class="plan-desc">For agencies managing creator client rosters.</p>
-                        <div class="price-row">
-                            <span class="price-val" data-monthly="$99" data-annual="$79">$99</span>
-                            <span class="price-period">/ month</span>
+                <!-- Agency Tier -->
+                <div class="pricing-plan-card">
+                    <div class="plan-header">
+                        <h3 class="plan-tier-name">Agency Scale</h3>
+                        <p class="plan-tier-sub">For agencies managing client rosters.</p>
+                        <div class="plan-price-row">
+                            <span class="plan-price-amount price-val" data-monthly="$99" data-annual="$79">$99</span>
+                            <span class="plan-price-cycle">/ month</span>
                         </div>
                     </div>
-                    <ul class="plan-features-list">
-                        <li><span class="chk">✓</span> <strong>Unlimited DMs</strong> monthly volume</li>
-                        <li><span class="chk">✓</span> 10+ Connected Client Accounts</li>
-                        <li><span class="chk">✓</span> Multi-Tenant Client Isolation</li>
-                        <li><span class="chk">✓</span> Custom Webhook Callbacks</li>
-                        <li><span class="chk">✓</span> Accelerated Dispatch (0.5s pacing)</li>
-                        <li><span class="chk">✓</span> 24/7 Dedicated Account Manager</li>
+                    <ul class="plan-perks-list">
+                        <li><span class="perk-check">✓</span> <strong>Unlimited DMs</strong> monthly volume</li>
+                        <li><span class="perk-check">✓</span> 10+ Connected Client Accounts</li>
+                        <li><span class="perk-check">✓</span> Multi-Tenant Isolation</li>
+                        <li><span class="perk-check">✓</span> Custom Webhook Callbacks</li>
+                        <li><span class="perk-check">✓</span> Accelerated Dispatch (0.5s pacing)</li>
+                        <li><span class="perk-check">✓</span> Dedicated Account Manager</li>
                     </ul>
-                    <button type="button" onclick="scrollToAuth('register')" class="plan-cta-btn btn-secondary">Scale My Agency</button>
+                    <button type="button" onclick="scrollToAuth('register')" class="plan-action-btn btn-plan-secondary">Scale My Agency</button>
                 </div>
 
-                <!-- Card 4: Super Admin -->
-                <div class="pricing-card pricing-admin">
-                    <div class="admin-badge">PLATFORM MASTER</div>
-                    <div class="pricing-card-header">
-                        <h3 class="plan-name">Super Admin</h3>
-                        <p class="plan-desc">Master infrastructure & tenant management.</p>
-                        <div class="price-row">
-                            <span class="price-val">MASTER</span>
+                <!-- Super Admin Master -->
+                <div class="pricing-plan-card admin-plan">
+                    <div class="admin-ribbon">PLATFORM MASTER</div>
+                    <div class="plan-header">
+                        <h3 class="plan-tier-name">Super Admin</h3>
+                        <p class="plan-tier-sub">Master platform & multi-tenant control.</p>
+                        <div class="plan-price-row">
+                            <span class="plan-price-amount">MASTER</span>
                         </div>
                     </div>
-                    <ul class="plan-features-list">
-                        <li><span class="chk">👑</span> <strong>Infinite DMs</strong> & Quota Overrides</li>
-                        <li><span class="chk">👑</span> 0.5s High-Speed Burst Dispatch</li>
-                        <li><span class="chk">👑</span> Creator Directory Rank #1 Pinning</li>
-                        <li><span class="chk">👑</span> Global Rate Limit Tuning for Any User</li>
-                        <li><span class="chk">👑</span> Full Platform Event Telemetry</li>
+                    <ul class="plan-perks-list">
+                        <li><span class="perk-check">👑</span> <strong>Infinite DMs</strong> & Quota Overrides</li>
+                        <li><span class="perk-check">👑</span> 0.5s High-Speed Burst Dispatch</li>
+                        <li><span class="perk-check">👑</span> Creator Directory Rank #1 Pinning</li>
+                        <li><span class="perk-check">👑</span> Global Rate Limit Tuning for Any User</li>
+                        <li><span class="perk-check">👑</span> Full Platform Event Telemetry</li>
                     </ul>
-                    <button type="button" onclick="autofillSuperAdmin(); scrollToAuth('login')" class="plan-cta-btn btn-admin">👑 Admin Access</button>
+                    <button type="button" onclick="autofillSuperAdmin(); scrollToAuth('login')" class="plan-action-btn btn-plan-admin">👑 Admin Access</button>
                 </div>
             </div>
         </section>
 
         <!-- FREQUENTLY ASKED QUESTIONS ACCORDION -->
-        <section id="faqs" class="landing-section-full bg-alt">
-            <div class="landing-section" style="padding-top: 0; padding-bottom: 0;">
-                <div class="section-header-block">
-                    <span class="section-eyebrow">FREQUENTLY ASKED QUESTIONS</span>
-                    <h2 class="section-title">Your Questions, Answered</h2>
-                    <p class="section-subtitle">
-                        Everything you need to know about InstaAuto AI Agent, Meta safety, and setup.
-                    </p>
+        <section id="faqs" class="emergent-content-section bg-subtle">
+            <div class="section-heading-box">
+                <span class="section-tag-pill">FREQUENTLY ASKED QUESTIONS</span>
+                <h2 class="section-headline">Your Questions, Answered</h2>
+                <p class="section-subtext">Everything you need to know about InstaAuto AI Agent, Meta safety, and setup.</p>
+            </div>
+
+            <div class="faq-accordion-box">
+                <div class="faq-accordion-item" onclick="toggleFaq(this)">
+                    <div class="faq-header-row">
+                        <h3>What is InstaAuto and how does it work?</h3>
+                        <span class="faq-plus-icon">+</span>
+                    </div>
+                    <div class="faq-body-content">
+                        <p>InstaAuto is an autonomous Instagram automation SaaS that connects directly to the official Meta Graph API. It automatically detects follower comments on your Reels, verifies whether they follow your account, and instantly sends them a personalized direct message containing your link or download.</p>
+                    </div>
                 </div>
 
-                <div class="faqs-accordion-wrapper">
-                    <!-- FAQ 1 -->
-                    <div class="faq-item" onclick="toggleFaq(this)">
-                        <div class="faq-question-row">
-                            <h3>What is InstaAuto and how does it work?</h3>
-                            <span class="faq-toggle-icon">+</span>
-                        </div>
-                        <div class="faq-answer">
-                            <p>InstaAuto is an autonomous Instagram automation SaaS that connects directly to the official Meta Graph API. It automatically detects follower comments on your Reels, verifies whether they follow your account, and instantly sends them a personalized direct message containing your link or download.</p>
-                        </div>
+                <div class="faq-accordion-item" onclick="toggleFaq(this)">
+                    <div class="faq-header-row">
+                        <h3>Is InstaAuto compliant with Meta's official Instagram terms?</h3>
+                        <span class="faq-plus-icon">+</span>
                     </div>
-
-                    <!-- FAQ 2 -->
-                    <div class="faq-item" onclick="toggleFaq(this)">
-                        <div class="faq-question-row">
-                            <h3>Is InstaAuto compliant with Meta's official Instagram terms?</h3>
-                            <span class="faq-toggle-icon">+</span>
-                        </div>
-                        <div class="faq-answer">
-                            <p>Yes, 100%. Unlike risky web scrapers or browser bots that cause account bans, InstaAuto operates exclusively on the verified Meta Graph API Webhook & Messaging endpoints with humanized dispatch pacing (0.5s - 1.5s delay), guaranteeing full compliance.</p>
-                        </div>
+                    <div class="faq-body-content">
+                        <p>Yes, 100%. Unlike risky web scrapers or browser bots that cause account bans, InstaAuto operates exclusively on the verified Meta Graph API Webhook & Messaging endpoints with humanized dispatch pacing (0.5s - 1.5s delay), guaranteeing full compliance.</p>
                     </div>
+                </div>
 
-                    <!-- FAQ 3 -->
-                    <div class="faq-item" onclick="toggleFaq(this)">
-                        <div class="faq-question-row">
-                            <h3>How is InstaAuto different from ManyChat?</h3>
-                            <span class="faq-toggle-icon">+</span>
-                        </div>
-                        <div class="faq-answer">
-                            <p>While ManyChat requires hours of setting up complicated drag-and-drop flowcharts and charges escalating contact fees, InstaAuto is specifically engineered for Reels creators with 24/7 autonomous monitoring, smart follower verification gates, and straightforward multi-tenant quotas.</p>
-                        </div>
+                <div class="faq-accordion-item" onclick="toggleFaq(this)">
+                    <div class="faq-header-row">
+                        <h3>How is InstaAuto different from ManyChat?</h3>
+                        <span class="faq-plus-icon">+</span>
                     </div>
-
-                    <!-- FAQ 4 -->
-                    <div class="faq-item" onclick="toggleFaq(this)">
-                        <div class="faq-question-row">
-                            <h3>Do I need to keep my laptop open or run anything locally?</h3>
-                            <span class="faq-toggle-icon">+</span>
-                        </div>
-                        <div class="faq-answer">
-                            <p>Not at all! InstaAuto runs entirely in the cloud. Once your account is connected and your keywords are set, the AI Agent works 24 hours a day, 7 days a week, even while you are asleep or travelling.</p>
-                        </div>
+                    <div class="faq-body-content">
+                        <p>While ManyChat requires hours of setting up complicated drag-and-drop flowcharts and charges escalating contact fees, InstaAuto is specifically engineered for Reels creators with 24/7 autonomous monitoring, smart follower verification gates, and straightforward multi-tenant quotas.</p>
                     </div>
+                </div>
 
-                    <!-- FAQ 5 -->
-                    <div class="faq-item" onclick="toggleFaq(this)">
-                        <div class="faq-question-row">
-                            <h3>What happens if I reach my hourly rate limit?</h3>
-                            <span class="faq-toggle-icon">+</span>
-                        </div>
-                        <div class="faq-answer">
-                            <p>InstaAuto features intelligent queue management. When a Reel goes hyper-viral and exceeds your hourly limit, messages are placed in a safe FIFO queue and systematically dispatched as your rolling 1-hour window resets. No follower is ever lost.</p>
-                        </div>
+                <div class="faq-accordion-item" onclick="toggleFaq(this)">
+                    <div class="faq-header-row">
+                        <h3>Do I need to keep my laptop open or run anything locally?</h3>
+                        <span class="faq-plus-icon">+</span>
                     </div>
+                    <div class="faq-body-content">
+                        <p>Not at all! InstaAuto runs entirely in the cloud. Once your account is connected and your keywords are set, the AI Agent works 24 hours a day, 7 days a week, even while you are asleep or travelling.</p>
+                    </div>
+                </div>
 
-                    <!-- FAQ 6 -->
-                    <div class="faq-item" onclick="toggleFaq(this)">
-                        <div class="faq-question-row">
-                            <h3>Can I try it for free?</h3>
-                            <span class="faq-toggle-icon">+</span>
-                        </div>
-                        <div class="faq-answer">
-                            <p>Yes! Our Starter Tier is 100% free with 60 DMs/hour, unlimited keyword automation, and click analytics. No credit card is required to sign up.</p>
-                        </div>
+                <div class="faq-accordion-item" onclick="toggleFaq(this)">
+                    <div class="faq-header-row">
+                        <h3>What happens if I reach my hourly rate limit?</h3>
+                        <span class="faq-plus-icon">+</span>
+                    </div>
+                    <div class="faq-body-content">
+                        <p>InstaAuto features intelligent queue management. When a Reel goes hyper-viral and exceeds your hourly limit, messages are placed in a safe FIFO queue and systematically dispatched as your rolling 1-hour window resets. No follower is ever lost.</p>
+                    </div>
+                </div>
+
+                <div class="faq-accordion-item" onclick="toggleFaq(this)">
+                    <div class="faq-header-row">
+                        <h3>Can I try it for free?</h3>
+                        <span class="faq-plus-icon">+</span>
+                    </div>
+                    <div class="faq-body-content">
+                        <p>Yes! Our Starter Tier is 100% free with 60 DMs/hour, unlimited keyword automation, and click analytics. No credit card is required to sign up.</p>
                     </div>
                 </div>
             </div>
         </section>
 
         <!-- SOLUTIONS SECTION -->
-        <section id="solutions" class="landing-section">
-            <div class="section-header-block">
-                <span class="section-eyebrow">SOLUTIONS FOR EVERY SCALE</span>
-                <h2 class="section-title">Built for Modern Creator Businesses</h2>
-                <p class="section-subtitle">
-                    Whether you are an individual creator or a full-scale growth agency, InstaAuto scales seamlessly.
-                </p>
+        <section id="solutions" class="emergent-content-section">
+            <div class="section-heading-box">
+                <span class="section-tag-pill">SOLUTIONS FOR EVERY SCALE</span>
+                <h2 class="section-headline">Built for Modern Creator Businesses</h2>
+                <p class="section-subtext">Whether you are an individual creator or a full-scale growth agency, InstaAuto scales seamlessly.</p>
             </div>
 
-            <div class="features-bento-grid">
-                <div class="bento-card">
-                    <div class="bento-badge">CREATORS & INFLUENCERS</div>
-                    <h3 class="bento-title">Monetize Every Comment</h3>
-                    <p class="bento-desc">
-                        Turn viral viewers into paying subscribers for your courses, digital templates, newsletters, and exclusive masterminds.
-                    </p>
+            <div class="bento-container">
+                <div class="bento-box">
+                    <span class="bento-badge-label">CREATORS & INFLUENCERS</span>
+                    <h3 class="bento-heading">Monetize Every Comment</h3>
+                    <p class="bento-copy">Turn viral viewers into paying subscribers for your courses, digital templates, newsletters, and exclusive masterminds.</p>
                 </div>
-                <div class="bento-card">
-                    <div class="bento-badge">MARKETING AGENCIES</div>
-                    <h3 class="bento-title">Manage Client Rosters</h3>
-                    <p class="bento-desc">
-                        Provide clients with proven 4x engagement boost, automated lead generation, and clean client-by-client isolation.
-                    </p>
+                <div class="bento-box">
+                    <span class="bento-badge-label">MARKETING AGENCIES</span>
+                    <h3 class="bento-heading">Manage Client Rosters</h3>
+                    <p class="bento-copy">Provide clients with proven 4x engagement boost, automated lead generation, and clean client-by-client isolation.</p>
                 </div>
-                <div class="bento-card">
-                    <div class="bento-badge">COACHES & CONSULTANTS</div>
-                    <h3 class="bento-title">Automate Booking Calendars</h3>
-                    <p class="bento-desc">
-                        Instantly deliver Calendly and consultation links when prospects comment "BOOK" or "CALL" on your thought leadership Reels.
-                    </p>
+                <div class="bento-box">
+                    <span class="bento-badge-label">COACHES & CONSULTANTS</span>
+                    <h3 class="bento-heading">Automate Booking Calendars</h3>
+                    <p class="bento-copy">Instantly deliver Calendly and consultation links when prospects comment "BOOK" or "CALL" on your thought leadership Reels.</p>
                 </div>
             </div>
         </section>
 
         <!-- PRE-FOOTER CALL TO ACTION BANNER -->
-        <section class="landing-cta-banner">
-            <div class="cta-banner-card">
-                <h2 class="cta-banner-title">Start Growing on Instagram with InstaAuto Today</h2>
-                <p class="cta-banner-subtitle">
-                    Deploy your first autonomous DM funnel in under 60 seconds. No credit card required.
-                </p>
-                <button type="button" onclick="scrollToAuth('register')" class="cta-banner-btn">
+        <section class="emergent-cta-banner">
+            <div class="cta-card-box">
+                <h2 class="cta-banner-heading">Start Growing on Instagram with InstaAuto Today</h2>
+                <p class="cta-banner-sub">Deploy your first autonomous DM funnel in under 60 seconds. No credit card required.</p>
+                <button type="button" onclick="scrollToAuth('register')" class="cta-banner-action-btn">
                     <span>Get Started Free</span>
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                 </button>
             </div>
         </section>
 
-        <!-- FOOTER (Emergent Style) -->
-        <footer class="landing-footer">
-            <div class="footer-top-grid">
+        <!-- EMERGENT-STYLE FOOTER -->
+        <footer class="emergent-footer">
+            <div class="footer-top-columns">
                 <!-- Brand Column -->
-                <div class="footer-brand-col">
-                    <div class="footer-logo">
-                        <img src="favicon.png?v=5" alt="InstaAuto Logo" style="width: 36px; height: 36px;" />
-                        <span class="footer-brand-title">InstaAuto</span>
+                <div class="footer-col-brand">
+                    <div class="footer-logo-row">
+                        <img src="favicon.png?v=5" alt="InstaAuto" class="footer-logo-img" />
+                        <span class="footer-logo-text">InstaAuto</span>
                     </div>
-                    <p class="footer-tagline">
-                        Automate Instagram growth through conversation. AI agents that detect comments, verify followings, and dispatch instant DMs 24/7.
+                    <p class="footer-brand-desc">
+                        Build production-ready growth through conversation. Autonomous AI agents that detect comments, verify followers, and dispatch instant DMs 24/7.
                     </p>
                 </div>
 
                 <!-- Product Links -->
-                <div class="footer-links-col">
+                <div class="footer-col-links">
                     <h4>Product</h4>
                     <ul>
                         <li><a href="#features">Autonomous Reel Watcher</a></li>
@@ -771,18 +689,18 @@
                 </div>
 
                 <!-- Solutions Links -->
-                <div class="footer-links-col">
+                <div class="footer-col-links">
                     <h4>Solutions</h4>
                     <ul>
                         <li><a href="#solutions">Creators & Influencers</a></li>
                         <li><a href="#solutions">Marketing Agencies</a></li>
                         <li><a href="#solutions">E-commerce Brands</a></li>
-                        <li><a href="#solutions">Course Creators & Coaches</a></li>
+                        <li><a href="#solutions">Coaches & Consultants</a></li>
                     </ul>
                 </div>
 
                 <!-- Resources Links -->
-                <div class="footer-links-col">
+                <div class="footer-col-links">
                     <h4>Resources</h4>
                     <ul>
                         <li><a href="#how-it-works">How It Works</a></li>
@@ -793,7 +711,7 @@
                 </div>
 
                 <!-- Company Links -->
-                <div class="footer-links-col">
+                <div class="footer-col-links">
                     <h4>Company</h4>
                     <ul>
                         <li><a href="#hero">About InstaAuto</a></li>
@@ -805,31 +723,29 @@
             </div>
 
             <!-- Bottom Copyright & Social Bar -->
-            <div class="footer-bottom-bar">
-                <div class="footer-copyright">
-                    <span>COPYRIGHT © INSTAAUTO LABS 2026. ALL RIGHTS RESERVED.</span>
+            <div class="footer-bottom-row">
+                <div class="footer-copyright-text">
+                    COPYRIGHT © INSTAAUTO LABS 2026. ALL RIGHTS RESERVED.
                 </div>
-                <div class="footer-built-by">
-                    <span>DESIGNED AND BUILT FOR CREATORS WORLDWIDE ⚡</span>
+                <div class="footer-built-with">
+                    DESIGNED AND BUILT FOR CREATORS WORLDWIDE ⚡
                 </div>
-                <div class="footer-socials">
+                <div class="footer-social-icons">
                     <a href="https://instagram.com" target="_blank" rel="noopener" aria-label="Instagram">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
                     </a>
                     <a href="https://x.com" target="_blank" rel="noopener" aria-label="X">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
                     </a>
                     <a href="https://linkedin.com" target="_blank" rel="noopener" aria-label="LinkedIn">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z"/></svg>
-                    </a>
-                    <a href="https://youtube.com" target="_blank" rel="noopener" aria-label="YouTube">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z"/></svg>
                     </a>
                 </div>
             </div>
         </footer>
     </div>
 
+    <!-- CLIENT JAVASCRIPT HELPERS -->
     <script>
         function switchAuthTab(mode) {
             const isLogin = mode === 'login';
@@ -837,31 +753,20 @@
             const registerForm = document.getElementById('register-form');
             if (loginForm) loginForm.style.display = isLogin ? 'block' : 'none';
             if (registerForm) registerForm.style.display = isLogin ? 'none' : 'block';
-
             const btnLogin = document.getElementById('tab-btn-login');
             const btnReg = document.getElementById('tab-btn-register');
             if (btnLogin && btnReg) {
-                if (isLogin) {
-                    btnLogin.classList.add('active');
-                    btnReg.classList.remove('active');
-                } else {
-                    btnReg.classList.add('active');
-                    btnLogin.classList.remove('active');
-                }
+                btnLogin.classList.toggle('active', isLogin);
+                btnReg.classList.toggle('active', !isLogin);
             }
         }
 
-        function toggleLoginPassword(fieldId = 'password', btnId = 'btn-toggle-login-pwd') {
+        function toggleLoginPassword(fieldId, btnEl) {
             const pwd = document.getElementById(fieldId);
-            const btn = document.getElementById(btnId);
-            if (pwd && btn) {
-                if (pwd.type === 'password') {
-                    pwd.type = 'text';
-                    btn.textContent = '🙈';
-                } else {
-                    pwd.type = 'password';
-                    btn.textContent = '👁️';
-                }
+            if (pwd) {
+                const isPwd = pwd.type === 'password';
+                pwd.type = isPwd ? 'text' : 'password';
+                if (btnEl) btnEl.textContent = isPwd ? '🙈' : '👁️';
             }
         }
 
@@ -875,22 +780,23 @@
 
         function scrollToAuth(mode) {
             switchAuthTab(mode);
-            const authBox = document.getElementById('auth-box');
-            if (authBox) {
-                authBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                setTimeout(() => {
-                    const target = mode === 'login' ? document.getElementById('login-email') : document.getElementById('reg-name');
-                    if (target) target.focus();
-                }, 400);
-            }
+            const hero = document.getElementById('hero');
+            if (hero) hero.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            setTimeout(() => {
+                const target = mode === 'login' ? document.getElementById('login-email') : document.getElementById('reg-name');
+                if (target) target.focus();
+            }, 400);
+        }
+
+        function scrollToSection(sectionId) {
+            const el = document.getElementById(sectionId);
+            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
 
         function toggleFaq(itemEl) {
-            const isCurrentlyActive = itemEl.classList.contains('active');
-            document.querySelectorAll('.faq-item').forEach(el => el.classList.remove('active'));
-            if (!isCurrentlyActive) {
-                itemEl.classList.add('active');
-            }
+            const isActive = itemEl.classList.contains('active');
+            document.querySelectorAll('.faq-accordion-item').forEach(el => el.classList.remove('active'));
+            if (!isActive) itemEl.classList.add('active');
         }
 
         function toggleBillingCycle() {
@@ -898,45 +804,33 @@
             const labelMonthly = document.getElementById('label-monthly');
             const labelAnnual = document.getElementById('label-annual');
             if (!switchBtn) return;
-            
             const isAnnual = switchBtn.classList.toggle('annual');
             if (labelMonthly && labelAnnual) {
-                if (isAnnual) {
-                    labelAnnual.classList.add('active');
-                    labelMonthly.classList.remove('active');
-                } else {
-                    labelMonthly.classList.add('active');
-                    labelAnnual.classList.remove('active');
-                }
+                labelAnnual.classList.toggle('active', isAnnual);
+                labelMonthly.classList.toggle('active', !isAnnual);
             }
-
             document.querySelectorAll('.price-val[data-monthly]').forEach(el => {
                 el.textContent = isAnnual ? el.getAttribute('data-annual') : el.getAttribute('data-monthly');
             });
         }
 
         function continueWithMeta() {
-            if (window.App && App.showToast) {
-                App.showToast('Connecting via Meta Graph API OAuth... Ready for login', 'info');
-            }
+            if (window.App && App.showToast) App.showToast('Connecting via Meta Graph API OAuth... Super Admin demo ready', 'info');
             autofillSuperAdmin();
             scrollToAuth('login');
         }
 
         function continueWithGoogle() {
-            if (window.App && App.showToast) {
-                App.showToast('Google Workspace Single Sign-On ready. Please sign in', 'info');
-            }
+            if (window.App && App.showToast) App.showToast('Google Workspace SSO ready. Please sign in.', 'info');
             scrollToAuth('login');
         }
 
         function continueWithApple() {
-            if (window.App && App.showToast) {
-                App.showToast('Apple ID Sign-In ready. Please sign in', 'info');
-            }
+            if (window.App && App.showToast) App.showToast('Apple ID Sign-In ready. Please sign in.', 'info');
             scrollToAuth('login');
         }
     </script>
+
 
     <!-- Main Dashboard -->
     <div id="dashboard" class="dashboard hidden">
