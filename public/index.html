@@ -42,90 +42,230 @@
 <body class="bg-cream-50 text-cream-800 antialiased min-h-screen">
     <div id="toast-container" class="toast-container"></div>
     
-    <!-- CLEAN DEDICATED AUTH SCREEN (SIGN IN & REGISTER) -->
+    <!-- SUBSCRIBER & SUBSCRIPTION THEMED SPLIT-SCREEN AUTH PORTAL -->
     <div id="login-screen" class="login-screen active">
-        <div class="login-card-box" style="max-width: 440px; width: 100%;">
-            <div class="login-header-text" style="text-align: left; margin-bottom: 1.4rem;">
-                <div style="display: flex; align-items: center; gap: 0.85rem; margin-bottom: 1.15rem;">
-                    <img src="favicon.png?v=5" alt="InstaAuto Logo" style="width: 44px; height: 44px; object-fit: contain; background: transparent;" />
-                    <div>
-                        <h1 style="font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: 1.45rem; color: #2C2A29; letter-spacing: -0.03em; margin: 0; line-height: 1.1;">InstaAuto</h1>
-                        <div style="font-size: 0.72rem; font-weight: 700; color: #D97757; text-transform: uppercase; letter-spacing: 0.04em; margin-top: 0.15rem;">Creator Automation SaaS</div>
+        <!-- Ambient Animated Background Gradients -->
+        <div class="login-bg-ambient">
+            <div class="login-orb-1"></div>
+            <div class="login-orb-2"></div>
+            <div class="login-orb-3"></div>
+        </div>
+
+        <div class="login-split-wrapper">
+            <!-- LEFT PANEL: Subscriber & Subscription Showcase -->
+            <div class="login-showcase-panel">
+                <!-- Platform Badge -->
+                <div class="login-brand-badge">
+                    <span>👑</span>
+                    <span>Multi-Tenant Creator & Subscription SaaS</span>
+                </div>
+
+                <!-- Hero Pitch -->
+                <div>
+                    <h1 class="login-hero-heading">
+                        Convert Instagram Comments into <span class="gradient-text">High-Paying Subscribers</span>
+                    </h1>
+                    <p class="login-hero-subtext" style="margin-top: 0.65rem;">
+                        Deploy intelligent automated DM funnels that instantly deliver lead magnets, VIP access links, and digital products the second a follower comments on your Reels or Posts.
+                    </p>
+                </div>
+
+                <!-- Live Animated Comment-to-DM Simulation Widget -->
+                <div class="login-demo-card">
+                    <div class="demo-reel-header">
+                        <div class="demo-creator-info">
+                            <div class="demo-creator-avatar">IA</div>
+                            <div>
+                                <div style="font-weight: 800; font-size: 0.84rem; color: #2C2A29;">@creator.studio</div>
+                                <div style="font-size: 0.7rem; color: #736E68;">Live Reel • "Comment 'GROWTH' for free blueprint"</div>
+                            </div>
+                        </div>
+                        <span style="background: #E8F5E9; color: #2E7D32; font-size: 0.7rem; font-weight: 700; padding: 2px 8px; border-radius: 6px; display: inline-flex; align-items: gap: 4px;">
+                            <span style="width: 6px; height: 6px; border-radius: 50%; background: #2E7D32; display: inline-block; animation: pulseGlow 1.5s infinite;"></span>
+                            Auto-Pilot Active
+                        </span>
+                    </div>
+
+                    <!-- Step 1: Follower Comment Trigger -->
+                    <div class="demo-step-comment">
+                        <div style="font-size: 1.15rem;">💬</div>
+                        <div style="flex: 1;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <strong style="color: #2C2A29; font-size: 0.78rem;">@sarah_creator</strong>
+                                <span class="demo-step-badge">⚡ Trigger: "GROWTH"</span>
+                            </div>
+                            <div style="color: #6B6762; font-size: 0.76rem; margin-top: 2px;">
+                                "GROWTH! Need this blueprint ASAP please 🔥"
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: Instant Automated DM Delivery -->
+                    <div class="demo-step-dm">
+                        <div class="demo-dm-header">
+                            <span style="display: flex; align-items: center; gap: 4px;">
+                                <span>🚀</span> Sent via InstaAuto (0.4s Pacing)
+                            </span>
+                            <span style="background: #DCFCE7; color: #166534; padding: 1px 6px; border-radius: 4px; font-size: 0.66rem; font-weight: 800;">DELIVERED</span>
+                        </div>
+                        <div style="color: #14532D; font-size: 0.78rem; line-height: 1.4;">
+                            "Hey Sarah! Here is your exclusive <strong>Creator Growth Blueprint</strong> + instant community invite 🎁"
+                        </div>
+                        <div style="display: flex; gap: 0.5rem; margin-top: 0.2rem;">
+                            <span style="background: #16A34A; color: #FFFFFF; font-size: 0.72rem; font-weight: 700; padding: 4px 10px; border-radius: 6px; display: inline-block;">
+                                Download Blueprint ↗
+                            </span>
+                            <span style="background: #DCFCE7; color: #15803D; font-size: 0.72rem; font-weight: 700; padding: 4px 8px; border-radius: 6px; display: inline-block;">
+                                98.4% Open Rate
+                            </span>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Auth Mode Switcher Tabs -->
-                <div style="display: flex; background: #F5F1EA; padding: 4px; border-radius: 12px; margin-bottom: 1.25rem;">
-                    <button type="button" id="tab-btn-login" onclick="switchAuthTab('login')" style="flex: 1; padding: 0.6rem; border-radius: 9px; font-weight: 700; font-size: 0.85rem; border: none; cursor: pointer; background: #FFFFFF; color: #2C2A29; box-shadow: 0 2px 6px rgba(0,0,0,0.06); transition: all 0.2s;">
-                        Sign In
-                    </button>
-                    <button type="button" id="tab-btn-register" onclick="switchAuthTab('register')" style="flex: 1; padding: 0.6rem; border-radius: 9px; font-weight: 700; font-size: 0.85rem; border: none; cursor: pointer; background: transparent; color: #736E68; transition: all 0.2s;">
-                        Create Account
-                    </button>
+                <!-- Subscription Tier Highlights -->
+                <div>
+                    <div style="font-size: 0.74rem; font-weight: 800; text-transform: uppercase; color: #736E68; letter-spacing: 0.05em; margin-bottom: 0.5rem;">
+                        Multi-Tier Subscription Engine
+                    </div>
+                    <div class="login-tier-matrix">
+                        <div class="tier-mini-pill">
+                            <div class="tier-pill-icon" style="background: #FAF0EC; color: #D97757;">⚡</div>
+                            <div>
+                                <div style="font-weight: 800; font-size: 0.8rem; color: #2C2A29;">Free / Starter</div>
+                                <div style="font-size: 0.7rem; color: #736E68;">60 DMs/hr • Keyword Triggers</div>
+                            </div>
+                        </div>
+                        <div class="tier-mini-pill">
+                            <div class="tier-pill-icon" style="background: #EFF6FF; color: #2563EB;">🚀</div>
+                            <div>
+                                <div style="font-weight: 800; font-size: 0.8rem; color: #2C2A29;">Pro Creator</div>
+                                <div style="font-size: 0.7rem; color: #736E68;">300 DMs/hr • Sheet Sync</div>
+                            </div>
+                        </div>
+                        <div class="tier-mini-pill">
+                            <div class="tier-pill-icon" style="background: #F5F3FF; color: #7C3AED;">🏢</div>
+                            <div>
+                                <div style="font-weight: 800; font-size: 0.8rem; color: #2C2A29;">Agency Scale</div>
+                                <div style="font-size: 0.7rem; color: #736E68;">1,000+ DMs/hr • Priority Queue</div>
+                            </div>
+                        </div>
+                        <div class="tier-mini-pill" style="border-color: #FCD34D; background: #FFFDF5;">
+                            <div class="tier-pill-icon" style="background: #FEF3C7; color: #B45309;">👑</div>
+                            <div>
+                                <div style="font-weight: 800; font-size: 0.8rem; color: #92400E;">Super Admin</div>
+                                <div style="font-size: 0.7rem; color: #B45309;">Infinite Volume • Tenant Director</div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
-                <div id="auth-heading-login">
-                    <h2 style="font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: 1.35rem; color: #2C2A29; margin: 0 0 0.35rem 0; letter-spacing: -0.02em;">Welcome Back 👋</h2>
-                    <p style="font-size: 0.86rem; color: #736E68; margin: 0; line-height: 1.45;">Enter your email & password to access your automation workspace.</p>
-                </div>
-
-                <div id="auth-heading-register" style="display: none;">
-                    <h2 style="font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: 1.35rem; color: #2C2A29; margin: 0 0 0.35rem 0; letter-spacing: -0.02em;">Start Free as Creator 🚀</h2>
-                    <p style="font-size: 0.86rem; color: #736E68; margin: 0; line-height: 1.45;">Create your dedicated workspace. Connect your Instagram in seconds.</p>
+                <!-- Trust Bar -->
+                <div style="display: flex; align-items: center; gap: 1.25rem; font-size: 0.76rem; color: #736E68; font-weight: 600; padding-top: 0.25rem;">
+                    <span style="display: flex; align-items: center; gap: 4px;">
+                        <span style="color: #2E7D32;">✔</span> 99.8% DM Delivery
+                    </span>
+                    <span style="display: flex; align-items: center; gap: 4px;">
+                        <span style="color: #2E7D32;">✔</span> Meta Graph API Safe
+                    </span>
+                    <span style="display: flex; align-items: center; gap: 4px;">
+                        <span style="color: #2E7D32;">✔</span> Multi-Tenant Isolation
+                    </span>
                 </div>
             </div>
 
-            <!-- SIGN IN FORM -->
-            <form id="login-form">
-                <div class="form-group" style="text-align: left; margin-bottom: 1rem;">
-                    <label style="font-size: 0.82rem; font-weight: 700; color: #2C2A29; margin-bottom: 0.4rem; display: block;">Email Address</label>
-                    <input type="email" id="login-email" class="input" placeholder="harshparmar686630@gmail.com or creator@domain.com" required style="width: 100%; padding: 0.75rem 1rem; font-size: 0.92rem; font-weight: 600; border-radius: 12px; border: 1.5px solid #E6E1D8; background: #FAF8F5; outline: none;">
-                </div>
+            <!-- RIGHT PANEL: Minimalist Auth Portal (Sign In & Sign Up) -->
+            <div class="login-auth-panel">
+                <div class="login-card-box">
+                    <div class="login-header-text" style="text-align: left; margin-bottom: 1.25rem;">
+                        <!-- Logo and Brand -->
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.15rem;">
+                            <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                <img src="favicon.png?v=5" alt="InstaAuto Logo" style="width: 40px; height: 40px; object-fit: contain; background: transparent;" />
+                                <div>
+                                    <h2 style="font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: 1.35rem; color: #2C2A29; letter-spacing: -0.03em; margin: 0; line-height: 1.1;">InstaAuto</h2>
+                                    <div style="font-size: 0.7rem; font-weight: 700; color: #D97757; text-transform: uppercase; letter-spacing: 0.04em; margin-top: 0.1rem;">Subscriber Portal</div>
+                                </div>
+                            </div>
+                            <span style="background: #FAF0EC; color: #D97757; font-size: 0.68rem; font-weight: 800; text-transform: uppercase; padding: 3px 8px; border-radius: 6px; border: 1px solid #F4D5CB;">SaaS v2.4</span>
+                        </div>
 
-                <div class="form-group" style="position: relative; text-align: left; margin-bottom: 1.25rem;">
-                    <label style="font-size: 0.82rem; font-weight: 700; color: #2C2A29; margin-bottom: 0.4rem; display: block;">Password</label>
-                    <input type="password" id="password" class="input" placeholder="Enter your password" required style="width: 100%; padding: 0.75rem 2.6rem 0.75rem 1rem; font-size: 0.92rem; font-weight: 600; border-radius: 12px; border: 1.5px solid #E6E1D8; background: #FAF8F5; outline: none;">
-                    <button type="button" id="btn-toggle-login-pwd" onclick="toggleLoginPassword('password', 'btn-toggle-login-pwd')" style="position: absolute; right: 12px; top: 34px; background: none; border: none; font-size: 1.05rem; cursor: pointer; color: #736E68;" title="Toggle Password Visibility">👁️</button>
-                    
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.5rem;">
-                        <span style="font-size: 0.76rem; color: #8C827A;">
-                            Default: <code style="font-weight: 700; color: #D97757; background: #FAF0EC; padding: 0.1rem 0.35rem; border-radius: 6px;">Harsh@2004</code>
-                        </span>
-                        <a href="javascript:void(0)" onclick="autofillSuperAdmin()" style="font-size: 0.76rem; font-weight: 700; color: #D97757; text-decoration: none;">👑 Autofill Super Admin</a>
+                        <!-- Auth Mode Switcher Tabs -->
+                        <div style="display: flex; background: #F5F1EA; padding: 4px; border-radius: 12px; margin-bottom: 1.15rem;">
+                            <button type="button" id="tab-btn-login" onclick="switchAuthTab('login')" style="flex: 1; padding: 0.55rem; border-radius: 9px; font-weight: 700; font-size: 0.84rem; border: none; cursor: pointer; background: #FFFFFF; color: #2C2A29; box-shadow: 0 2px 6px rgba(0,0,0,0.06); transition: all 0.2s;">
+                                Sign In
+                            </button>
+                            <button type="button" id="tab-btn-register" onclick="switchAuthTab('register')" style="flex: 1; padding: 0.55rem; border-radius: 9px; font-weight: 700; font-size: 0.84rem; border: none; cursor: pointer; background: transparent; color: #736E68; transition: all 0.2s;">
+                                Create Account
+                            </button>
+                        </div>
+
+                        <div id="auth-heading-login">
+                            <h3 style="font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: 1.2rem; color: #2C2A29; margin: 0 0 0.25rem 0; letter-spacing: -0.02em;">Welcome Back 👋</h3>
+                            <p style="font-size: 0.82rem; color: #736E68; margin: 0; line-height: 1.45;">Enter your credentials to access your creator dashboard and automation funnels.</p>
+                        </div>
+
+                        <div id="auth-heading-register" style="display: none;">
+                            <h3 style="font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: 1.2rem; color: #2C2A29; margin: 0 0 0.25rem 0; letter-spacing: -0.02em;">Start Free as Creator 🚀</h3>
+                            <p style="font-size: 0.82rem; color: #736E68; margin: 0; line-height: 1.45;">Create your dedicated workspace. Connect your Instagram in seconds.</p>
+                        </div>
+                    </div>
+
+                    <!-- SIGN IN FORM -->
+                    <form id="login-form">
+                        <div class="form-group" style="text-align: left; margin-bottom: 0.9rem;">
+                            <label style="font-size: 0.78rem; font-weight: 700; color: #2C2A29; margin-bottom: 0.3rem; display: block;">Email Address</label>
+                            <input type="email" id="login-email" class="input" placeholder="creator@domain.com or admin email" required style="width: 100%; padding: 0.68rem 0.95rem; font-size: 0.88rem; font-weight: 600; border-radius: 10px; border: 1.5px solid #E6E1D8; background: #FAF8F5; outline: none; transition: border-color 0.15s ease;">
+                        </div>
+
+                        <div class="form-group" style="position: relative; text-align: left; margin-bottom: 1.15rem;">
+                            <label style="font-size: 0.78rem; font-weight: 700; color: #2C2A29; margin-bottom: 0.3rem; display: block;">Password</label>
+                            <input type="password" id="password" class="input" placeholder="Enter your password" required style="width: 100%; padding: 0.68rem 2.6rem 0.68rem 0.95rem; font-size: 0.88rem; font-weight: 600; border-radius: 10px; border: 1.5px solid #E6E1D8; background: #FAF8F5; outline: none; transition: border-color 0.15s ease;">
+                            <button type="button" id="btn-toggle-login-pwd" onclick="toggleLoginPassword('password', 'btn-toggle-login-pwd')" style="position: absolute; right: 10px; top: 30px; background: none; border: none; font-size: 1rem; cursor: pointer; color: #736E68;" title="Toggle Password Visibility">👁️</button>
+                            
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.45rem;">
+                                <span style="font-size: 0.72rem; color: #8C827A;">
+                                    Demo Super Admin: <code style="font-weight: 700; color: #D97757; background: #FAF0EC; padding: 0.1rem 0.3rem; border-radius: 4px;">Harsh@2004</code>
+                                </span>
+                                <a href="javascript:void(0)" onclick="autofillSuperAdmin()" style="font-size: 0.72rem; font-weight: 700; color: #D97757; text-decoration: none; display: flex; align-items: center; gap: 3px;">
+                                    <span>👑</span> Autofill Super Admin
+                                </a>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-full" style="padding: 0.75rem 1.25rem; font-size: 0.9rem; font-weight: 800; border-radius: 10px; box-shadow: 0 4px 14px rgba(217, 119, 87, 0.3); width: 100%; cursor: pointer;">
+                            <span>Sign In to Dashboard →</span>
+                        </button>
+                    </form>
+
+                    <!-- REGISTER FORM -->
+                    <form id="register-form" style="display: none;">
+                        <div class="form-group" style="text-align: left; margin-bottom: 0.75rem;">
+                            <label style="font-size: 0.78rem; font-weight: 700; color: #2C2A29; margin-bottom: 0.25rem; display: block;">Full Name</label>
+                            <input type="text" id="reg-name" class="input" placeholder="e.g. Alex Rivera" required style="width: 100%; padding: 0.68rem 0.95rem; font-size: 0.88rem; font-weight: 600; border-radius: 10px; border: 1.5px solid #E6E1D8; background: #FAF8F5; outline: none;">
+                        </div>
+
+                        <div class="form-group" style="text-align: left; margin-bottom: 0.75rem;">
+                            <label style="font-size: 0.78rem; font-weight: 700; color: #2C2A29; margin-bottom: 0.25rem; display: block;">Email Address</label>
+                            <input type="email" id="reg-email" class="input" placeholder="e.g. alex@creatorstudio.com" required style="width: 100%; padding: 0.68rem 0.95rem; font-size: 0.88rem; font-weight: 600; border-radius: 10px; border: 1.5px solid #E6E1D8; background: #FAF8F5; outline: none;">
+                        </div>
+
+                        <div class="form-group" style="position: relative; text-align: left; margin-bottom: 1.15rem;">
+                            <label style="font-size: 0.78rem; font-weight: 700; color: #2C2A29; margin-bottom: 0.25rem; display: block;">Password (min 6 chars)</label>
+                            <input type="password" id="reg-password" class="input" placeholder="Create a secure password" minlength="6" required style="width: 100%; padding: 0.68rem 2.6rem 0.68rem 0.95rem; font-size: 0.88rem; font-weight: 600; border-radius: 10px; border: 1.5px solid #E6E1D8; background: #FAF8F5; outline: none;">
+                            <button type="button" id="btn-toggle-reg-pwd" onclick="toggleLoginPassword('reg-password', 'btn-toggle-reg-pwd')" style="position: absolute; right: 10px; top: 28px; background: none; border: none; font-size: 1rem; cursor: pointer; color: #736E68;" title="Toggle Password Visibility">👁️</button>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-full" style="padding: 0.75rem 1.25rem; font-size: 0.9rem; font-weight: 800; border-radius: 10px; box-shadow: 0 4px 14px rgba(217, 119, 87, 0.3); width: 100%; cursor: pointer;">
+                            <span>Create Creator Account →</span>
+                        </button>
+                    </form>
+
+                    <!-- Trust & Guarantee Notice -->
+                    <div style="margin-top: 1.25rem; text-align: center; font-size: 0.72rem; font-weight: 700; color: #736E68; display: flex; align-items: center; justify-content: center; gap: 0.35rem; border-top: 1px solid #F5F1EA; padding-top: 1rem;">
+                        <span style="color: #2E7D32;">🟢</span>
+                        <span>Meta Graph API 2026 Compliant • Dedicated Tenant Workspaces</span>
                     </div>
                 </div>
-
-                <button type="submit" class="btn btn-primary w-full" style="padding: 0.85rem 1.5rem; font-size: 0.95rem; font-weight: 800; border-radius: 12px; box-shadow: 0 4px 14px rgba(217, 119, 87, 0.3);">
-                    <span>Sign In to Workspace →</span>
-                </button>
-            </form>
-
-            <!-- REGISTER FORM -->
-            <form id="register-form" style="display: none;">
-                <div class="form-group" style="text-align: left; margin-bottom: 0.85rem;">
-                    <label style="font-size: 0.82rem; font-weight: 700; color: #2C2A29; margin-bottom: 0.35rem; display: block;">Full Name</label>
-                    <input type="text" id="reg-name" class="input" placeholder="e.g. Alex Rivera" required style="width: 100%; padding: 0.75rem 1rem; font-size: 0.92rem; font-weight: 600; border-radius: 12px; border: 1.5px solid #E6E1D8; background: #FAF8F5; outline: none;">
-                </div>
-
-                <div class="form-group" style="text-align: left; margin-bottom: 0.85rem;">
-                    <label style="font-size: 0.82rem; font-weight: 700; color: #2C2A29; margin-bottom: 0.35rem; display: block;">Email Address</label>
-                    <input type="email" id="reg-email" class="input" placeholder="e.g. alex@creatorstudio.com" required style="width: 100%; padding: 0.75rem 1rem; font-size: 0.92rem; font-weight: 600; border-radius: 12px; border: 1.5px solid #E6E1D8; background: #FAF8F5; outline: none;">
-                </div>
-
-                <div class="form-group" style="position: relative; text-align: left; margin-bottom: 1.25rem;">
-                    <label style="font-size: 0.82rem; font-weight: 700; color: #2C2A29; margin-bottom: 0.35rem; display: block;">Password (min 6 chars)</label>
-                    <input type="password" id="reg-password" class="input" placeholder="Create a secure password" minlength="6" required style="width: 100%; padding: 0.75rem 2.6rem 0.75rem 1rem; font-size: 0.92rem; font-weight: 600; border-radius: 12px; border: 1.5px solid #E6E1D8; background: #FAF8F5; outline: none;">
-                    <button type="button" id="btn-toggle-reg-pwd" onclick="toggleLoginPassword('reg-password', 'btn-toggle-reg-pwd')" style="position: absolute; right: 12px; top: 34px; background: none; border: none; font-size: 1.05rem; cursor: pointer; color: #736E68;" title="Toggle Password Visibility">👁️</button>
-                </div>
-
-                <button type="submit" class="btn btn-primary w-full" style="padding: 0.85rem 1.5rem; font-size: 0.95rem; font-weight: 800; border-radius: 12px; box-shadow: 0 4px 14px rgba(217, 119, 87, 0.3);">
-                    <span>Create Creator Account →</span>
-                </button>
-            </form>
-
-            <div style="margin-top: 1.45rem; text-align: center; font-size: 0.76rem; font-weight: 700; color: #736E68; display: flex; align-items: center; justify-content: center; gap: 0.4rem; border-top: 1px solid #F5F1EA; padding-top: 1.15rem;">
-                <span style="color: #2E7D32;">🟢</span>
-                <span>Isolated Workspace • Meta Graph API 250 DMs/hr Cap Safe</span>
             </div>
         </div>
     </div>
