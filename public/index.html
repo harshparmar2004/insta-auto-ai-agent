@@ -42,707 +42,140 @@
 <body class="bg-cream-50 text-cream-800 antialiased min-h-screen">
     <div id="toast-container" class="toast-container"></div>
     
-    <!-- ==========================================================================
-         MINIMALIST, USABLE & ANIMATED SAAS LANDING PAGE (InstaAuto AI Agent)
-         ========================================================================== -->
+    <!-- CLEAN DEDICATED AUTH SCREEN (SIGN IN & REGISTER) -->
     <div id="login-screen" class="login-screen active">
-        <!-- Subtle Ambient Background Glows -->
-        <div class="ambient-glow glow-1"></div>
-        <div class="ambient-glow glow-2"></div>
+        <div class="login-card-box" style="max-width: 440px; width: 100%;">
+            <div class="login-header-text" style="text-align: left; margin-bottom: 1.4rem;">
+                <div style="display: flex; align-items: center; gap: 0.85rem; margin-bottom: 1.15rem;">
+                    <img src="favicon.png?v=5" alt="InstaAuto Logo" style="width: 44px; height: 44px; object-fit: contain; background: transparent;" />
+                    <div>
+                        <h1 style="font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: 1.45rem; color: #2C2A29; letter-spacing: -0.03em; margin: 0; line-height: 1.1;">InstaAuto</h1>
+                        <div style="font-size: 0.72rem; font-weight: 700; color: #D97757; text-transform: uppercase; letter-spacing: 0.04em; margin-top: 0.15rem;">Creator Automation SaaS</div>
+                    </div>
+                </div>
 
-        <!-- STICKY MINIMAL HEADER -->
-        <header class="minimal-header">
-            <div class="header-container">
-                <a href="#hero" class="brand-logo-group">
-                    <img src="favicon.png?v=5" alt="InstaAuto Logo" class="brand-icon" />
-                    <span class="brand-title">InstaAuto</span>
-                    <span class="brand-version-chip">
-                        <span class="pulse-green-dot"></span>
-                        Meta API v21.0
-                    </span>
-                </a>
-
-                <nav class="header-nav">
-                    <a href="#how-it-works" class="nav-anchor">How It Works</a>
-                    <a href="#features" class="nav-anchor">Features</a>
-                    <a href="#pricing" class="nav-anchor">Pricing</a>
-                    <a href="#faqs" class="nav-anchor">FAQs</a>
-                </nav>
-
-                <div class="header-actions">
-                    <button type="button" onclick="scrollToAuth('login')" class="btn-ghost-signin">Sign In</button>
-                    <button type="button" onclick="scrollToAuth('register')" class="btn-primary-cta">
-                        <span>Get Started Free</span>
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                <!-- Auth Mode Switcher Tabs -->
+                <div style="display: flex; background: #F5F1EA; padding: 4px; border-radius: 12px; margin-bottom: 1.25rem;">
+                    <button type="button" id="tab-btn-login" onclick="switchAuthTab('login')" style="flex: 1; padding: 0.6rem; border-radius: 9px; font-weight: 700; font-size: 0.85rem; border: none; cursor: pointer; background: #FFFFFF; color: #2C2A29; box-shadow: 0 2px 6px rgba(0,0,0,0.06); transition: all 0.2s;">
+                        Sign In
+                    </button>
+                    <button type="button" id="tab-btn-register" onclick="switchAuthTab('register')" style="flex: 1; padding: 0.6rem; border-radius: 9px; font-weight: 700; font-size: 0.85rem; border: none; cursor: pointer; background: transparent; color: #736E68; transition: all 0.2s;">
+                        Create Account
                     </button>
                 </div>
-            </div>
-        </header>
 
-        <!-- HERO SECTION (Minimalist Front Page + Live Animation) -->
-        <section id="hero" class="hero-section">
-            <div class="hero-container">
-                <!-- LEFT COLUMN: Headline & Usable Minimalist Auth -->
-                <div class="hero-auth-col">
-                    <!-- Eyebrow Pill -->
-                    <div class="hero-badge">
-                        <span class="badge-sparkle">✨</span>
-                        <span>Autonomous Instagram Growth Agent</span>
-                        <span class="badge-separator">•</span>
-                        <span class="badge-status">0.4s DM Engine</span>
-                    </div>
-
-                    <!-- Main Headline -->
-                    <h1 class="hero-headline">
-                        Automate your Instagram growth <br/>
-                        <span class="gradient-accent">without the complexity.</span>
-                    </h1>
-
-                    <p class="hero-tagline">
-                        InstaAuto turns Reel comments into verified followers and automated DM sales in 0.4 seconds. Safe, compliant, and always on.
-                    </p>
-
-                    <!-- Clean Minimalist Auth Box -->
-                    <div id="auth-box" class="minimal-auth-card">
-                        <!-- Mode Tabs (Sign In / Create Account) -->
-                        <div class="auth-tabs-row">
-                            <button type="button" id="tab-btn-login" onclick="switchAuthTab('login')" class="auth-tab-pill active">
-                                Sign In
-                            </button>
-                            <button type="button" id="tab-btn-register" onclick="switchAuthTab('register')" class="auth-tab-pill">
-                                Create Free Account
-                            </button>
-                        </div>
-
-                        <!-- Quick Social Auth Buttons -->
-                        <div class="social-auth-grid">
-                            <button type="button" onclick="continueWithMeta()" class="btn-social btn-social-meta" title="Connect Instagram via Meta API">
-                                <svg class="social-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
-                                <span>Continue with Instagram</span>
-                            </button>
-                            <button type="button" onclick="continueWithGoogle()" class="btn-social btn-social-google" title="Sign in with Google">
-                                <svg class="social-icon" viewBox="0 0 24 24"><path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"/><path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.34 24 12 24z"/><path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 10.03 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/><path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.34 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/></svg>
-                                <span>Google</span>
-                            </button>
-                        </div>
-
-                        <!-- Divider -->
-                        <div class="minimal-divider">
-                            <span class="rule-line"></span>
-                            <span class="rule-text">or continue with email</span>
-                            <span class="rule-line"></span>
-                        </div>
-
-                        <!-- SIGN IN FORM -->
-                        <form id="login-form" class="clean-auth-form">
-                            <div class="field-wrap">
-                                <label for="login-email">Email Address</label>
-                                <input type="email" id="login-email" class="clean-input-box" placeholder="creator@studio.com or admin email" required />
-                            </div>
-
-                            <div class="field-wrap">
-                                <div class="label-row">
-                                    <label for="password">Password</label>
-                                    <span class="admin-chip">Admin Demo: <code>Harsh@2004</code></span>
-                                </div>
-                                <div class="relative-field">
-                                    <input type="password" id="password" class="clean-input-box" placeholder="Enter your password" required />
-                                    <button type="button" onclick="toggleLoginPassword('password', this)" class="btn-eye" title="Toggle visibility">👁️</button>
-                                </div>
-                            </div>
-
-                            <div class="autofill-row">
-                                <button type="button" onclick="autofillSuperAdmin()" class="autofill-action-btn">
-                                    <span>👑</span> One-Click Autofill Super Admin
-                                </button>
-                            </div>
-
-                            <button type="submit" class="submit-action-btn">
-                                <span>Sign In to Dashboard →</span>
-                            </button>
-                        </form>
-
-                        <!-- REGISTER FORM -->
-                        <form id="register-form" class="clean-auth-form" style="display: none;">
-                            <div class="field-wrap">
-                                <label for="reg-name">Full Name</label>
-                                <input type="text" id="reg-name" class="clean-input-box" placeholder="Alex Rivera" required />
-                            </div>
-
-                            <div class="field-wrap">
-                                <label for="reg-email">Work / Creator Email</label>
-                                <input type="email" id="reg-email" class="clean-input-box" placeholder="alex@creatorstudio.com" required />
-                            </div>
-
-                            <div class="field-wrap">
-                                <label for="reg-password">Password (min 6 chars)</label>
-                                <div class="relative-field">
-                                    <input type="password" id="reg-password" class="clean-input-box" placeholder="Create a secure password" minlength="6" required />
-                                    <button type="button" onclick="toggleLoginPassword('reg-password', this)" class="btn-eye" title="Toggle visibility">👁️</button>
-                                </div>
-                            </div>
-
-                            <button type="submit" class="submit-action-btn">
-                                <span>Launch AI Agent Free →</span>
-                            </button>
-                        </form>
-
-                        <p class="auth-footnote">
-                            By continuing, you agree to our <a href="#faqs">Terms</a> and <a href="#faqs">Privacy Policy</a>.
-                        </p>
-                    </div>
+                <div id="auth-heading-login">
+                    <h2 style="font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: 1.35rem; color: #2C2A29; margin: 0 0 0.35rem 0; letter-spacing: -0.02em;">Welcome Back 👋</h2>
+                    <p style="font-size: 0.86rem; color: #736E68; margin: 0; line-height: 1.45;">Enter your email & password to access your automation workspace.</p>
                 </div>
 
-                <!-- RIGHT COLUMN: Animated Minimalist Live Agent Preview -->
-                <div class="hero-preview-col">
-                    <div class="preview-stage-wrap">
-                        <!-- Floating Glass Simulator Card -->
-                        <div class="animated-preview-card">
-                            <!-- Card Header: Profile & Live Status -->
-                            <div class="sim-header-row">
-                                <div class="sim-profile-group">
-                                    <div class="sim-avatar">IA</div>
-                                    <div>
-                                        <div class="sim-handle">@harshparmar007__</div>
-                                        <div class="sim-reel-name">Active Reel • "Comment 'GROWTH' for AI blueprint"</div>
-                                    </div>
-                                </div>
-                                <div class="sim-active-pill">
-                                    <span class="pulse-indicator"></span>
-                                    <span>AI Auto-Pilot: ON</span>
-                                </div>
-                            </div>
-
-                            <!-- Animated Step 1: Incoming Follower Comment -->
-                            <div class="sim-comment-bubble">
-                                <div class="comment-top-bar">
-                                    <span class="comment-author">@sarah_creator</span>
-                                    <span class="trigger-pill">⚡ Matched: "GROWTH"</span>
-                                </div>
-                                <p class="comment-quote">"GROWTH! Sent me this blueprint please, dying to scale my page 🔥"</p>
-                            </div>
-
-                            <!-- Animated Step 2: Instant Pipeline Checks -->
-                            <div class="sim-checks-container">
-                                <div class="check-line check-1">
-                                    <span class="check-icon">✓</span>
-                                    <span>Follower Verified (@sarah_creator follows you)</span>
-                                </div>
-                                <div class="check-line check-2">
-                                    <span class="check-icon">✓</span>
-                                    <span>Multi-Tenant Queue Safe (12 / 500 consumed)</span>
-                                </div>
-                                <div class="check-line check-3">
-                                    <span class="check-icon">✓</span>
-                                    <span>Dynamic AI Response Armed (0.4s dispatch delay)</span>
-                                </div>
-                            </div>
-
-                            <!-- Animated Step 3: Instant DM Delivered -->
-                            <div class="sim-dm-delivered-box">
-                                <div class="dm-status-header">
-                                    <span class="dm-source">🚀 Sent via InstaAuto AI Agent</span>
-                                    <span class="dm-tag-success">DELIVERED (0.4s)</span>
-                                </div>
-                                <p class="dm-message-body">
-                                    "Hey Sarah! Here is your exclusive <strong>Creator Growth Blueprint & VIP Invite</strong> 🎁"
-                                </p>
-                                <div class="dm-action-row">
-                                    <span class="dm-cta-link">Download Blueprint ↗</span>
-                                    <span class="dm-open-rate-tag">98.8% Open Rate</span>
-                                </div>
-                            </div>
-
-                            <!-- Real-Time Conversion Metrics Bar -->
-                            <div class="sim-metrics-bar">
-                                <div class="metric-col">
-                                    <span class="metric-number">99.8%</span>
-                                    <span class="metric-caption">Inbox Delivery</span>
-                                </div>
-                                <div class="metric-separator"></div>
-                                <div class="metric-col">
-                                    <span class="metric-number">0.4s</span>
-                                    <span class="metric-caption">Dispatch Speed</span>
-                                </div>
-                                <div class="metric-separator"></div>
-                                <div class="metric-col">
-                                    <span class="metric-number">0 Flags</span>
-                                    <span class="metric-caption">Meta Compliant</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Floating Micro-Badge 1 -->
-                        <div class="floating-chip chip-left">
-                            <span class="chip-emoji">🛡️</span>
-                            <span>Zero Shadowban Risk</span>
-                        </div>
-
-                        <!-- Floating Micro-Badge 2 -->
-                        <div class="floating-chip chip-right">
-                            <span class="chip-emoji">📈</span>
-                            <span>+1,420 Followers this week</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- SOCIAL PROOF STRIP -->
-        <section class="minimal-proof-strip">
-            <div class="proof-content">
-                <span class="proof-label">TRUSTED BY 10,000+ CREATORS, AGENCIES, AND DIGITAL FOUNDERS</span>
-                <div class="proof-tags">
-                    <span>@luxurycreators</span>
-                    <span>@scaleagency</span>
-                    <span>@growthhackers</span>
-                    <span>@fitcoach.pro</span>
-                    <span>@ecomboost</span>
-                    <span>@socialelite</span>
-                </div>
-            </div>
-        </section>
-
-        <!-- HOW IT WORKS (Minimalist Continuous Flow - Not In Clunky Boxes) -->
-        <section id="how-it-works" class="minimal-section">
-            <div class="section-title-wrap">
-                <span class="section-badge">HOW IT WORKS</span>
-                <h2 class="section-title">From Reel Comment to Paid Customer</h2>
-                <p class="section-description">
-                    Four effortless steps. Zero complicated visual spaghetti. Built for maximum conversion.
-                </p>
-            </div>
-
-            <div class="flow-steps-container">
-                <!-- Step 1 -->
-                <div class="flow-step-item">
-                    <div class="flow-step-number">01</div>
-                    <h3 class="flow-step-title">Creator Posts Reel</h3>
-                    <p class="flow-step-desc">Publish your Instagram Reel with a clear call-to-action like <em>"Comment GROWTH for the blueprint"</em>.</p>
-                </div>
-                <div class="flow-connector">
-                    <span class="connector-line"></span>
-                </div>
-
-                <!-- Step 2 -->
-                <div class="flow-step-item">
-                    <div class="flow-step-number">02</div>
-                    <h3 class="flow-step-title">Viewer Comments Keyword</h3>
-                    <p class="flow-step-desc">Followers comment the keyword. The autonomous cloud watcher detects the new comment in real-time.</p>
-                </div>
-                <div class="flow-connector">
-                    <span class="connector-line"></span>
-                </div>
-
-                <!-- Step 3 -->
-                <div class="flow-step-item">
-                    <div class="flow-step-number">03</div>
-                    <h3 class="flow-step-title">AI Verifies & Prepares</h3>
-                    <p class="flow-step-desc">InstaAuto verifies they follow you, checks safe rate limits, and crafts a humanized DM reply.</p>
-                </div>
-                <div class="flow-connector">
-                    <span class="connector-line"></span>
-                </div>
-
-                <!-- Step 4 -->
-                <div class="flow-step-item">
-                    <div class="flow-step-number">04</div>
-                    <h3 class="flow-step-title">Instant DM Delivery</h3>
-                    <p class="flow-step-desc">The message lands directly in their primary inbox in 0.4 seconds with your tracked checkout or lead link.</p>
-                </div>
-            </div>
-        </section>
-
-        <!-- FEATURES GRID (Minimalist & Spacious) -->
-        <section id="features" class="minimal-section bg-card-surface">
-            <div class="section-title-wrap">
-                <span class="section-badge">POWERFUL AUTONOMOUS ENGINE</span>
-                <h2 class="section-title">Everything You Need to Scale Instagram</h2>
-                <p class="section-description">
-                    Purpose-built for Reels creators and digital agencies who want reliable growth on autopilot.
-                </p>
-            </div>
-
-            <div class="clean-features-grid">
-                <div class="clean-feature-card feature-span-2">
-                    <div class="card-icon-pill">⚡</div>
-                    <h3 class="card-title">24/7 Autonomous Reel Watcher</h3>
-                    <p class="card-desc">
-                        Never manually set up a trigger again. InstaAuto continuously polls your account, detects newly published Reels, and automatically arms your comment-to-DM funnels without opening your laptop.
-                    </p>
-                    <div class="card-chip-footer">
-                        <span class="chip-status">Live feed watcher</span>
-                        <span class="chip-sub">Cloud-native • 100% Uptime</span>
-                    </div>
-                </div>
-
-                <div class="clean-feature-card">
-                    <div class="card-icon-pill">🔒</div>
-                    <h3 class="card-title">Follow-to-Unlock Gate</h3>
-                    <p class="card-desc">
-                        Convert viral viewers into permanent followers. The agent confirms they follow your account before delivering the link.
-                    </p>
-                    <span class="tag-accent">3.8x Follower Growth</span>
-                </div>
-
-                <div class="clean-feature-card">
-                    <div class="card-icon-pill">🚀</div>
-                    <h3 class="card-title">0.4s Comment-to-DM Speed</h3>
-                    <p class="card-desc">
-                        Deliver lead magnets and checkout links while your viewer's attention is at its peak.
-                    </p>
-                    <span class="tag-accent">Instant Inbox Delivery</span>
-                </div>
-
-                <div class="clean-feature-card feature-span-2">
-                    <div class="card-icon-pill">🛡️</div>
-                    <h3 class="card-title">ManyChat-Grade Multi-Tenant Queues</h3>
-                    <p class="card-desc">
-                        Built-in sliding-window rate limiters, burst management, and randomized delay pacing ensure full Meta API v21.0 compliance and zero account flags.
-                    </p>
-                    <div class="safety-indicator-bar">
-                        <div class="bar-fill"></div>
-                    </div>
-                </div>
-
-                <div class="clean-feature-card">
-                    <div class="card-icon-pill">📊</div>
-                    <h3 class="card-title">Real-Time Funnel Analytics</h3>
-                    <p class="card-desc">
-                        Track conversion rates, link click-throughs, and sync every new subscriber to Google Sheets and Webhooks instantly.
-                    </p>
-                    <span class="tag-accent">Live Google Sheets Sync</span>
-                </div>
-
-                <div class="clean-feature-card">
-                    <div class="card-icon-pill">👑</div>
-                    <h3 class="card-title">Super Admin Master Control</h3>
-                    <p class="card-desc">
-                        Creator directory ranking, flexible tenant quotas, and full platform telemetry for the master operator.
-                    </p>
-                    <span class="tag-accent">Unlimited Master Quota</span>
-                </div>
-            </div>
-        </section>
-
-        <!-- PRICING SECTION -->
-        <section id="pricing" class="minimal-section">
-            <div class="section-title-wrap">
-                <span class="section-badge">TRANSPARENT PRICING</span>
-                <h2 class="section-title">Simple, Predictable Plans</h2>
-                <p class="section-description">
-                    Start completely free. Upgrade seamlessly as your reach and sales expand.
-                </p>
-
-                <!-- Billing Toggle -->
-                <div class="pricing-toggle-box">
-                    <span id="label-monthly" class="toggle-label active">Monthly</span>
-                    <button type="button" id="billing-switch" onclick="toggleBillingCycle()" class="toggle-pill-btn" aria-label="Toggle annual billing">
-                        <span class="toggle-knob"></span>
-                    </button>
-                    <span id="label-annual" class="toggle-label">Annual</span>
-                    <span class="discount-pill">Save 20%</span>
+                <div id="auth-heading-register" style="display: none;">
+                    <h2 style="font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: 1.35rem; color: #2C2A29; margin: 0 0 0.35rem 0; letter-spacing: -0.02em;">Start Free as Creator 🚀</h2>
+                    <p style="font-size: 0.86rem; color: #736E68; margin: 0; line-height: 1.45;">Create your dedicated workspace. Connect your Instagram in seconds.</p>
                 </div>
             </div>
 
-            <div class="pricing-cards-container">
-                <!-- Free Plan -->
-                <div class="minimal-pricing-card">
-                    <div class="plan-top">
-                        <h3 class="plan-name">Starter</h3>
-                        <p class="plan-sub">For emerging creators testing the waters.</p>
-                        <div class="plan-cost">
-                            <span class="cost-val">$0</span>
-                            <span class="cost-period">/ month</span>
-                        </div>
-                    </div>
-                    <ul class="plan-perks">
-                        <li><span>✓</span> 60 DMs / hour quota</li>
-                        <li><span>✓</span> 1 Connected Instagram account</li>
-                        <li><span>✓</span> Unlimited Keyword Funnels</li>
-                        <li><span>✓</span> Basic Click Tracking</li>
-                        <li><span>✓</span> Community Support</li>
-                    </ul>
-                    <button type="button" onclick="scrollToAuth('register')" class="btn-plan btn-plan-outline">Start Free</button>
+            <!-- SIGN IN FORM -->
+            <form id="login-form">
+                <div class="form-group" style="text-align: left; margin-bottom: 1rem;">
+                    <label style="font-size: 0.82rem; font-weight: 700; color: #2C2A29; margin-bottom: 0.4rem; display: block;">Email Address</label>
+                    <input type="email" id="login-email" class="input" placeholder="harshparmar686630@gmail.com or creator@domain.com" required style="width: 100%; padding: 0.75rem 1rem; font-size: 0.92rem; font-weight: 600; border-radius: 12px; border: 1.5px solid #E6E1D8; background: #FAF8F5; outline: none;">
                 </div>
 
-                <!-- Pro Plan (Featured) -->
-                <div class="minimal-pricing-card featured-plan-card">
-                    <div class="popular-ribbon">MOST POPULAR</div>
-                    <div class="plan-top">
-                        <h3 class="plan-name">Pro Creator</h3>
-                        <p class="plan-sub">For scaling creators and influencers.</p>
-                        <div class="plan-cost">
-                            <span class="cost-val price-val" data-monthly="$29" data-annual="$23">$29</span>
-                            <span class="cost-period">/ month</span>
-                        </div>
-                    </div>
-                    <ul class="plan-perks">
-                        <li><span>✓</span> <strong>500 DMs / hour</strong> quota</li>
-                        <li><span>✓</span> 3 Connected Instagram accounts</li>
-                        <li><span>✓</span> <strong>Autonomous 24/7 Reel Watcher</strong></li>
-                        <li><span>✓</span> <strong>Follow-to-Unlock Verification</strong></li>
-                        <li><span>✓</span> Google Sheets & Webhook CRM Sync</li>
-                        <li><span>✓</span> Priority Dispatch (1.0s delay)</li>
-                    </ul>
-                    <button type="button" onclick="scrollToAuth('register')" class="btn-plan btn-plan-primary">Get Started with Pro</button>
-                </div>
-
-                <!-- Agency Plan -->
-                <div class="minimal-pricing-card">
-                    <div class="plan-top">
-                        <h3 class="plan-name">Agency Scale</h3>
-                        <p class="plan-sub">For teams managing creator rosters.</p>
-                        <div class="plan-cost">
-                            <span class="cost-val price-val" data-monthly="$99" data-annual="$79">$99</span>
-                            <span class="cost-period">/ month</span>
-                        </div>
-                    </div>
-                    <ul class="plan-perks">
-                        <li><span>✓</span> <strong>Unlimited DMs</strong> monthly volume</li>
-                        <li><span>✓</span> 10+ Connected Accounts</li>
-                        <li><span>✓</span> Multi-Tenant Isolation</li>
-                        <li><span>✓</span> Custom Webhook Callbacks</li>
-                        <li><span>✓</span> Accelerated Dispatch (0.5s)</li>
-                        <li><span>✓</span> Dedicated Priority Support</li>
-                    </ul>
-                    <button type="button" onclick="scrollToAuth('register')" class="btn-plan btn-plan-outline">Scale My Agency</button>
-                </div>
-
-                <!-- Super Admin Master -->
-                <div class="minimal-pricing-card admin-plan-card">
-                    <div class="admin-ribbon">PLATFORM MASTER</div>
-                    <div class="plan-top">
-                        <h3 class="plan-name">Super Admin</h3>
-                        <p class="plan-sub">Master platform & multi-tenant control.</p>
-                        <div class="plan-cost">
-                            <span class="cost-val">MASTER</span>
-                        </div>
-                    </div>
-                    <ul class="plan-perks">
-                        <li><span>👑</span> <strong>Infinite DMs</strong> & Quota Overrides</li>
-                        <li><span>👑</span> 0.5s High-Speed Burst Dispatch</li>
-                        <li><span>👑</span> Rank #1 Directory Pinning</li>
-                        <li><span>👑</span> Global Rate Limit Tuning</li>
-                        <li><span>👑</span> Full Platform Event Telemetry</li>
-                    </ul>
-                    <button type="button" onclick="autofillSuperAdmin(); scrollToAuth('login')" class="btn-plan btn-plan-admin">👑 Admin Access</button>
-                </div>
-            </div>
-        </section>
-
-        <!-- YOUR QUESTIONS, ANSWERED (User Loved Minimalist Accordion) -->
-        <section id="faqs" class="minimal-section bg-card-surface">
-            <div class="section-title-wrap">
-                <span class="section-badge">FREQUENTLY ASKED QUESTIONS</span>
-                <h2 class="section-headline">Your Questions, Answered</h2>
-                <p class="section-subtext">Everything you need to know about InstaAuto AI Agent, Meta safety, and setup.</p>
-            </div>
-
-            <div class="faq-accordion-box">
-                <div class="faq-accordion-item" onclick="toggleFaq(this)">
-                    <div class="faq-header-row">
-                        <h3>What is InstaAuto and how does it work?</h3>
-                        <span class="faq-plus-icon">+</span>
-                    </div>
-                    <div class="faq-body-content">
-                        <p>InstaAuto is an autonomous Instagram automation SaaS that connects directly to the official Meta Graph API. It automatically detects follower comments on your Reels, verifies whether they follow your account, and instantly sends them a personalized direct message containing your link or download.</p>
+                <div class="form-group" style="position: relative; text-align: left; margin-bottom: 1.25rem;">
+                    <label style="font-size: 0.82rem; font-weight: 700; color: #2C2A29; margin-bottom: 0.4rem; display: block;">Password</label>
+                    <input type="password" id="password" class="input" placeholder="Enter your password" required style="width: 100%; padding: 0.75rem 2.6rem 0.75rem 1rem; font-size: 0.92rem; font-weight: 600; border-radius: 12px; border: 1.5px solid #E6E1D8; background: #FAF8F5; outline: none;">
+                    <button type="button" id="btn-toggle-login-pwd" onclick="toggleLoginPassword('password', 'btn-toggle-login-pwd')" style="position: absolute; right: 12px; top: 34px; background: none; border: none; font-size: 1.05rem; cursor: pointer; color: #736E68;" title="Toggle Password Visibility">👁️</button>
+                    
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.5rem;">
+                        <span style="font-size: 0.76rem; color: #8C827A;">
+                            Default: <code style="font-weight: 700; color: #D97757; background: #FAF0EC; padding: 0.1rem 0.35rem; border-radius: 6px;">Harsh@2004</code>
+                        </span>
+                        <a href="javascript:void(0)" onclick="autofillSuperAdmin()" style="font-size: 0.76rem; font-weight: 700; color: #D97757; text-decoration: none;">👑 Autofill Super Admin</a>
                     </div>
                 </div>
 
-                <div class="faq-accordion-item" onclick="toggleFaq(this)">
-                    <div class="faq-header-row">
-                        <h3>Is InstaAuto compliant with Meta's official Instagram terms?</h3>
-                        <span class="faq-plus-icon">+</span>
-                    </div>
-                    <div class="faq-body-content">
-                        <p>Yes, 100%. Unlike risky web scrapers or browser bots that cause account bans, InstaAuto operates exclusively on the verified Meta Graph API Webhook & Messaging endpoints with humanized dispatch pacing (0.5s - 1.5s delay), guaranteeing full compliance.</p>
-                    </div>
-                </div>
-
-                <div class="faq-accordion-item" onclick="toggleFaq(this)">
-                    <div class="faq-header-row">
-                        <h3>How is InstaAuto different from ManyChat?</h3>
-                        <span class="faq-plus-icon">+</span>
-                    </div>
-                    <div class="faq-body-content">
-                        <p>While ManyChat requires hours of setting up complicated drag-and-drop flowcharts and charges escalating contact fees, InstaAuto is specifically engineered for Reels creators with 24/7 autonomous monitoring, smart follower verification gates, and straightforward multi-tenant quotas.</p>
-                    </div>
-                </div>
-
-                <div class="faq-accordion-item" onclick="toggleFaq(this)">
-                    <div class="faq-header-row">
-                        <h3>Do I need to keep my laptop open or run anything locally?</h3>
-                        <span class="faq-plus-icon">+</span>
-                    </div>
-                    <div class="faq-body-content">
-                        <p>Not at all! InstaAuto runs entirely in the cloud. Once your account is connected and your keywords are set, the AI Agent works 24 hours a day, 7 days a week, even while you are asleep or travelling.</p>
-                    </div>
-                </div>
-
-                <div class="faq-accordion-item" onclick="toggleFaq(this)">
-                    <div class="faq-header-row">
-                        <h3>What happens if I reach my hourly rate limit?</h3>
-                        <span class="faq-plus-icon">+</span>
-                    </div>
-                    <div class="faq-body-content">
-                        <p>InstaAuto features intelligent queue management. When a Reel goes hyper-viral and exceeds your hourly limit, messages are placed in a safe FIFO queue and systematically dispatched as your rolling 1-hour window resets. No follower is ever lost.</p>
-                    </div>
-                </div>
-
-                <div class="faq-accordion-item" onclick="toggleFaq(this)">
-                    <div class="faq-header-row">
-                        <h3>Can I try it for free?</h3>
-                        <span class="faq-plus-icon">+</span>
-                    </div>
-                    <div class="faq-body-content">
-                        <p>Yes! Our Starter Tier is 100% free with 60 DMs/hour, unlimited keyword automation, and click analytics. No credit card is required to sign up.</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- PRE-FOOTER CTA -->
-        <section class="minimal-section">
-            <div class="minimal-cta-card">
-                <h2 class="cta-title">Start Growing on Instagram with InstaAuto Today</h2>
-                <p class="cta-sub">Deploy your first autonomous DM funnel in under 60 seconds. No credit card required.</p>
-                <button type="button" onclick="scrollToAuth('register')" class="btn-primary-cta btn-large-cta">
-                    <span>Get Started Free</span>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                <button type="submit" class="btn btn-primary w-full" style="padding: 0.85rem 1.5rem; font-size: 0.95rem; font-weight: 800; border-radius: 12px; box-shadow: 0 4px 14px rgba(217, 119, 87, 0.3);">
+                    <span>Sign In to Workspace →</span>
                 </button>
-            </div>
-        </section>
+            </form>
 
-        <!-- MINIMALIST FOOTER -->
-        <footer class="minimal-footer">
-            <div class="footer-inner">
-                <div class="footer-brand-col">
-                    <div class="footer-logo">
-                        <img src="favicon.png?v=5" alt="InstaAuto" class="footer-logo-img" />
-                        <span class="footer-logo-title">InstaAuto</span>
-                    </div>
-                    <p class="footer-tagline">
-                        Autonomous AI agents that detect Reel comments, verify followers, and dispatch instant DMs 24/7.
-                    </p>
+            <!-- REGISTER FORM -->
+            <form id="register-form" style="display: none;">
+                <div class="form-group" style="text-align: left; margin-bottom: 0.85rem;">
+                    <label style="font-size: 0.82rem; font-weight: 700; color: #2C2A29; margin-bottom: 0.35rem; display: block;">Full Name</label>
+                    <input type="text" id="reg-name" class="input" placeholder="e.g. Alex Rivera" required style="width: 100%; padding: 0.75rem 1rem; font-size: 0.92rem; font-weight: 600; border-radius: 12px; border: 1.5px solid #E6E1D8; background: #FAF8F5; outline: none;">
                 </div>
 
-                <div class="footer-links-group">
-                    <div class="footer-col">
-                        <h4>Product</h4>
-                        <ul>
-                            <li><a href="#how-it-works">How It Works</a></li>
-                            <li><a href="#features">Features</a></li>
-                            <li><a href="#pricing">Pricing</a></li>
-                            <li><a href="#faqs">FAQs</a></li>
-                        </ul>
-                    </div>
-
-                    <div class="footer-col">
-                        <h4>Platform</h4>
-                        <ul>
-                            <li><a href="https://developers.facebook.com/docs/instagram-platform" target="_blank" rel="noopener">Meta Graph API</a></li>
-                            <li><a href="javascript:void(0)" onclick="autofillSuperAdmin(); scrollToAuth('login')">Super Admin Portal</a></li>
-                            <li><a href="#faqs">Privacy Policy</a></li>
-                            <li><a href="#faqs">Terms of Service</a></li>
-                        </ul>
-                    </div>
+                <div class="form-group" style="text-align: left; margin-bottom: 0.85rem;">
+                    <label style="font-size: 0.82rem; font-weight: 700; color: #2C2A29; margin-bottom: 0.35rem; display: block;">Email Address</label>
+                    <input type="email" id="reg-email" class="input" placeholder="e.g. alex@creatorstudio.com" required style="width: 100%; padding: 0.75rem 1rem; font-size: 0.92rem; font-weight: 600; border-radius: 12px; border: 1.5px solid #E6E1D8; background: #FAF8F5; outline: none;">
                 </div>
-            </div>
 
-            <div class="footer-bottom-bar">
-                <span>COPYRIGHT © INSTAAUTO LABS 2026. ALL RIGHTS RESERVED.</span>
-                <span>BUILT FOR CREATORS WORLDWIDE ⚡</span>
+                <div class="form-group" style="position: relative; text-align: left; margin-bottom: 1.25rem;">
+                    <label style="font-size: 0.82rem; font-weight: 700; color: #2C2A29; margin-bottom: 0.35rem; display: block;">Password (min 6 chars)</label>
+                    <input type="password" id="reg-password" class="input" placeholder="Create a secure password" minlength="6" required style="width: 100%; padding: 0.75rem 2.6rem 0.75rem 1rem; font-size: 0.92rem; font-weight: 600; border-radius: 12px; border: 1.5px solid #E6E1D8; background: #FAF8F5; outline: none;">
+                    <button type="button" id="btn-toggle-reg-pwd" onclick="toggleLoginPassword('reg-password', 'btn-toggle-reg-pwd')" style="position: absolute; right: 12px; top: 34px; background: none; border: none; font-size: 1.05rem; cursor: pointer; color: #736E68;" title="Toggle Password Visibility">👁️</button>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-full" style="padding: 0.85rem 1.5rem; font-size: 0.95rem; font-weight: 800; border-radius: 12px; box-shadow: 0 4px 14px rgba(217, 119, 87, 0.3);">
+                    <span>Create Creator Account →</span>
+                </button>
+            </form>
+
+            <div style="margin-top: 1.45rem; text-align: center; font-size: 0.76rem; font-weight: 700; color: #736E68; display: flex; align-items: center; justify-content: center; gap: 0.4rem; border-top: 1px solid #F5F1EA; padding-top: 1.15rem;">
+                <span style="color: #2E7D32;">🟢</span>
+                <span>Isolated Workspace • Meta Graph API 250 DMs/hr Cap Safe</span>
             </div>
-        </footer>
+        </div>
     </div>
 
-    <!-- CLIENT JAVASCRIPT HELPERS -->
     <script>
         function switchAuthTab(mode) {
             const isLogin = mode === 'login';
-            const loginForm = document.getElementById('login-form');
-            const registerForm = document.getElementById('register-form');
-            if (loginForm) loginForm.style.display = isLogin ? 'block' : 'none';
-            if (registerForm) registerForm.style.display = isLogin ? 'none' : 'block';
+            document.getElementById('login-form').style.display = isLogin ? 'block' : 'none';
+            document.getElementById('register-form').style.display = isLogin ? 'none' : 'block';
+            document.getElementById('auth-heading-login').style.display = isLogin ? 'block' : 'none';
+            document.getElementById('auth-heading-register').style.display = isLogin ? 'none' : 'block';
+
             const btnLogin = document.getElementById('tab-btn-login');
             const btnReg = document.getElementById('tab-btn-register');
-            if (btnLogin && btnReg) {
-                btnLogin.classList.toggle('active', isLogin);
-                btnReg.classList.toggle('active', !isLogin);
+            if (isLogin) {
+                btnLogin.style.background = '#FFFFFF';
+                btnLogin.style.color = '#2C2A29';
+                btnLogin.style.boxShadow = '0 2px 6px rgba(0,0,0,0.06)';
+                btnReg.style.background = 'transparent';
+                btnReg.style.color = '#736E68';
+                btnReg.style.boxShadow = 'none';
+            } else {
+                btnReg.style.background = '#FFFFFF';
+                btnReg.style.color = '#2C2A29';
+                btnReg.style.boxShadow = '0 2px 6px rgba(0,0,0,0.06)';
+                btnLogin.style.background = 'transparent';
+                btnLogin.style.color = '#736E68';
+                btnLogin.style.boxShadow = 'none';
             }
         }
 
-        function toggleLoginPassword(fieldId, btnEl) {
+        function toggleLoginPassword(fieldId = 'password', btnId = 'btn-toggle-login-pwd') {
             const pwd = document.getElementById(fieldId);
-            if (pwd) {
-                const isPwd = pwd.type === 'password';
-                pwd.type = isPwd ? 'text' : 'password';
-                if (btnEl) btnEl.textContent = isPwd ? '🙈' : '👁️';
+            const btn = document.getElementById(btnId);
+            if (pwd && btn) {
+                if (pwd.type === 'password') {
+                    pwd.type = 'text';
+                    btn.textContent = '🙈';
+                } else {
+                    pwd.type = 'password';
+                    btn.textContent = '👁️';
+                }
             }
         }
 
         function autofillSuperAdmin() {
-            const emailInput = document.getElementById('login-email');
-            const pwdInput = document.getElementById('password');
-            if (emailInput) emailInput.value = 'harshparmar686630@gmail.com';
-            if (pwdInput) pwdInput.value = 'Harsh@2004';
-            switchAuthTab('login');
-        }
-
-        function scrollToAuth(mode) {
-            switchAuthTab(mode);
-            const box = document.getElementById('auth-box');
-            if (box) box.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            setTimeout(() => {
-                const target = mode === 'login' ? document.getElementById('login-email') : document.getElementById('reg-name');
-                if (target) target.focus();
-            }, 350);
-        }
-
-        function scrollToSection(id) {
-            const el = document.getElementById(id);
-            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-
-        function toggleFaq(itemEl) {
-            const isActive = itemEl.classList.contains('active');
-            document.querySelectorAll('.faq-accordion-item').forEach(el => el.classList.remove('active'));
-            if (!isActive) itemEl.classList.add('active');
-        }
-
-        function toggleBillingCycle() {
-            const switchBtn = document.getElementById('billing-switch');
-            const labelMonthly = document.getElementById('label-monthly');
-            const labelAnnual = document.getElementById('label-annual');
-            if (!switchBtn) return;
-            const isAnnual = switchBtn.classList.toggle('annual');
-            if (labelMonthly && labelAnnual) {
-                labelAnnual.classList.toggle('active', isAnnual);
-                labelMonthly.classList.toggle('active', !isAnnual);
-            }
-            document.querySelectorAll('.price-val[data-monthly]').forEach(el => {
-                el.textContent = isAnnual ? el.getAttribute('data-annual') : el.getAttribute('data-monthly');
-            });
-        }
-
-        function continueWithMeta() {
-            if (window.App && App.showToast) App.showToast('Connecting via Meta Graph API OAuth... Super Admin demo ready', 'info');
-            autofillSuperAdmin();
-            scrollToAuth('login');
-        }
-
-        function continueWithGoogle() {
-            if (window.App && App.showToast) App.showToast('Google Workspace SSO ready. Please sign in.', 'info');
-            scrollToAuth('login');
-        }
-
-        function continueWithApple() {
-            if (window.App && App.showToast) App.showToast('Apple ID Sign-In ready. Please sign in.', 'info');
-            scrollToAuth('login');
+            document.getElementById('login-email').value = 'harshparmar686630@gmail.com';
+            document.getElementById('password').value = 'Harsh@2004';
         }
     </script>
-
 
     <!-- Main Dashboard -->
     <div id="dashboard" class="dashboard hidden">
