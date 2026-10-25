@@ -178,6 +178,14 @@ function getDb() {
       updated_by_admin INTEGER DEFAULT 0,
       updated_at TEXT
     );
+
+    CREATE TABLE IF NOT EXISTS data_deletions (
+      confirmation_code TEXT PRIMARY KEY,
+      ig_user_id TEXT,
+      status TEXT DEFAULT 'completed',
+      requested_at TEXT,
+      details TEXT
+    );
   `);
 
   // Safe migrations
@@ -943,6 +951,54 @@ function checkAndIncrementUserQuota(userId) {
   };
 }
 
+function recordDataDeletion(confirmationCode, igUserId, details = '') {
+  const db = getDb();
+  const now = new Date().toISOString();
+  db.prepare(`
+    INSERT INTO data_deletions (confirmation_code, ig_user_id, status, requested_at, details)
+    VALUES (?, ?, 'completed', ?, ?)
+    ON CONFLICT(confirmation_code) DO UPDATE SET
+      status = 'completed',
+      requested_at = ?,
+      details = ?
+  `).run(confirmationCode, igUserId || null, now, details, now, details);
+  return db.prepare('SELECT * FROM data_deletions WHERE confirmation_code = ?').get(confirmationCode);
+}
+
+function getDataDeletion(confirmationCode) {
+  if (!confirmationCode) return null;
+  const db = getDb();
+  return db.prepare('SELECT * FROM data_deletions WHERE confirmation_code = ?').get(confirmationCode);
+}
+
+function deleteInstagramDataByIgId(igUserId) {
+  if (!igUserId) return false;
+  const db = getDb();
+  try {
+    // 1. Invalidate tokens and deactivate account
+    db.prepare(`
+      UPDATE instagram_accounts 
+      SET access_token = 'DELETED',
+          is_active = 0,
+          token_expires_at = NULL,
+          updated_at = ?
+      WHERE ig_user_id = ?
+    `).run(new Date().toISOString(), igUserId);
+
+    // 2. If it's stored in global config, clear it
+    if (getConfig('ig_user_id') === String(igUserId)) {
+      setConfig('access_token', '');
+      setConfig('ig_user_id', '');
+      setConfig('ig_username', 'Disconnected');
+    }
+
+    return true;
+  } catch (err) {
+    console.error('[DB] deleteInstagramDataByIgId error:', err.message);
+    return false;
+  }
+}
+
 module.exports = {
   getDb,
   getConfig,
@@ -970,5 +1026,8 @@ module.exports = {
   getAgentCampaigns,
   getUserQuota,
   updateUserQuota,
-  checkAndIncrementUserQuota
+  checkAndIncrementUserQuota,
+  recordDataDeletion,
+  getDataDeletion,
+  deleteInstagramDataByIgId
 };

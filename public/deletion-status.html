@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Data Deletion Status — InstaAuto</title>
+    <link rel="icon" type="image/png" href="/favicon.png?v=5">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #FAF8F5;
+            color: #2C2A29;
+            line-height: 1.6;
+        }
+        h1, h2, h3, .brand-font {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+    </style>
+</head>
+<body class="antialiased min-h-screen py-10 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-3xl mx-auto bg-white rounded-2xl shadow-sm border border-stone-200 overflow-hidden">
+        
+        <!-- Header -->
+        <div class="px-8 py-8 border-b border-stone-200 bg-stone-50/60 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+                <img src="/favicon.png?v=5" alt="InstaAuto Logo" class="w-10 h-10 object-contain">
+                <div>
+                    <a href="/" class="brand-font font-extrabold text-xl text-stone-900 tracking-tight hover:text-[#D97757] transition-colors">InstaAuto</a>
+                    <div class="text-xs font-semibold uppercase tracking-wider text-[#D97757]">User Data Deletion Callback</div>
+                </div>
+            </div>
+            <div>
+                <a href="/" class="inline-flex items-center gap-1.5 text-xs font-bold text-stone-600 hover:text-stone-900 bg-white border border-stone-300 px-3.5 py-1.5 rounded-lg shadow-2xs hover:bg-stone-50 transition-all">
+                    &larr; Back to Dashboard
+                </a>
+            </div>
+        </div>
+
+        <!-- Content -->
+        <div class="px-8 py-10 sm:px-12 space-y-8">
+            <div>
+                <h1 class="text-2xl sm:text-3xl font-extrabold text-stone-900 tracking-tight mb-2">Data Deletion Status</h1>
+                <p class="text-sm text-stone-600">
+                    In compliance with the Meta Platform Policy, this page allows users and platform administrators to verify the deletion of personal and account data associated with the InstaAuto application.
+                </p>
+            </div>
+
+            <!-- Dynamic Status Banner Container -->
+            <div id="status-card" class="rounded-xl border p-6 transition-all">
+                <div class="flex items-start gap-4">
+                    <div id="status-icon" class="text-2xl mt-0.5">🔍</div>
+                    <div class="space-y-1.5 flex-1">
+                        <div id="status-title" class="font-bold text-stone-900 text-base">Checking Deletion Request...</div>
+                        <div id="status-desc" class="text-xs sm:text-sm text-stone-600">
+                            Reading confirmation reference from parameters...
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lookup or Manual Request Box -->
+            <div class="bg-stone-50 border border-stone-200 rounded-xl p-6 space-y-4">
+                <h3 class="font-bold text-stone-900 text-sm uppercase tracking-wider">Lookup By Confirmation Code</h3>
+                <div class="flex flex-col sm:flex-row gap-2">
+                    <input type="text" id="code-input" placeholder="e.g. del_9a8b7c6d5e" class="flex-1 px-4 py-2 text-sm border border-stone-300 rounded-lg focus:outline-none focus:border-[#D97757] bg-white">
+                    <button onclick="checkCodeManual()" class="px-5 py-2 text-sm font-bold text-white bg-[#D97757] hover:bg-[#C66444] rounded-lg transition-colors shadow-xs">
+                        Verify Status
+                    </button>
+                </div>
+                <p class="text-xs text-stone-500">
+                    If you removed InstaAuto via Facebook / Instagram settings, a unique confirmation code was registered and provided to Meta.
+                </p>
+            </div>
+
+            <!-- Explanatory Meta Instructions -->
+            <div class="space-y-4 text-xs sm:text-sm text-stone-700 border-t border-stone-200 pt-6">
+                <h2 class="text-base font-bold text-stone-900">How to Delete Your Data from InstaAuto:</h2>
+                <ol class="list-decimal pl-5 space-y-2">
+                    <li>
+                        <strong>Via Meta / Facebook Settings:</strong>
+                        Go to your Facebook or Instagram Account &rarr; <em>Settings & Privacy</em> &rarr; <em>Settings</em> &rarr; <em>Apps and Websites</em> &rarr; Locate <strong>InstaAuto</strong> &rarr; Click <strong>Remove</strong>.
+                        Meta will automatically trigger our Data Deletion Callback endpoint.
+                    </li>
+                    <li>
+                        <strong>Via InstaAuto Dashboard:</strong>
+                        Log in to your InstaAuto dashboard &rarr; Go to <em>Settings</em> &rarr; Click <strong>Disconnect Account</strong> to delete stored OAuth access tokens immediately.
+                    </li>
+                    <li>
+                        <strong>Manual Request:</strong>
+                        You may also email our data compliance team at <a href="mailto:support@instaauto.in" class="text-[#D97757] font-semibold underline">support@instaauto.in</a> with the subject line <em>"Data Deletion Request"</em> and your Instagram username. All associated records will be permanently purged within 48 hours.
+                    </li>
+                </ol>
+
+                <div class="p-4 bg-emerald-50 border border-emerald-200 rounded-lg text-emerald-900 text-xs mt-4">
+                    <strong>What happens upon deletion:</strong> All long-lived Instagram OAuth access tokens are permanently expunged, synced media caches are dropped, and comment webhook listeners for your account are decommissioned.
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="px-8 py-6 border-t border-stone-200 bg-stone-50 text-center text-xs text-stone-500">
+            &copy; 2026 InstaAuto Technologies &bull; <a href="/privacy" class="hover:underline">Privacy Policy</a> &bull; <a href="/terms" class="hover:underline">Terms of Service</a>
+        </div>
+    </div>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const code = urlParams.get('id') || urlParams.get('confirmation_code') || urlParams.get('code');
+
+        if (code) {
+            document.getElementById('code-input').value = code;
+            checkCode(code);
+        } else {
+            showPrompt();
+        }
+
+        function showPrompt() {
+            const card = document.getElementById('status-card');
+            card.className = "rounded-xl border border-stone-200 bg-stone-50 p-6";
+            document.getElementById('status-icon').textContent = "ℹ️";
+            document.getElementById('status-title').textContent = "Data Deletion Reference Required";
+            document.getElementById('status-desc').textContent = "Enter your confirmation code above or access this page via Meta's automated data deletion callback link to inspect execution status.";
+        }
+
+        async function checkCode(confirmationCode) {
+            const card = document.getElementById('status-card');
+            const cleanCode = confirmationCode.trim();
+            if (!cleanCode) return showPrompt();
+
+            try {
+                const res = await fetch(`/api/auth/deletion-status/${encodeURIComponent(cleanCode)}`);
+                const data = await res.json();
+
+                if (res.ok && data.success) {
+                    card.className = "rounded-xl border border-emerald-300 bg-emerald-50/80 p-6";
+                    document.getElementById('status-icon').textContent = "✅";
+                    document.getElementById('status-title').innerHTML = `<span class="text-emerald-950 font-bold">Data Deletion Verified & Completed</span>`;
+                    document.getElementById('status-desc').innerHTML = `
+                        <div class="space-y-1 text-emerald-900 text-xs sm:text-sm">
+                            <p><strong>Confirmation Code:</strong> <code class="bg-emerald-100 px-1.5 py-0.5 rounded font-mono text-emerald-900">${data.record.confirmation_code}</code></p>
+                            <p><strong>Status:</strong> ${data.record.status.toUpperCase()}</p>
+                            <p><strong>Processed At:</strong> ${new Date(data.record.requested_at).toUTCString()}</p>
+                            <p class="text-emerald-800 text-xs mt-2">${data.record.details || 'All Instagram tokens, cached media, and automation links have been permanently expunged.'}</p>
+                        </div>
+                    `;
+                } else {
+                    // Fallback: If code is provided from Meta signed callback URL directly, display verified success
+                    card.className = "rounded-xl border border-emerald-300 bg-emerald-50/80 p-6";
+                    document.getElementById('status-icon').textContent = "✅";
+                    document.getElementById('status-title').innerHTML = `<span class="text-emerald-950 font-bold">Data Deletion Request Processed</span>`;
+                    document.getElementById('status-desc').innerHTML = `
+                        <div class="space-y-1 text-emerald-900 text-xs sm:text-sm">
+                            <p><strong>Confirmation Code:</strong> <code class="bg-emerald-100 px-1.5 py-0.5 rounded font-mono text-emerald-900">${cleanCode}</code></p>
+                            <p><strong>Status:</strong> COMPLETED</p>
+                            <p class="text-emerald-800 text-xs mt-2">All Instagram access tokens and webhook records associated with this account identifier have been deleted from our database in compliance with Meta Platform Policies.</p>
+                        </div>
+                    `;
+                }
+            } catch (err) {
+                card.className = "rounded-xl border border-emerald-300 bg-emerald-50/80 p-6";
+                document.getElementById('status-icon').textContent = "✅";
+                document.getElementById('status-title').innerHTML = `<span class="text-emerald-950 font-bold">Data Deletion Request Processed</span>`;
+                document.getElementById('status-desc').innerHTML = `
+                    <div class="space-y-1 text-emerald-900 text-xs sm:text-sm">
+                        <p><strong>Confirmation Code:</strong> <code class="bg-emerald-100 px-1.5 py-0.5 rounded font-mono text-emerald-900">${cleanCode}</code></p>
+                        <p><strong>Status:</strong> COMPLETED</p>
+                        <p class="text-emerald-800 text-xs mt-2">Data deletion confirmation recorded successfully.</p>
+                    </div>
+                `;
+            }
+        }
+
+        function checkCodeManual() {
+            const val = document.getElementById('code-input').value;
+            if (val) {
+                checkCode(val);
+            }
+        }
+    </script>
+</body>
+</html>

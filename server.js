@@ -62,8 +62,18 @@ const agentRoutes = require('./src/routes/agent');
 app.use('/webhook', express.raw({ type: 'application/json' }), webhookRoutes);
 app.use('/api/webhook', express.raw({ type: 'application/json' }), webhookRoutes);
 
-// Other routes need JSON parser
+// Other routes need JSON and URL-encoded parsers (Meta sends data deletion callbacks as form-urlencoded)
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Meta Compliance & Legal Endpoints
+app.get('/privacy', (req, res) => res.sendFile(path.join(__dirname, 'public', 'privacy.html')));
+app.get('/terms', (req, res) => res.sendFile(path.join(__dirname, 'public', 'terms.html')));
+app.get('/deletion-status', (req, res) => res.sendFile(path.join(__dirname, 'public', 'deletion-status.html')));
+app.post('/data-deletion', (req, res, next) => {
+    req.url = '/data-deletion';
+    authRoutes(req, res, next);
+});
 
 app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);

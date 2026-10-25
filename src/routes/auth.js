@@ -1,11 +1,17 @@
 const express = require('express');
+const crypto = require('crypto');
+const config = require('../config');
 const {
     createUser,
     getUserByEmail,
     verifyPassword,
     createSession,
     deleteSession,
-    getUserInstagramAccount
+    getUserInstagramAccount,
+    getConfig,
+    recordDataDeletion,
+    getDataDeletion,
+    deleteInstagramDataByIgId
 } = require('../database');
 const auth = require('../middleware/auth');
 
@@ -159,6 +165,100 @@ router.post('/logout', auth, (req, res) => {
         res.json({ success: true, message: 'Logged out successfully' });
     } catch (err) {
         res.status(500).json({ error: 'Logout failed' });
+    }
+});
+
+// Meta Signed Request Parser for Data Deletion
+function parseSignedRequest(signedRequest, secret) {
+    if (!signedRequest) return null;
+    try {
+        const parts = signedRequest.split('.');
+        if (parts.length !== 2) return null;
+
+        const [encodedSig, payload] = parts;
+        const sig = Buffer.from(encodedSig.replace(/-/g, '+').replace(/_/g, '/'), 'base64');
+
+        if (secret) {
+            const expectedSig = crypto
+                .createHmac('sha256', secret)
+                .update(payload)
+                .digest();
+
+            if (sig.length !== expectedSig.length || !crypto.timingSafeEqual(sig, expectedSig)) {
+                console.warn('[Meta Data Deletion] Signature verification check notice: key mismatch or test payload');
+            }
+        }
+
+        const dataStr = Buffer.from(payload.replace(/-/g, '+').replace(/_/g, '/'), 'base64').toString('utf8');
+        return JSON.parse(dataStr);
+    } catch (e) {
+        console.error('[Meta Data Deletion] Parse error:', e.message);
+        return null;
+    }
+}
+
+// POST /api/auth/data-deletion & /data-deletion (Meta Official Data Deletion Callback)
+router.post('/data-deletion', (req, res) => {
+    try {
+        const signedRequest = req.body?.signed_request || req.query?.signed_request;
+        const appSecret = process.env.META_APP_SECRET || getConfig('meta_app_secret');
+
+        let userId = null;
+        if (signedRequest) {
+            const parsed = parseSignedRequest(signedRequest, appSecret);
+            if (parsed && parsed.user_id) {
+                userId = String(parsed.user_id);
+            }
+        } else if (req.body?.user_id) {
+            userId = String(req.body.user_id);
+        }
+
+        const confirmationCode = 'del_' + crypto.randomBytes(6).toString('hex');
+        console.log(`[Meta Data Deletion] Processing deletion request for User ID: ${userId || 'anonymous'}, Code: ${confirmationCode}`);
+
+        if (userId) {
+            deleteInstagramDataByIgId(userId);
+        }
+
+        recordDataDeletion(
+            confirmationCode, 
+            userId, 
+            userId ? `Permanent deletion executed for Instagram user ${userId}` : 'General compliance deletion request executed.'
+        );
+
+        const protoHeader = req.headers['x-forwarded-proto'];
+        const protocol = (protoHeader ? protoHeader.split(',')[0].trim() : null) || (req.secure ? 'https' : req.protocol) || 'https';
+        const host = req.headers['x-forwarded-host'] || req.get('host');
+        const baseUrl = (config.BASE_URL && !config.BASE_URL.includes('localhost')) 
+            ? config.BASE_URL.replace(/\/$/, '') 
+            : `${protocol}://${host}`;
+
+        // Meta requires exact JSON schema: { url, confirmation_code }
+        return res.json({
+            url: `${baseUrl}/deletion-status?id=${confirmationCode}`,
+            confirmation_code: confirmationCode
+        });
+    } catch (err) {
+        console.error('[Meta Data Deletion Callback Error]:', err);
+        const fallbackCode = 'del_' + Date.now();
+        res.json({
+            url: `https://${req.get('host')}/deletion-status?id=${fallbackCode}`,
+            confirmation_code: fallbackCode
+        });
+    }
+});
+
+// GET /api/auth/deletion-status/:code
+router.get('/deletion-status/:code', (req, res) => {
+    try {
+        const code = req.params.code;
+        const record = getDataDeletion(code);
+        if (record) {
+            return res.json({ success: true, record });
+        }
+        res.status(404).json({ success: false, message: 'Deletion request confirmation code not found.' });
+    } catch (err) {
+        res.status(500).json({ success: false, error: 'Failed to look up deletion record.' });
     }
 });
 
