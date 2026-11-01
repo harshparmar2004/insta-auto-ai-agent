@@ -220,7 +220,14 @@ function getDb() {
     }
   } catch (err) {}
 
-  // Startup sync: Restore media, automations & events from JSON backup if needed
+  // 1. Startup sync: Initialize Super Admin & promote admin users FIRST so foreign keys succeed
+  try {
+    initSuperAdminAndMigrate(db);
+  } catch (e) {
+    console.warn('[Database] Super admin migration notice:', e.message);
+  }
+
+  // 2. Startup sync: Restore media, automations & events from JSON backup if needed
   try {
     db.prepare("UPDATE media SET status = 'active' WHERE status = 'deleted'").run();
   } catch (e) {}
@@ -230,13 +237,6 @@ function getDb() {
     restoreRules(db);
     restoreEvents(db);
   } catch (e) {}
-
-  // Startup sync: Initialize Super Admin & migrate single-user data
-  try {
-    initSuperAdminAndMigrate(db);
-  } catch (e) {
-    console.warn('[Database] Super admin migration notice:', e.message);
-  }
 
   return db;
 }
